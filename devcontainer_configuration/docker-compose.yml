@@ -1,0 +1,57 @@
+volumes:
+  mysql-data:
+
+services:
+  app:
+    container_name: laps-backend
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in db container
+        MYSQL_PASSWORD: secret
+        MYSQL_USER: mysql
+        MYSQL_DB: mysql
+        MYSQL_HOSTNAME: db
+
+    volumes:
+      - ../..:/workspaces:cached
+      
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # Use proper Docker networking instead of network_mode: service:db
+    # to ensure reliable DNS resolution in all environments
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  db:
+    container_name: laps-backend-mysqlDB
+    image: mysql:8.0.45-debian
+    restart: unless-stopped
+    ports:
+      - 50000:3306
+      - 50001:33060
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pmysql"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in app container
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_PASSWORD: secret
+      MYSQL_USER: mysql
+      MYSQL_DATABASE: mysql
+
+networks:
+  app-network:
+    driver: bridge
