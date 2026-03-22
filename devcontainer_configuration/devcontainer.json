@@ -18,7 +18,7 @@
 	//}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8080,3306, 33060],
+	"forwardPorts": [8100,3306, 33060],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "java -version",
