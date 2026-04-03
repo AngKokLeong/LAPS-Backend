@@ -6,4 +6,8 @@ import jakarta.persistence.*;
 @Table(name="Employee")
 public class Employee {
 
+  @Id
+  private Long id;
+  private String fname;
+  private String lname;
 }
