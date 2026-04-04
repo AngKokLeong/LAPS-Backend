@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>LAPS</title>
+	<meta charset="UTF-8">
+	
+</head>
+
+<body>
+	<h1>Leave Application System</h1>
+	<h5>Sign in to manage your leave requests</h5>
+	<form th:action="@{/validate}" method="POST">
+		<div>
+			<label for="username">Email Address:</label>
+			<input type="text" id="username" name="username" required>
+		</div>
+		<div>
+			<label for="password">Password:</label>
+			<input type="password" id="password" name="password" required>
+		</div>
+		<div>
+			<button type="submit">Sign In</button>
+		</div>
+	</form>
+</body>
+</html>
