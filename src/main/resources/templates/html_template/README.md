@@ -11,6 +11,11 @@ These are self-contained HTML files that represent the various views and functio
 ### 📋 Index
 - **index.html** - Landing page with links to all other pages
 
+### 🔀 Navigation Sidebars (By Role)
+- **nav-employee.html** - Employee navigation sidebar (john@company.com)
+- **nav-manager.html** - Manager navigation sidebar (sarah@company.com)  
+- **nav-administrator.html** - Administrator navigation sidebar (admin@company.com)
+
 ### 🔐 Public Pages
 - **login.html** - Authentication page with demo account credentials
 
@@ -121,4 +126,8 @@ April 3, 2026
 
 ## Pages Count
 
-**15 Total Pages** covering all major features and user roles in the Leave Management System.
+**15 Application Pages** covering all major features and user roles in the Leave Management System.
+
+**3 Navigation Examples** showing role-based sidebar navigation for Employee, Manager, and Administrator.
+
+**Total: 18 HTML Files** (plus index and README)
