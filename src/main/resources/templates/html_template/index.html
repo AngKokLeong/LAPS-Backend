@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index - Leave Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .page-link {
+            display: block;
+            padding: 1rem 1.5rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            color: #111827;
+            transition: all 0.2s;
+        }
+        .page-link:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .page-category {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-8">
+        <div class="max-w-5xl mx-auto">
+            <div class="mb-12 text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-2xl mb-6">
+                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Leave Management System</h1>
+                <p class="text-lg text-gray-600">Static HTML Page Documentation</p>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+                <div class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold text-blue-900 mb-2">About These Pages</h3>
+                        <p class="text-sm text-blue-800">These are static HTML snapshots of the Leave Management System application. Each page represents a different view or functionality within the system. All pages use Tailwind CSS via CDN for styling.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Public Pages -->
+            <div class="mb-8">
+                <div class="page-category">Public Pages</div>
+                <div class="space-y-3">
+                    <a href="login.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Login Page</h3>
+                                <p class="text-sm text-gray-600">Authentication page with demo account credentials</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Employee Pages -->
+            <div class="mb-8">
+                <div class="page-category">Employee Pages</div>
+                <div class="space-y-3">
+                    <a href="dashboard.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Dashboard</h3>
+                                <p class="text-sm text-gray-600">Employee dashboard with leave statistics and recent requests</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="apply-for-leave.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Apply for Leave</h3>
+                                <p class="text-sm text-gray-600">Form to submit new leave requests with leave balance display</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="view-leaves.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">View Leaves</h3>
+                                <p class="text-sm text-gray-600">List of all leave requests with filtering by status</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Manager Pages -->
+            <div class="mb-8">
+                <div class="page-category">Manager Pages</div>
+                <div class="space-y-3">
+                    <a href="leave-approvals.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Leave Approvals</h3>
+                                <p class="text-sm text-gray-600">Manager view to approve or reject team leave requests</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="team-leaves.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Team Leaves</h3>
+                                <p class="text-sm text-gray-600">Overview of all team members' leave schedules</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="movement-register.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Movement Register</h3>
+                                <p class="text-sm text-gray-600">Track employee movements and attendance</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Administrator Pages -->
+            <div class="mb-8">
+                <div class="page-category">Administrator Pages</div>
+                <div class="space-y-3">
+                    <a href="employee-management.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Employee Management</h3>
+                                <p class="text-sm text-gray-600">Manage employee accounts, roles, and details</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="leave-type-management.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Leave Type Management</h3>
+                                <p class="text-sm text-gray-600">Configure leave types with status toggle switches</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="leave-entitlement.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Leave Entitlement</h3>
+                                <p class="text-sm text-gray-600">Manage employee leave entitlements and balances</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="email-templates.html" class="page-link">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-1">Email Templates</h3>
+                                <p class="text-sm text-gray-600">Manage system email templates with CRUD operations</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2">11</div>
+                        <p class="text-sm text-gray-600">Total Pages</p>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2">3</div>
+                        <p class="text-sm text-gray-600">User Roles</p>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2">100%</div>
+                        <p class="text-sm text-gray-600">Coverage</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
