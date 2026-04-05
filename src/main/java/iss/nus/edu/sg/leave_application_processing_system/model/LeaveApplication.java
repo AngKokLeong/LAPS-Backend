@@ -54,11 +54,11 @@ public class LeaveApplication {
 		this.employee = employee;
 	}
 
-	public Enum<LeaveType> getLeaveType() {
+	public LeaveType getLeaveType() {
 		return leaveType;
 	}
 
-	public void setLeaveType(Enum<LeaveType> leaveType) {
+	public void setLeaveType(LeaveType leaveType) {
 		this.leaveType = leaveType;
 	}
 
@@ -86,11 +86,11 @@ public class LeaveApplication {
 		this.appliedAt = appliedAt;
 	}
 
-	public Enum<LeaveStatus> getStatus() {
+	public LeaveStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(Enum<LeaveStatus> status) {
+	public void setStatus(LeaveStatus status) {
 		this.status = status;
 	}
 		
