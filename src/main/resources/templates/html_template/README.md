@@ -22,13 +22,17 @@ These are self-contained HTML files that represent the various views and functio
 ### 👔 Manager Pages  
 - **leave-approvals.html** - Manager view to approve/reject team leave requests
 - **team-leaves.html** - Overview of all team members' leave schedules
+- **team-leave-history.html** - View all reviewed leave requests from your team
+- **view-team-members-leave.html** - View leave balances for your team members
 - **movement-register.html** - Track employee movements and attendance
 
 ### ⚙️ Administrator Pages
 - **employee-management.html** - Manage employee accounts, roles, and details
 - **leave-type-management.html** - Configure leave types with status toggle switches
 - **leave-entitlement.html** - Manage employee leave entitlements and balances
-- **email-templates.html** - Manage system email templates with CRUD operations
+- **email-template-management.html** - Manage system email templates with CRUD operations
+- **email-template.html** - Preview different email notification templates (demonstration)
+- **email-templates.html** - (Legacy) Email template management page
 
 ## Features
 
@@ -117,4 +121,4 @@ April 3, 2026
 
 ## Pages Count
 
-**11 Total Pages** covering all major features and user roles in the Leave Management System.
+**15 Total Pages** covering all major features and user roles in the Leave Management System.
