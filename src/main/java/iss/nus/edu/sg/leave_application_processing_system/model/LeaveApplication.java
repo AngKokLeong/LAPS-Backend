@@ -19,12 +19,12 @@ public class LeaveApplication {
 	private Long id;
 	
 	private Employee employee;
-	private Enum<LeaveType> leaveType;
+	private LeaveType leaveType;
 	
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private LocalDateTime appliedAt;
-	private Enum<LeaveStatus> status;
+	private LeaveStatus status;
 	
 	public LeaveApplication() {}
 
