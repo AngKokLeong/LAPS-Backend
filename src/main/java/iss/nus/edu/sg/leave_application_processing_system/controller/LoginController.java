@@ -25,7 +25,7 @@ public class LoginController {
 	public String validateLogin (@RequestParam String username, @RequestParam String password, Model model) {
 		if (username.equalsIgnoreCase("john@company.com") && password.equalsIgnoreCase("any")) {
 			model.addAttribute("username", username);
-			return "success";
+			return "redirect:/landing/";
 		}
 		else {
 			return "failure";
