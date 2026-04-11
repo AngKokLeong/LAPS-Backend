@@ -15,4 +15,9 @@ public class ManagerController {
 	public String teamMembersLeave() {
 		return "view-team-members-leave";       
 	}
+	
+	@GetMapping("/manage-leave-requests")
+	public String manageLeaveRequests() {
+		return "manage-leave-requests";       
+	}
 }
