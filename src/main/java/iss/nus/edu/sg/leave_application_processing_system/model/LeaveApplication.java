@@ -30,19 +30,37 @@ public class LeaveApplication {
 	private LocalDateTime appliedAt;
 	private LeaveStatus status;
 	
+	// --- ADDED THESE FIELDS ---Tricia
+    private String reason;
+    private String contactDetail;
+    private boolean halfDay;
+    
 	public LeaveApplication() {}
 
-	public LeaveApplication(Employee employee, LeaveType leaveType, LocalDate startDate, LocalDate endDate) {
-		this.employee = employee;
-		this.leaveType = leaveType;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.appliedAt = LocalDateTime.now();
-		this.status = LeaveStatus.PENDING;
-	}
-	
+	// Updated Constructor
+    public LeaveApplication(Employee employee, LeaveType leaveType, LocalDate startDate, LocalDate endDate, String reason, String contactDetail) {
+        this.employee = employee;
+        this.leaveType = leaveType;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.reason = reason;
+        this.contactDetail = contactDetail;
+        this.appliedAt = LocalDateTime.now();
+        this.status = LeaveStatus.PENDING;
+    }
+    
+ // --- GETTERS AND SETTERS FOR NEW FIELDS ---
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
+
+    public String getContactDetail() { return contactDetail; }
+    public void setContactDetail(String contactDetail) { this.contactDetail = contactDetail; }
+
+    public boolean isHalfDay() { return halfDay; }
+    public void setHalfDay(boolean halfDay) { this.halfDay = halfDay; }
+    
 	//getters and setters
-	public Long getId() {
+    public Long getId() {
 		return id;
 	}
 
