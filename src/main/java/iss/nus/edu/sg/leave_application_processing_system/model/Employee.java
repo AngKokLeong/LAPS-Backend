@@ -13,11 +13,9 @@ public class Employee {
   
   
   public Employee() {
-	super();
   }
 
   public Employee(Long id, String fname, String lname) {
-	super();
 	this.id = id;
 	this.fname = fname;
 	this.lname = lname;
