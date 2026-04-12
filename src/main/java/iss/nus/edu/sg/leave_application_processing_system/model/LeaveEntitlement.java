@@ -16,6 +16,6 @@ public class LeaveEntitlement {
 	private LeaveType leavetype;
 	private int year;
 	private int totalDays;
-	private int usedDays;
+	private EmployeeRole employeerole;
 	
 }
