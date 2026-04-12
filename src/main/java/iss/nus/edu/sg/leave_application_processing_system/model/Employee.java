@@ -10,4 +10,16 @@ public class Employee {
   private Long id;
   private String fname;
   private String lname;
+  
+  
+  public Employee() {
+	super();
+  }
+
+  public Employee(Long id, String fname, String lname) {
+	super();
+	this.id = id;
+	this.fname = fname;
+	this.lname = lname;
+  }
 }
