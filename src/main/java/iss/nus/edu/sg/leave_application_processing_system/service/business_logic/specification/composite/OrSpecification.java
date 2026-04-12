@@ -17,7 +17,7 @@ public class OrSpecification<T> extends CompositeSpecification<T> {
     @Override
     public BiPredicate<T, T> toPredicate() {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'toPredicate'");
+        return firstSpecification.toPredicate().or(secondSpecification.toPredicate());
     }
     
 }
