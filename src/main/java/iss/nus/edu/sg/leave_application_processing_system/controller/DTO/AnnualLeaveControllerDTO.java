@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.service.DTO;
+package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
 import java.time.LocalDateTime;
 
@@ -7,20 +7,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class AnnualLeaveServiceDTO implements ServiceDTO { 
+@AllArgsConstructor
+public class AnnualLeaveControllerDTO implements ControllerDTO{
     
     private LocalDateTime leavePeriodStart;
     private LocalDateTime leavePeriodEnd;
     
-    
-
-
     @Override
-    public ServiceDTO getAllAttribute() {
+    public ControllerDTO getAllAttribute() {
         return this;
     }
-
+    
     
 }
