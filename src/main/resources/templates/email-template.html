@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+  <head
+    th:replace="~{fragments/common_header :: head('Email Templates (Demonstration) - Leave Management System')}"
+  >
+  </head>
+  <body class="bg-gray-50">
+    <div class="flex min-h-screen">
+      <!-- Admin Navigation Sidebar -->
+      <div
+        th:replace="~{fragments/admin_left_navigation_bar :: admin_navigation_bar('Admin')}"
+      ></div>
+
+      <main class="flex-1 min-w-0 p-8">
+        <div class="max-w-4xl mx-auto">
+          <!-- Header -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-semibold text-gray-900">
+              Email Templates - Demonstration
+            </h1>
+            <p class="text-gray-500 mt-1">
+              View different email notification templates used in the system
+            </p>
+          </div>
+
+          <!-- Template Selector -->
+          <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+            <div class="flex gap-3">
+              <button
+                onclick="showTemplate('manager')"
+                id="btn-manager"
+                class="flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-blue-600 text-white"
+              >
+                Manager Notification
+              </button>
+              <button
+                onclick="showTemplate('approved')"
+                id="btn-approved"
+                class="flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+              >
+                Employee - Approved
+              </button>
+              <button
+                onclick="showTemplate('rejected')"
+                id="btn-rejected"
+                class="flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+              >
+                Employee - Rejected
+              </button>
+            </div>
+          </div>
+
+          <!-- Manager Notification Template -->
+          <div
+            id="template-manager"
+            class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+          >
+            <!-- Email Header -->
+            <div class="bg-blue-600 p-6">
+              <div class="flex items-center gap-3 text-white">
+                <div
+                  class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-semibold">
+                    Leave Application System
+                  </h2>
+                  <p class="text-blue-100 text-sm">Automated Notification</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Metadata -->
+            <div class="border-b border-gray-200 bg-gray-50 p-6">
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <span class="text-sm font-semibold text-gray-600 w-20"
+                    >From:</span
+                  >
+                  <span class="text-sm text-gray-900"
+                    >Leave Application System &lt;noreply@company.com&gt;</span
+                  >
+                </div>
+                <div class="flex items-start gap-3">
+                  <span class="text-sm font-semibold text-gray-600 w-20"
+                    >To:</span
+                  >
+                  <span class="text-sm text-gray-900"
+                    >Sarah Manager &lt;sarah@company.com&gt;</span
+                  >
+                </div>
+                <div class="flex items-start gap-3">
+                  <span class="text-sm font-semibold text-gray-600 w-20"
+                    >Subject:</span
+                  >
+                  <span class="text-sm font-medium text-gray-900"
+                    >New Leave Application - John Doe (Vacation Leave)</span
+                  >
+                </div>
+                <div class="flex items-start gap-3">
+                  <span class="text-sm font-semibold text-gray-600 w-20"
+                    >Date:</span
+                  >
+                  <span class="text-sm text-gray-900"
+                    >April 2, 2026, 09:45 AM</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Body -->
+            <div class="p-8">
+              <!-- Greeting -->
+              <div class="mb-6">
+                <p class="text-gray-900">Dear Sarah Manager,</p>
+              </div>
+
+              <!-- Main Message -->
+              <div class="mb-6">
+                <p class="text-gray-700 leading-relaxed">
+                  A new leave application has been submitted by one of your team
+                  members and requires your approval.
+                </p>
+              </div>
+
+              <!-- Leave Details Card -->
+              <div
+                class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6"
+              >
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Leave Application Details
+                </h3>
+
+                <div class="space-y-4">
+                  <!-- Employee Information -->
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-5 h-5 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-gray-600">
+                        Employee
+                      </p>
+                      <p class="text-gray-900 font-medium">John Doe</p>
+                      <p class="text-sm text-gray-600">EMP001 • Engineering</p>
+                      <p class="text-sm text-gray-500">john@company.com</p>
+                    </div>
+                  </div>
+
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <!-- Leave Type -->
+                      <div class="flex items-start gap-3">
+                        <div
+                          class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                        >
+                          <svg
+                            class="w-5 h-5 text-purple-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            ></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <p class="text-sm font-semibold text-gray-600">
+                            Leave Type
+                          </p>
+                          <p class="text-gray-900 font-medium">
+                            Vacation Leave
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- Duration -->
+                      <div class="flex items-start gap-3">
+                        <div
+                          class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                        >
+                          <svg
+                            class="w-5 h-5 text-orange-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <p class="text-sm font-semibold text-gray-600">
+                            Duration
+                          </p>
+                          <p class="text-gray-900 font-medium">3 days</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Dates -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="flex items-start gap-3">
+                      <div
+                        class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                      >
+                        <svg
+                          class="w-5 h-5 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <p class="text-sm font-semibold text-gray-600 mb-2">
+                          Leave Period
+                        </p>
+                        <div class="flex items-center gap-2">
+                          <span class="text-gray-900 font-medium"
+                            >April 10, 2026</span
+                          >
+                          <span class="text-gray-400">→</span>
+                          <span class="text-gray-900 font-medium"
+                            >April 12, 2026</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Reason -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <p class="text-sm font-semibold text-gray-600 mb-2">
+                      Reason for Leave
+                    </p>
+                    <p class="text-gray-700 leading-relaxed">
+                      Family vacation planned for several months. Will ensure
+                      all pending tasks are completed before departure.
+                    </p>
+                  </div>
+
+                  <!-- Status Badge -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div
+                      class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      <span class="font-semibold">Pending Approval</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div
+                class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6"
+              >
+                <h3 class="font-semibold text-gray-900 mb-4">
+                  Action Required
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                  Please review this leave application and take appropriate
+                  action:
+                </p>
+                <div class="flex gap-3">
+                  <button
+                    class="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                    Approve Leave
+                  </button>
+                  <button
+                    class="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                    Reject Leave
+                  </button>
+                  <button
+                    class="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    View in System
+                  </button>
+                </div>
+              </div>
+
+              <!-- Instructions -->
+              <div class="bg-blue-50 border-l-4 border-blue-600 p-4 mb-6">
+                <p class="text-sm text-blue-900">
+                  <strong>Note:</strong> If no action is taken within 3 business
+                  days, this application will be automatically escalated to the
+                  department head.
+                </p>
+              </div>
+
+              <!-- Closing -->
+              <div class="space-y-3">
+                <p class="text-gray-700">
+                  If you have any questions regarding this leave application,
+                  please contact the HR department or reach out to the employee
+                  directly.
+                </p>
+                <p class="text-gray-900">
+                  Best regards,<br />
+                  <span class="font-medium">Leave Application System</span
+                  ><br />
+                  <span class="text-sm text-gray-600"
+                    >Human Resources Department</span
+                  >
+                </p>
+              </div>
+            </div>
+
+            <!-- Email Footer -->
+            <div class="bg-gray-50 border-t border-gray-200 p-6">
+              <div class="text-center text-sm text-gray-500">
+                <p class="mb-2">
+                  This is an automated notification from the Leave Application
+                  System
+                </p>
+                <p>© 2026 Company Name. All rights reserved.</p>
+                <p class="mt-3 text-xs text-gray-400">
+                  Please do not reply to this email. For assistance, contact HR
+                  at hr@company.com
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employee Approved Template (Hidden by default) -->
+          <div
+            id="template-approved"
+            class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+            style="display: none"
+          >
+            <!-- Same structure as manager template but with approved content -->
+            <div class="bg-blue-600 p-6">
+              <div class="flex items-center gap-3 text-white">
+                <div
+                  class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-semibold">
+                    Leave Application System
+                  </h2>
+                  <p class="text-blue-100 text-sm">Automated Notification</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-b border-gray-200 bg-gray-50 p-6">
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <span class="text-sm font-semibold text-gray-600 w-20"
+                    >Subject:</span
+                  >
+                  <span class="text-sm font-medium text-gray-900"
+                    >Leave Application Approved - Vacation Leave</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="p-8">
+              <div class="mb-6">
+                <p class="text-gray-900">Dear John Doe,</p>
+              </div>
+
+              <div class="mb-6">
+                <p class="text-gray-700 leading-relaxed">
+                  Your leave application has been approved by your manager,
+                  Sarah Manager.
+                </p>
+              </div>
+
+              <div
+                class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6"
+              >
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Leave Application Details
+                </h3>
+                <div class="space-y-4">
+                  <div class="border-t border-blue-200 pt-4">
+                    <div
+                      class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      <span class="font-semibold">Approved</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <p class="text-gray-700">
+                  If you have any questions regarding this leave application,
+                  please contact the HR department or reach out to your manager
+                  directly.
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-gray-50 border-t border-gray-200 p-6">
+              <div class="text-center text-sm text-gray-500">
+                <p class="mb-2">
+                  This is an automated notification from the Leave Application
+                  System
+                </p>
+                <p>© 2026 Company Name. All rights reserved.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employee Rejected Template (Hidden by default) -->
+          <div
+            id="template-rejected"
+            class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+            style="display: none"
+          >
+            <div class="bg-blue-600 p-6">
+              <div class="flex items-center gap-3 text-white">
+                <div
+                  class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-semibold">
+                    Leave Application System
+                  </h2>
+                  <p class="text-blue-100 text-sm">Automated Notification</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-b border-gray-200 bg-gray-50 p-6">
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <span class="text-sm font-semibold text-gray-600 w-20"
+                    >Subject:</span
+                  >
+                  <span class="text-sm font-medium text-gray-900"
+                    >Leave Application Rejected - Vacation Leave</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="p-8">
+              <div class="mb-6">
+                <p class="text-gray-900">Dear John Doe,</p>
+              </div>
+
+              <div class="mb-6">
+                <p class="text-gray-700 leading-relaxed">
+                  Your leave application has been rejected by your manager,
+                  Sarah Manager.
+                </p>
+              </div>
+
+              <div
+                class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6"
+              >
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Leave Application Details
+                </h3>
+                <div class="space-y-4">
+                  <div class="border-t border-blue-200 pt-4">
+                    <p class="text-sm font-semibold text-gray-600 mb-2">
+                      Rejection Reason
+                    </p>
+                    <p class="text-gray-700 leading-relaxed">
+                      Unfortunately, we have multiple team members already
+                      scheduled for leave during this period. Please coordinate
+                      with your team and submit a request for alternative dates.
+                    </p>
+                  </div>
+                  <div class="border-t border-blue-200 pt-4">
+                    <div
+                      class="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-lg"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      <span class="font-semibold">Rejected</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <p class="text-gray-700">
+                  If you would like to discuss this decision or submit a new
+                  application with alternative dates, please contact your
+                  manager or the HR department.
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-gray-50 border-t border-gray-200 p-6">
+              <div class="text-center text-sm text-gray-500">
+                <p class="mb-2">
+                  This is an automated notification from the Leave Application
+                  System
+                </p>
+                <p>© 2026 Company Name. All rights reserved.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      function showTemplate(type) {
+        // Hide all templates
+        document.getElementById("template-manager").style.display = "none";
+        document.getElementById("template-approved").style.display = "none";
+        document.getElementById("template-rejected").style.display = "none";
+
+        // Reset all button styles
+        document.getElementById("btn-manager").className =
+          "flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200";
+        document.getElementById("btn-approved").className =
+          "flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200";
+        document.getElementById("btn-rejected").className =
+          "flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200";
+
+        // Show selected template and highlight button
+        if (type === "manager") {
+          document.getElementById("template-manager").style.display = "block";
+          document.getElementById("btn-manager").className =
+            "flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-blue-600 text-white";
+        } else if (type === "approved") {
+          document.getElementById("template-approved").style.display = "block";
+          document.getElementById("btn-approved").className =
+            "flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-green-600 text-white";
+        } else if (type === "rejected") {
+          document.getElementById("template-rejected").style.display = "block";
+          document.getElementById("btn-rejected").className =
+            "flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-red-600 text-white";
+        }
+      }
+    </script>
+  </body>
+</html>
