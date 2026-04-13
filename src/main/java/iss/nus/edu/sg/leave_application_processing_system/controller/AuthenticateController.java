@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/")
-public class LoginController {
+@RequestMapping("/authenticate")
+public class AuthenticateController {
 
 	@GetMapping ("/")
 	public String showLandingPage() {
@@ -23,15 +23,20 @@ public class LoginController {
 		return "login";
 	}
 	
-	@PostMapping ("/validate") 
+	@PostMapping ("/login") 
 	public String validateLogin (@RequestParam String username, @RequestParam String password, Model model) {
 		if (username.equalsIgnoreCase("john@company.com") && password.equalsIgnoreCase("any")) {
 			model.addAttribute("username", username);
-			return "redirect:/landing/";
+			return "redirect:/staff";
 		}
 		else {
 			return "failure";
 			}
+	}
+
+	@PostMapping("/logout")
+	public String processLogout(){
+		return "";
 	}
 	
 	@GetMapping ("/success/dashboard")

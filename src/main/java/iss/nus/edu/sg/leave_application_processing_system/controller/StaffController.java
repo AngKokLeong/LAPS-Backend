@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping ("/staff")
 public class StaffController {
 	
-	@GetMapping ("/dashboard")
+	@GetMapping ({"", "/"})
 	public String staffDashboard() {
-		return "dashboard";
+		return "landing";
 	}
 	
 	@GetMapping ("/apply-for-leave") 
