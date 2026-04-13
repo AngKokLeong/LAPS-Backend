@@ -12,10 +12,11 @@ public class LeaveEntitlement {
 
 	@Id
 	private int entitlementId;
+	private Employee employeeId;
 	@Enumerated (EnumType.STRING)
 	private LeaveType leavetype;
 	private int year;
 	private int totalDays;
-	private EmployeeRole employeerole;
+	private int usedDays;
 	
 }
