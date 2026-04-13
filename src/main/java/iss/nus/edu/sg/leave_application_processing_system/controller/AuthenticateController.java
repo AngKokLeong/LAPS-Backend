@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/")
-public class LoginController {
+@RequestMapping("/authenticate")
+public class AuthenticateController {
 
 	@GetMapping ("/")
 	public String showLandingPage() {
@@ -41,8 +41,12 @@ public class LoginController {
 			session.setAttribute("userRole", "admin");
 			return "redirect:/landing/";
 		}
-		
 		return "failure";
+	}
+
+	@PostMapping("/logout")
+	public String processLogout(){
+		return "";
 	}
 	
 	@GetMapping ("/success/dashboard")
