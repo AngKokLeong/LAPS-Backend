@@ -7,23 +7,7 @@
 <body class="bg-gray-50">
 	<div class="flex min-h-screen">
 		<!-- Staff Navigation Sidebar -->
-		<div th:switch="${session.userRole}">
-			<th:block th:case="'manager'">
-				<div th:replace="~{fragments/manager_left_navigation_bar :: manager_navigation_bar('Manager')}"></div>
-			</th:block>
-		
-			<th:block th:case="'admin'">
-				<div th:replace="~{fragments/admin_left_navigation_bar :: admin_navigation_bar('Admin')}"></div>
-			</th:block>
-		
-			<th:block th:case="'staff'">
-				<div th:replace="~{fragments/staff_left_navigation_bar :: navigation_bar('Staff')}"></div>
-			</th:block>
-		
-			<div th:case="*">
-				<p>Error: User role not recognized. Please log in again.</p>
-			</div>
-		</div>
+		<div th:replace="~{fragments/layout-parts :: dynamic_sidebar}"></div>
 
 		<!-- Main Content -->
 		<main class="flex-1 overflow-auto">
