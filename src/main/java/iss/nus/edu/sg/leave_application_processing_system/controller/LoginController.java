@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping("/")
 public class LoginController {
@@ -53,7 +55,17 @@ public class LoginController {
 	}
 	
 	@GetMapping("/claim-ot")
-	public String claimOT() {	
+	public String claimOT(@RequestParam(required = false) String role, HttpSession session) {	
+		
+		if (role != null) {
+	        session.setAttribute("userRole", role.toLowerCase());
+	    }
+	    
+	    // Default fallback if session is empty and no param is provided
+	    if (session.getAttribute("userRole") == null) {
+	        session.setAttribute("userRole", "staff"); 
+	    }
+	    
 		return("claim-ot");
 	}
 }
