@@ -24,14 +24,23 @@ public class LoginController {
 	}
 	
 	@PostMapping ("/validate") 
-	public String validateLogin (@RequestParam String username, @RequestParam String password, Model model) {
+	public String validateLogin (@RequestParam String username, @RequestParam String password, Model model, HttpSession session) {
 		if (username.equalsIgnoreCase("john@company.com") && password.equalsIgnoreCase("any")) {
 			model.addAttribute("username", username);
+			session.setAttribute("userRole", "staff");
+			return "redirect:/landing/";
+		} else if (username.equalsIgnoreCase("sarah@company.com") && password.equalsIgnoreCase("any")) {
+			model.addAttribute("username", username);
+			session.setAttribute("userRole", "manager");
+			return "redirect:/landing/";
+		} else if (username.equalsIgnoreCase("admin@company.com") && password.equalsIgnoreCase("any")) {
+			model.addAttribute("username", username);
+			session.setAttribute("userRole", "admin");
 			return "redirect:/landing/";
 		}
-		else {
-			return "failure";
-			}
+		
+		return "failure";
+
 	}
 	
 	@GetMapping ("/success/dashboard")
