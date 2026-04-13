@@ -9,9 +9,4 @@ import java.util.Optional;
 
 @Repository
 public interface CompensationLedgerRepository extends JpaRepository<CompensationLedger, Long> {
-
-    Optional<CompensationLedger> findByEmployeeIdAndYearApplied(
-            String employeeId,
-            int yearApplied
-    );
 }
