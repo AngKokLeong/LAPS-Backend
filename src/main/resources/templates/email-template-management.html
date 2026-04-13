@@ -51,11 +51,11 @@
           <div
             class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
           >
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex gap-3">
                   <div
-                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                    class="w-10 h-10 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center"
                   >
                     <svg
                       class="w-5 h-5 text-blue-600"
@@ -71,49 +71,48 @@
                       ></path>
                     </svg>
                   </div>
-                  <div>
-                    <h3 class="font-semibold text-gray-900">
-                      Manager Notification
-                    </h3>
-                    <p class="text-sm text-gray-500">
-                      Sent to managers when their team members submit a leave
-                      application
-                    </p>
-                  </div>
-                </div>
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 class="font-semibold text-gray-900">
+                        Manager Notification
+                      </h3>
+                      <p class="text-sm text-gray-500">
+                        Sent to managers when their team members submit a leave
+                        application
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        Manager
+                      </span>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Active
+                      </span>
+                      <span class="text-xs text-gray-500"
+                        >Last modified: 2026-04-02</span
+                      >
+                    </div>
 
-                <div class="ml-13 space-y-2">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                    >
-                      Manager
-                    </span>
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                    >
-                      Active
-                    </span>
-                    <span class="text-xs text-gray-500"
-                      >Last modified: 2026-04-02</span
-                    >
-                  </div>
+                    <div class="text-sm text-gray-600">
+                      <strong>Subject:</strong> New Leave Application -
+                      {{employee_name}} ({{leave_type}})
+                    </div>
 
-                  <div class="text-sm text-gray-600">
-                    <strong>Subject:</strong> New Leave Application -
-                    {{employee_name}} ({{leave_type}})
-                  </div>
-
-                  <div class="text-sm text-gray-600">
-                    <strong>Variables:</strong> {{employee_name}},
-                    {{employee_email}}, {{employee_id}}, {{department}},
-                    {{manager_name}}, {{leave_type}}, {{start_date}},
-                    {{end_date}}, {{duration}}, {{reason}}, {{applied_date}}
+                    <div class="text-sm text-gray-600 break-words">
+                      <strong>Variables:</strong> {{employee_name}},
+                      {{employee_email}}, {{employee_id}}, {{department}},
+                      {{manager_name}}, {{leave_type}}, {{start_date}},
+                      {{end_date}}, {{duration}}, {{reason}}, {{applied_date}}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="flex gap-2">
+              <div class="flex shrink-0 gap-2">
                 <button
                   class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Preview"
@@ -200,11 +199,11 @@
           <div
             class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
           >
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex gap-3">
                   <div
-                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                    class="w-10 h-10 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center"
                   >
                     <svg
                       class="w-5 h-5 text-blue-600"
@@ -220,47 +219,48 @@
                       ></path>
                     </svg>
                   </div>
-                  <div>
-                    <h3 class="font-semibold text-gray-900">
-                      Employee - Approved
-                    </h3>
-                    <p class="text-sm text-gray-500">
-                      Sent to employees when their leave application is approved
-                    </p>
-                  </div>
-                </div>
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 class="font-semibold text-gray-900">
+                        Employee - Approved
+                      </h3>
+                      <p class="text-sm text-gray-500">
+                        Sent to employees when their leave application is
+                        approved
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Employee
+                      </span>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Active
+                      </span>
+                      <span class="text-xs text-gray-500"
+                        >Last modified: 2026-04-01</span
+                      >
+                    </div>
 
-                <div class="ml-13 space-y-2">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                    >
-                      Employee
-                    </span>
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                    >
-                      Active
-                    </span>
-                    <span class="text-xs text-gray-500"
-                      >Last modified: 2026-04-01</span
-                    >
-                  </div>
+                    <div class="text-sm text-gray-600">
+                      <strong>Subject:</strong> Leave Application Approved -
+                      {{leave_type}}
+                    </div>
 
-                  <div class="text-sm text-gray-600">
-                    <strong>Subject:</strong> Leave Application Approved -
-                    {{leave_type}}
-                  </div>
-
-                  <div class="text-sm text-gray-600">
-                    <strong>Variables:</strong> {{employee_name}},
-                    {{leave_type}}, {{start_date}}, {{end_date}}, {{duration}},
-                    {{manager_name}}, {{approved_date}}, {{reason}}
+                    <div class="text-sm text-gray-600 break-words">
+                      <strong>Variables:</strong> {{employee_name}},
+                      {{leave_type}}, {{start_date}}, {{end_date}},
+                      {{duration}}, {{manager_name}}, {{approved_date}},
+                      {{reason}}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="flex gap-2">
+              <div class="flex shrink-0 gap-2">
                 <button
                   class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Preview"
@@ -347,11 +347,11 @@
           <div
             class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
           >
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex gap-3">
                   <div
-                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                    class="w-10 h-10 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center"
                   >
                     <svg
                       class="w-5 h-5 text-blue-600"
@@ -367,47 +367,48 @@
                       ></path>
                     </svg>
                   </div>
-                  <div>
-                    <h3 class="font-semibold text-gray-900">
-                      Employee - Rejected
-                    </h3>
-                    <p class="text-sm text-gray-500">
-                      Sent to employees when their leave application is rejected
-                    </p>
-                  </div>
-                </div>
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 class="font-semibold text-gray-900">
+                        Employee - Rejected
+                      </h3>
+                      <p class="text-sm text-gray-500">
+                        Sent to employees when their leave application is
+                        rejected
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Employee
+                      </span>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Active
+                      </span>
+                      <span class="text-xs text-gray-500"
+                        >Last modified: 2026-03-28</span
+                      >
+                    </div>
 
-                <div class="ml-13 space-y-2">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                    >
-                      Employee
-                    </span>
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                    >
-                      Active
-                    </span>
-                    <span class="text-xs text-gray-500"
-                      >Last modified: 2026-03-28</span
-                    >
-                  </div>
+                    <div class="text-sm text-gray-600">
+                      <strong>Subject:</strong> Leave Application Rejected -
+                      {{leave_type}}
+                    </div>
 
-                  <div class="text-sm text-gray-600">
-                    <strong>Subject:</strong> Leave Application Rejected -
-                    {{leave_type}}
-                  </div>
-
-                  <div class="text-sm text-gray-600">
-                    <strong>Variables:</strong> {{employee_name}},
-                    {{leave_type}}, {{start_date}}, {{end_date}}, {{duration}},
-                    {{manager_name}}, {{rejected_date}}, {{rejection_reason}}
+                    <div class="text-sm text-gray-600 break-words">
+                      <strong>Variables:</strong> {{employee_name}},
+                      {{leave_type}}, {{start_date}}, {{end_date}},
+                      {{duration}}, {{manager_name}}, {{rejected_date}},
+                      {{rejection_reason}}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="flex gap-2">
+              <div class="flex shrink-0 gap-2">
                 <button
                   class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Preview"
