@@ -26,27 +26,22 @@ public class AuthenticateController {
 	@GetMapping ("/logout")
 	public String logout(HttpSession session) {	
 		session.invalidate();
-		return "redirect:/login";
+		return "redirect:/";
 	}
 	
-	@PostMapping ("/validate") 
+	@PostMapping ("/login") 
 	public String validateLogin (@RequestParam String username, @RequestParam String password, HttpSession session) {
 		if (username.equalsIgnoreCase("john@company.com") && password.equalsIgnoreCase("any")) {
 			session.setAttribute("userRole", "staff");
-			return "redirect:/landing/";
+			return "redirect:/staff";
 		} else if (username.equalsIgnoreCase("sarah@company.com") && password.equalsIgnoreCase("any")) {
 			session.setAttribute("userRole", "manager");
-			return "redirect:/landing/";
+			return "redirect:/staff";
 		} else if (username.equalsIgnoreCase("admin@company.com") && password.equalsIgnoreCase("any")) {
 			session.setAttribute("userRole", "admin");
-			return "redirect:/landing/";
+			return "redirect:/staff";
 		}
 		return "failure";
-	}
-
-	@PostMapping("/logout")
-	public String processLogout(){
-		return "";
 	}
 	
 	@GetMapping ("/success/dashboard")
