@@ -9,7 +9,7 @@ public class Employee {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long employeeId;
+  private Long id;
   private String email;
   private String password;
   private String name;
@@ -23,33 +23,12 @@ public class Employee {
     this.email = email;
   }
 
-  /*
-  // Self-referencing manager relationship
-  @ManyToOne
-  @JoinColumn(name = "manager_id")
-  private Employee manager;
-
-  @OneToMany(mappedBy = "manager")
-  private List<Employee> subordinates;
-
-  @OneToMany(mappedBy = "employee")
-  private List<LeaveApplication> leaveApplications;
-
-  @OneToMany(mappedBy = "employee")
-  private List<LeaveEntitlement> leaveEntitlements;
-
-  @OneToMany(mappedBy = "employee")
-  private List<OverTimeClaim> overTimeClaims;
-
-  @OneToMany(mappedBy = "employee")
-  private List<CompensationLedger> compensationLedgers;
-
-  public Long getEmployeeId() {
-    return employeeId;
+  public Long getId() {
+    return id;
   }
 
-  public void setEmployeeId(Long employeeId) {
-    this.employeeId = employeeId;
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public String getEmail() {
@@ -92,53 +71,7 @@ public class Employee {
     this.department = department;
   }
 
-  public Employee getManager() {
-    return manager;
-  }
+  
 
-  public void setManager(Employee manager) {
-    this.manager = manager;
-  }
-
-  public List<Employee> getSubordinates() {
-    return subordinates;
-  }
-
-  public void setSubordinates(List<Employee> subordinates) {
-    this.subordinates = subordinates;
-  }
-
-  public List<LeaveApplication> getLeaveApplications() {
-    return leaveApplications;
-  }
-
-  public void setLeaveApplications(List<LeaveApplication> leaveApplications) {
-    this.leaveApplications = leaveApplications;
-  }
-
-  public List<LeaveEntitlement> getLeaveEntitlements() {
-    return leaveEntitlements;
-  }
-
-  public void setLeaveEntitlements(List<LeaveEntitlement> leaveEntitlements) {
-    this.leaveEntitlements = leaveEntitlements;
-  }
-
-  public List<OverTimeClaim> getOverTimeClaims() {
-    return overTimeClaims;
-  }
-
-  public void setOverTimeClaims(List<OverTimeClaim> overTimeClaims) {
-    this.overTimeClaims = overTimeClaims;
-  }
-
-  public List<CompensationLedger> getCompensationLedgers() {
-    return compensationLedgers;
-  }
-
-  public void setCompensationLedgers(List<CompensationLedger> compensationLedgers) {
-    this.compensationLedgers = compensationLedgers;
-  }
-  */
   
 }
