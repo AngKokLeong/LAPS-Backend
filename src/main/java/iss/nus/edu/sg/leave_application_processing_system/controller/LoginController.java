@@ -52,5 +52,9 @@ public class LoginController {
 		return("myleaves");
 	}
 	
+	@GetMapping("/claim-ot")
+	public String claimOT() {	
+		return("claim-ot");
+	}
 }
 
