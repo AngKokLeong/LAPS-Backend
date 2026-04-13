@@ -5,10 +5,8 @@
 </head>
 <body class="bg-gray-50">
     <div class="flex min-h-screen">
-        <!-- Staff Navigation Sidebar -->
-	<div
-		 th:replace="~{fragments/staff_left_navigation_bar :: navigation_bar('Staff')}"
-	></div>
+		<!-- Dynamic Navigation Sidebar -->
+		<div th:replace="~{fragments/layout-parts :: dynamic_sidebar}"></div>
 
         <!-- Main Content -->
         <main class="flex-1 p-8">
