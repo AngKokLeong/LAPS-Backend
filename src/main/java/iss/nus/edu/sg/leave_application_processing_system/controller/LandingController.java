@@ -18,30 +18,30 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO
 
 
 @Controller
-@RequestMapping("/landing")
+@RequestMapping("/")
 public class LandingController {
 
-    private LeaveApplicationService leaveApplicationService;
+    //private LeaveApplicationService leaveApplicationService;
 
-    public LandingController(@Qualifier("AnnualLeaveApplicationService") LeaveApplicationService leaveApplicationService){
-        this.leaveApplicationService = leaveApplicationService;
-    }
+    //public LandingController(@Qualifier("AnnualLeaveApplicationService") LeaveApplicationService leaveApplicationService){
+    //    this.leaveApplicationService = leaveApplicationService;
+    //}
 
 
-    @GetMapping("/")
-    public String landingPage(Model model) {
+    @GetMapping("")
+    public String landingPage() {
 
-        ServiceDTO annualLeaveApplicationDTO = new AnnualLeaveServiceDTO(
-                                            LocalDateTime.of(2026, 05, 04, 11, 0),
-                                            LocalDateTime.of(2026, 05, 11, 11, 0)
-                                        );
+        //ServiceDTO annualLeaveApplicationDTO = new AnnualLeaveServiceDTO(
+        //                                    LocalDateTime.of(2026, 05, 04, 11, 0),
+        //                                    LocalDateTime.of(2026, 05, 11, 11, 0)
+        //                                );
         
-        boolean status = leaveApplicationService.submitApplication(annualLeaveApplicationDTO);
+        //boolean status = leaveApplicationService.submitApplication(annualLeaveApplicationDTO);
 
-        model.addAttribute("test", status);
+        //model.addAttribute("test", status);
 
 
-        return "landing";
+        return "login";
     }
     
 
