@@ -25,4 +25,9 @@ public class ManagerController {
 	public String manageLeaveRequests() {
 		return "manage-leave-requests";       
 	}
+	
+	@GetMapping("/approve-ot-claim")
+	public String approveOTClaim() {
+		return "approve-ot-claim";       
+	}
 }

@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+  <head
+    th:replace="~{fragments/common_header :: head('Email Template Management - Leave Management System')}"
+  >
+  </head>
+  <body class="bg-gray-50">
+    <div class="flex min-h-screen">
+      <!-- Admin Navigation Sidebar -->
+      <div
+        th:replace="~{fragments/admin_left_navigation_bar :: admin_navigation_bar('Admin')}"
+      ></div>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div class="mb-8">
+          <h1 class="text-3xl font-semibold text-gray-900">
+            Email Template Management
+          </h1>
+          <p class="text-gray-500 mt-1">
+            Create, edit, and manage email notification templates
+          </p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="mb-6 flex justify-between items-center">
+          <div class="text-sm text-gray-600">3 templates total</div>
+          <button
+            class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              ></path>
+            </svg>
+            Add New Template
+          </button>
+        </div>
+
+        <!-- Template List -->
+        <div class="space-y-4">
+          <!-- Template 1: Manager Notification -->
+          <div
+            class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex gap-3">
+                  <div
+                    class="w-10 h-10 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 class="font-semibold text-gray-900">
+                        Manager Notification
+                      </h3>
+                      <p class="text-sm text-gray-500">
+                        Sent to managers when their team members submit a leave
+                        application
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        Manager
+                      </span>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Active
+                      </span>
+                      <span class="text-xs text-gray-500"
+                        >Last modified: 2026-04-02</span
+                      >
+                    </div>
+
+                    <div class="text-sm text-gray-600">
+                      <strong>Subject:</strong> New Leave Application -
+                      {{employee_name}} ({{leave_type}})
+                    </div>
+
+                    <div class="text-sm text-gray-600 break-words">
+                      <strong>Variables:</strong> {{employee_name}},
+                      {{employee_email}}, {{employee_id}}, {{department}},
+                      {{manager_name}}, {{leave_type}}, {{start_date}},
+                      {{end_date}}, {{duration}}, {{reason}}, {{applied_date}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex shrink-0 gap-2">
+                <button
+                  class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Preview"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Duplicate"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Edit"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Template 2: Employee - Approved -->
+          <div
+            class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex gap-3">
+                  <div
+                    class="w-10 h-10 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 class="font-semibold text-gray-900">
+                        Employee - Approved
+                      </h3>
+                      <p class="text-sm text-gray-500">
+                        Sent to employees when their leave application is
+                        approved
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Employee
+                      </span>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Active
+                      </span>
+                      <span class="text-xs text-gray-500"
+                        >Last modified: 2026-04-01</span
+                      >
+                    </div>
+
+                    <div class="text-sm text-gray-600">
+                      <strong>Subject:</strong> Leave Application Approved -
+                      {{leave_type}}
+                    </div>
+
+                    <div class="text-sm text-gray-600 break-words">
+                      <strong>Variables:</strong> {{employee_name}},
+                      {{leave_type}}, {{start_date}}, {{end_date}},
+                      {{duration}}, {{manager_name}}, {{approved_date}},
+                      {{reason}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex shrink-0 gap-2">
+                <button
+                  class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Preview"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Duplicate"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Edit"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Template 3: Employee - Rejected -->
+          <div
+            class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex gap-3">
+                  <div
+                    class="w-10 h-10 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <h3 class="font-semibold text-gray-900">
+                        Employee - Rejected
+                      </h3>
+                      <p class="text-sm text-gray-500">
+                        Sent to employees when their leave application is
+                        rejected
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Employee
+                      </span>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        Active
+                      </span>
+                      <span class="text-xs text-gray-500"
+                        >Last modified: 2026-03-28</span
+                      >
+                    </div>
+
+                    <div class="text-sm text-gray-600">
+                      <strong>Subject:</strong> Leave Application Rejected -
+                      {{leave_type}}
+                    </div>
+
+                    <div class="text-sm text-gray-600 break-words">
+                      <strong>Variables:</strong> {{employee_name}},
+                      {{leave_type}}, {{start_date}}, {{end_date}},
+                      {{duration}}, {{manager_name}}, {{rejected_date}},
+                      {{rejection_reason}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex shrink-0 gap-2">
+                <button
+                  class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Preview"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Duplicate"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Edit"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div class="flex items-start gap-3">
+            <div
+              class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0"
+            >
+              <svg
+                class="w-4 h-4 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-blue-900 mb-1">
+                Email Template Management Tips
+              </h3>
+              <ul class="text-sm text-blue-800 space-y-1">
+                <li>• Use {{variable_name}} syntax for dynamic content</li>
+                <li>• Preview templates before activating them</li>
+                <li>• Duplicate existing templates to create variations</li>
+                <li>
+                  • Inactive templates won't be sent but can be re-enabled
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

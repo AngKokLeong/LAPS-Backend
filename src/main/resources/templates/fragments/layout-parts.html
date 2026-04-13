@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    
+<body>
+	<div th:fragment="dynamic_sidebar">
+		<div th:switch="${session.userRole}">
+			<th:block th:case="'manager'">
+				<div th:replace="~{fragments/manager_left_navigation_bar :: manager_navigation_bar('Manager')}"></div>
+			</th:block>
+
+			<th:block th:case="'admin'">
+				<div th:replace="~{fragments/admin_left_navigation_bar :: admin_navigation_bar('Admin')}"></div>
+			</th:block>
+
+			<th:block th:case="'staff'">
+				<div th:replace="~{fragments/staff_left_navigation_bar :: navigation_bar('Staff')}"></div>
+			</th:block>
+			
+			<div th:case="*">
+				<p class="p-4 text-red-500">Error: Please log in.</p>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

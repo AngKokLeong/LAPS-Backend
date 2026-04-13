@@ -12,7 +12,7 @@ import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication
 @Repository
 public interface LeaveApplicationRepository extends JpaRepository<LeaveApplication, Long> {
 	
-	List<LeaveApplication> findByEmployeeId(Long employeeId);
+	List<LeaveApplication> findByEmployee_Id(Long employeeId);
 	
 	// For the Manager: "Show me everything waiting for approval"
 	List<LeaveApplication> findByStatus(LeaveStatus status);
