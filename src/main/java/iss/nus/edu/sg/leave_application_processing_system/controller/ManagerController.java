@@ -15,7 +15,7 @@ public class ManagerController {
 	public String teamLeaveHistory(HttpSession session) {     
 		String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"manager".equals(role)) {
 	        return "redirect:/staff";
@@ -28,7 +28,7 @@ public class ManagerController {
 	public String teamMembersLeave(HttpSession session) {
 		String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"manager".equals(role)) {
 	        return "redirect:/staff";
@@ -41,7 +41,7 @@ public class ManagerController {
 	public String manageLeaveRequests(HttpSession session) {
 		String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"manager".equals(role)) {
 	        return "redirect:/staff";
@@ -54,7 +54,7 @@ public class ManagerController {
 	public String approveOTClaim(HttpSession session) {
 		String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"manager".equals(role)) {
 	        return "redirect:/staff";

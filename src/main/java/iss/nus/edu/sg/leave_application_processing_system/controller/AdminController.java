@@ -14,7 +14,7 @@ public class AdminController {
 	public String employeeManagement(HttpSession session) {  
 	  	String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+	  	if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"admin".equals(role)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
@@ -27,7 +27,7 @@ public class AdminController {
 	public String leaveTypeManagement(HttpSession session) {
 	  	String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+	  	if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"admin".equals(role)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
@@ -40,7 +40,7 @@ public class AdminController {
 	public String leaveEntitlementManagement(HttpSession session) {
 	  	String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+	  	if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"admin".equals(role)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
@@ -53,7 +53,7 @@ public class AdminController {
 	public String emailTemplateManagement(HttpSession session) {
 	  	String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+	  	if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"admin".equals(role)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
@@ -66,7 +66,7 @@ public class AdminController {
 	public String emailTemplate(HttpSession session) {
 	  	String role = (String) session.getAttribute("userRole");
 		
-		if (role == null) return "redirect:/";
+	  	if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"admin".equals(role)) {
 	        return "redirect:/staff";
