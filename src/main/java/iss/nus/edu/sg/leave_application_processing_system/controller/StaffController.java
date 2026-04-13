@@ -4,32 +4,54 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping ("/staff")
 public class StaffController {
 	
 	@GetMapping ({"", "/"})
-	public String staffDashboard() {
+	public String staffDashboard(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
+		
 		return "dashboard";
 	}
 	
 	@GetMapping ("/apply-for-leave") 
-	public String applyForLeave() {
+	public String applyForLeave(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
+		
 		return "apply-for-leave";
 	}
 	
 	@GetMapping ("/my-leave-requests")
-	public String myLeaveRequests() {
+	public String myLeaveRequests(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
+		
 		return "my-leave-requests";
 	}
 	
 	@GetMapping ("/movement-register") 
-	public String movementRegister() {
+	public String movementRegister(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
+		
 		return "movement-register";
 	}
 	
 	@GetMapping ("/submit-ot-claim") 
-	public String submitOvertimeClaim() {
+	public String submitOvertimeClaim(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
+		
 		return "submit-ot-claim";
 	}
 

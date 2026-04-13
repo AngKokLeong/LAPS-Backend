@@ -12,22 +12,54 @@ import jakarta.servlet.http.HttpSession;
 public class ManagerController {
 	
 	@GetMapping("/team-leave-history")
-	public String teamLeaveHistory() {     
+	public String teamLeaveHistory(HttpSession session) {     
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null) return "redirect:/";
+
+	    if (!"manager".equals(role)) {
+	        return "redirect:/staff";
+	    }
+		
 		return "team-leave-history";       
 	}
 	
 	@GetMapping("/view-team-members-leave")
-	public String teamMembersLeave() {
+	public String teamMembersLeave(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null) return "redirect:/";
+
+	    if (!"manager".equals(role)) {
+	        return "redirect:/staff";
+	    }
+	    
 		return "view-team-members-leave";       
 	}
 	
 	@GetMapping("/manage-leave-requests")
-	public String manageLeaveRequests() {
+	public String manageLeaveRequests(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null) return "redirect:/";
+
+	    if (!"manager".equals(role)) {
+	        return "redirect:/staff";
+	    }
+	    
 		return "manage-leave-requests";       
 	}
 	
 	@GetMapping("/approve-ot-claim")
-	public String approveOTClaim() {
+	public String approveOTClaim(HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null) return "redirect:/";
+
+	    if (!"manager".equals(role)) {
+	        return "redirect:/staff";
+	    }
+	    
 		return "approve-ot-claim";       
 	}
 }
