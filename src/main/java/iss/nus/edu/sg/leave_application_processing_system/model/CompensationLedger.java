@@ -16,11 +16,11 @@ public class CompensationLedger {
 
     private double usedDays;
 
-    /* 
+    
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
-
+     
     public Long getLedgerId() {
         return ledgerId;
     }
@@ -61,5 +61,5 @@ public class CompensationLedger {
         this.employee = employee;
     }
 
-    */
+    
 }
