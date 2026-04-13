@@ -23,6 +23,12 @@ public class LoginController {
 		return "login";
 	}
 	
+	@GetMapping ("/logout")
+	public String logout(HttpSession session) {	
+		session.invalidate();
+		return "redirect:/login";
+	}
+	
 	@PostMapping ("/validate") 
 	public String validateLogin (@RequestParam String username, @RequestParam String password, HttpSession session) {
 		if (username.equalsIgnoreCase("john@company.com") && password.equalsIgnoreCase("any")) {
