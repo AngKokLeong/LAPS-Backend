@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import iss.nus.edu.sg.leave_application_processing_system.service.LeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.implementation.MedicalLeaveApplicationService;
 
 
 
@@ -21,24 +23,27 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO
 @RequestMapping("/")
 public class LandingController {
 
-    //private LeaveApplicationService leaveApplicationService;
+    private LeaveApplicationService annualLeaveApplicationService;
+    private LeaveApplicationService medicalLeaveApplicationService;
 
-    //public LandingController(@Qualifier("AnnualLeaveApplicationService") LeaveApplicationService leaveApplicationService){
-    //    this.leaveApplicationService = leaveApplicationService;
-    //}
+    public LandingController(@Qualifier("AnnualLeaveApplicationService") LeaveApplicationService annualLeaveApplicationService, @Qualifier("MedicalLeaveApplicationService") LeaveApplicationService medicalLeaveApplicationService){
+        this.annualLeaveApplicationService = annualLeaveApplicationService;
+        this.medicalLeaveApplicationService = medicalLeaveApplicationService;
+
+    }
 
 
     @GetMapping("")
-    public String landingPage() {
+    public String landingPage(Model model) {
 
-        //ServiceDTO annualLeaveApplicationDTO = new AnnualLeaveServiceDTO(
-        //                                    LocalDateTime.of(2026, 05, 04, 11, 0),
-        //                                    LocalDateTime.of(2026, 05, 11, 11, 0)
-        //                                );
+        ServiceDTO amedicalLeaveApplicationDTO = new MedicalLeaveServiceDTO(
+                                            LocalDateTime.of(2025, 03, 04, 11, 0),
+                                            LocalDateTime.of(2026, 05, 03, 11, 0)
+                                        );
         
-        //boolean status = leaveApplicationService.submitApplication(annualLeaveApplicationDTO);
+        boolean status = medicalLeaveApplicationService.submitApplication(amedicalLeaveApplicationDTO);
 
-        //model.addAttribute("test", status);
+        model.addAttribute("test", status);
 
 
         return "login";
