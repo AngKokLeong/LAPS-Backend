@@ -15,7 +15,15 @@ public class Employee {
   private String name;
   private String role; // STAFF, MANAGER, ADMIN
   private String department;
+  
+  public Employee() {}
+  
+  public Employee(String name, String email) {
+    this.name = name;
+    this.email = email;
+  }
 
+  /*
   // Self-referencing manager relationship
   @ManyToOne
   @JoinColumn(name = "manager_id")
@@ -131,6 +139,6 @@ public class Employee {
   public void setCompensationLedgers(List<CompensationLedger> compensationLedgers) {
     this.compensationLedgers = compensationLedgers;
   }
-
+  */
   
 }
