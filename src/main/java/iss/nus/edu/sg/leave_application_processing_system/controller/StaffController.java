@@ -10,7 +10,7 @@ public class StaffController {
 	
 	@GetMapping ({"", "/"})
 	public String staffDashboard() {
-		return "landing";
+		return "dashboard";
 	}
 	
 	@GetMapping ("/apply-for-leave") 
