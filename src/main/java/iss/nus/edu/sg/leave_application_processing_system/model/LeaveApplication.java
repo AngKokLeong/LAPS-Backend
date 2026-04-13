@@ -98,5 +98,4 @@ public class LeaveApplication {
 		this.status = status;
 	}
 		
-	
 }
