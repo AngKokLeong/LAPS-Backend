@@ -20,7 +20,7 @@ public class AdminController {
 	
 	@GetMapping("/leave-entitlement-management")
 	public String leaveEntitlementManagement() {
-		return "leave-entitlement-management";       
+		return "leave-entitlement";       
 	}
 
   @GetMapping("/email-template-management")
@@ -30,7 +30,7 @@ public class AdminController {
 
   @GetMapping("/email-template")
   public String emailTemplate() {
-		return "email-template";       
+		return "view-email-template";       
 	}
 
 }
