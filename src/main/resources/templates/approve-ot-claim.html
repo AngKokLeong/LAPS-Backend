@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{fragments/common_header :: head('Manage OT Claims - Leave Management System')}">
+</head>
+
+<body class="bg-gray-50">
+	<div class="flex min-h-screen">
+		<!-- Manager Navigation Sidebar -->
+		<div th:replace="~{fragments/manager_left_navigation_bar :: manager_navigation_bar('Manager')}"></div>
+
+		<!-- Main Content -->
+		<main class="flex-1 overflow-auto">
+			<div class="p-8">
+				<div class="mb-8">
+					<h1 class="text-3xl font-semibold text-gray-900">Manage OT Claims</h1>
+					<p class="text-gray-500 mt-1">Review and approve overtime claims</p>
+				</div>
+
+				<div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="text-sm text-gray-600">Pending Approvals</p>
+							<p class="text-3xl font-semibold text-gray-900 mt-1" id="pendingCount">3</p>
+						</div>
+						<div class="flex gap-2">
+							<button onclick="filterClaims('all')" id="filter-all"
+								class="px-4 py-2 rounded-lg bg-blue-600 text-white transition-colors">
+								All
+							</button>
+							<button onclick="filterClaims('pending')" id="filter-pending"
+								class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+								Pending
+							</button>
+							<button onclick="filterClaims('approved')" id="filter-approved"
+								class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+								Approved
+							</button>
+							<button onclick="filterClaims('rejected')" id="filter-rejected"
+								class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+								Rejected
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<div id="claimsContainer" class="space-y-4">
+					<!-- Claims will be rendered here by JavaScript -->
+				</div>
+			</div>
+		</main>
+	</div>
+
+	<script>
+		let currentFilter = 'all';
+		let claims = [
+			{
+				id: '1',
+				employeeName: 'John Doe',
+				department: 'Engineering',
+				startDate: '2026-04-10',
+				startTime: '18:00',
+				endDate: '2026-04-10',
+				endTime: '22:00',
+				description: 'Critical bug fix for production deployment',
+				status: 'approved',
+				submittedDate: '2026-04-11',
+				reviewedBy: 'Sarah Manager',
+				reviewedDate: '2026-04-12',
+				comments: 'Approved - critical work completed'
+			},
+			{
+				id: '2',
+				employeeName: 'Alice Johnson',
+				department: 'Engineering',
+				startDate: '2026-04-08',
+				startTime: '19:00',
+				endDate: '2026-04-09',
+				endTime: '02:00',
+				description: 'Emergency server maintenance and database migration',
+				status: 'pending',
+				submittedDate: '2026-04-09'
+			},
+			{
+				id: '3',
+				employeeName: 'Bob Smith',
+				department: 'Engineering',
+				startDate: '2026-04-05',
+				startTime: '17:30',
+				endDate: '2026-04-05',
+				endTime: '21:00',
+				description: 'Client demo preparation and testing',
+				status: 'pending',
+				submittedDate: '2026-04-06'
+			},
+			{
+				id: '4',
+				employeeName: 'Charlie Davis',
+				department: 'Engineering',
+				startDate: '2026-03-28',
+				startTime: '18:00',
+				endDate: '2026-03-28',
+				endTime: '20:30',
+				description: 'Code review and documentation update',
+				status: 'rejected',
+				submittedDate: '2026-03-29',
+				reviewedBy: 'Sarah Manager',
+				reviewedDate: '2026-03-30',
+				comments: 'Not pre-approved - regular work hours should be sufficient'
+			},
+			{
+				id: '5',
+				employeeName: 'John Doe',
+				department: 'Engineering',
+				startDate: '2026-04-12',
+				startTime: '20:00',
+				endDate: '2026-04-13',
+				endTime: '01:30',
+				description: 'Release deployment and monitoring',
+				status: 'pending',
+				submittedDate: '2026-04-13'
+			}
+		];
+
+		function calculateDuration(startDate, startTime, endDate, endTime) {
+			const start = new Date(`${startDate}T${startTime}`);
+			const end = new Date(`${endDate}T${endTime}`);
+			const diffMs = end - start;
+			const hours = Math.floor(diffMs / (1000 * 60 * 60));
+			const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+			return `${hours}h ${minutes}m`;
+		}
+
+		function formatDate(dateStr) {
+			const date = new Date(dateStr);
+			return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+		}
+
+		function formatLongDate(dateStr) {
+			const date = new Date(dateStr);
+			return date.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
+		}
+
+		function getInitials(name) {
+			return name.split(' ').map(n => n[0]).join('');
+		}
+
+		function renderClaims() {
+			const container = document.getElementById('claimsContainer');
+			const filteredClaims = currentFilter === 'all' ? claims : claims.filter(c => c.status === currentFilter);
+
+			if (filteredClaims.length === 0) {
+				container.innerHTML = `
+          <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">No OT Claims</h3>
+            <p class="text-gray-500">There are no ${currentFilter !== 'all' ? currentFilter : ''} OT claims to display.</p>
+          </div>
+        `;
+				return;
+			}
+
+			container.innerHTML = filteredClaims.map(claim => {
+				const borderClass = claim.status === 'pending' ? 'border-2 border-yellow-200' :
+					claim.status === 'approved' ? 'border border-green-200' :
+						'border border-red-200';
+
+				const statusBadge = claim.status === 'pending' ?
+					'<div class="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-200"><svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span class="text-sm font-medium text-yellow-700">Awaiting Review</span></div>' :
+					claim.status === 'approved' ?
+						'<div class="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-lg border border-green-200"><svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm font-medium text-green-700">Approved</span></div>' :
+						'<div class="flex items-center gap-2 bg-red-50 px-3 py-1 rounded-lg border border-red-200"><svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm font-medium text-red-700">Rejected</span></div>';
+
+				return `
+          <div class="bg-white rounded-xl ${borderClass} p-6 shadow-sm">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-white font-semibold text-lg">${getInitials(claim.employeeName)}</span>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900">${claim.employeeName}</h3>
+                    <p class="text-sm text-gray-500">${claim.department}</p>
+                  </div>
+                  ${statusBadge}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
+                  <div class="bg-gray-50 rounded-lg p-3">
+                    <p class="text-xs text-gray-500 mb-1">Start</p>
+                    <p class="text-sm font-medium text-gray-900">${formatDate(claim.startDate)} at ${claim.startTime}</p>
+                  </div>
+                  <div class="bg-gray-50 rounded-lg p-3">
+                    <p class="text-xs text-gray-500 mb-1">End</p>
+                    <p class="text-sm font-medium text-gray-900">${formatDate(claim.endDate)} at ${claim.endTime}</p>
+                  </div>
+                  <div class="bg-gray-50 rounded-lg p-3">
+                    <div class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <div>
+                        <p class="text-xs text-gray-500 mb-1">Duration</p>
+                        <p class="text-sm font-medium text-gray-900">${calculateDuration(claim.startDate, claim.startTime, claim.endDate, claim.endTime)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                  <p class="text-xs font-medium text-blue-900 mb-1">Description:</p>
+                  <p class="text-sm text-blue-800">${claim.description}</p>
+                </div>
+
+                <div class="text-xs text-gray-500 mb-4">
+                  Submitted on ${formatLongDate(claim.submittedDate)}
+                </div>
+
+                ${claim.status === 'pending' ? `
+                  <div class="space-y-3" id="actions-${claim.id}">
+                    <div class="flex gap-3">
+                      <button onclick="showCommentBox('${claim.id}')" class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                        Add Comments
+                      </button>
+                    </div>
+                  </div>
+                ` : ''}
+
+                ${claim.reviewedBy ? `
+                  <div class="mt-4 bg-gray-50 rounded-lg p-3">
+                    <p class="text-sm text-gray-600">
+                      <span class="font-medium">Reviewed by:</span> ${claim.reviewedBy} on ${formatDate(claim.reviewedDate)}
+                    </p>
+                    ${claim.comments ? `<p class="text-sm text-gray-600 mt-2"><span class="font-medium">Comments:</span> ${claim.comments}</p>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+			}).join('');
+		}
+
+		function showCommentBox(claimId) {
+			const actionsDiv = document.getElementById(`actions-${claimId}`);
+			actionsDiv.innerHTML = `
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Comments (optional for approval, required for rejection)
+          </label>
+          <textarea
+            id="comment-${claimId}"
+            placeholder="Add comments about this OT claim..."
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          ></textarea>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="approveClaim('${claimId}')" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Approve
+          </button>
+          <button onclick="rejectClaim('${claimId}')" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Reject
+          </button>
+          <button onclick="renderClaims()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+            Cancel
+          </button>
+        </div>
+      `;
+		}
+
+		function approveClaim(claimId) {
+			const comment = document.getElementById(`comment-${claimId}`).value || 'Approved';
+			claims = claims.map(c => c.id === claimId ? {
+				...c,
+				status: 'approved',
+				reviewedBy: 'Sarah Manager',
+				reviewedDate: new Date().toISOString().split('T')[0],
+				comments: comment
+			} : c);
+			updatePendingCount();
+			renderClaims();
+		}
+
+		function rejectClaim(claimId) {
+			const comment = document.getElementById(`comment-${claimId}`).value;
+			if (!comment.trim()) {
+				alert('Please provide a reason for rejection');
+				return;
+			}
+			claims = claims.map(c => c.id === claimId ? {
+				...c,
+				status: 'rejected',
+				reviewedBy: 'Sarah Manager',
+				reviewedDate: new Date().toISOString().split('T')[0],
+				comments: comment
+			} : c);
+			updatePendingCount();
+			renderClaims();
+		}
+
+		function filterClaims(filter) {
+			currentFilter = filter;
+
+			// Update button styles
+			['all', 'pending', 'approved', 'rejected'].forEach(f => {
+				const btn = document.getElementById(`filter-${f}`);
+				if (f === filter) {
+					btn.className = `px-4 py-2 rounded-lg bg-${f === 'all' ? 'blue' : f === 'pending' ? 'yellow' : f === 'approved' ? 'green' : 'red'}-600 text-white transition-colors`;
+				} else {
+					btn.className = 'px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors';
+				}
+			});
+
+			renderClaims();
+		}
+
+		function updatePendingCount() {
+			const pendingCount = claims.filter(c => c.status === 'pending').length;
+			document.getElementById('pendingCount').textContent = pendingCount;
+		}
+
+		// Initial render
+		renderClaims();
+	</script>
+</body>
+
+</html>
