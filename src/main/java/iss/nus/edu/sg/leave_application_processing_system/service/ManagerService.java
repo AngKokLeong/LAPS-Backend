@@ -8,4 +8,5 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO
 public interface ManagerService {
 
 	List<ControllerDTO> viewTeamLeaveBalances(ServiceDTO serviceDTO);
+	ControllerDTO processApproval(ServiceDTO serviceDTO);
 }

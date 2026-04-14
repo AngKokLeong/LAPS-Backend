@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveBalanceControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.ManagerService;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 
@@ -58,6 +60,40 @@ public class TeamManagementService implements ManagerService {
         teamLeaveBalances.add(mock3);
 
         return teamLeaveBalances;
+	}
+	
+	@Override
+	public ControllerDTO processApproval(ServiceDTO serviceDTO) {
+		
+        LeaveApprovalServiceDTO request = (LeaveApprovalServiceDTO) serviceDTO.getAllAttribute();
+
+        LeaveApprovalControllerDTO response = new LeaveApprovalControllerDTO();
+        response.setApplicationId(request.getApplicationId());
+        
+        // --- MOCK LOGIC START ---
+        // Later, use request.getApplicationId() to find the record in the DB
+        
+        if (request.getApplicationId() == null) {
+            response.setSuccess(false);
+            response.setMessage("Error: Invalid Application ID.");
+            return response;
+        }
+
+        // Simulate a successful update
+        String finalStatus = request.getStatus(); // "APPROVED" or "REJECTED"
+        response.setNewStatus(finalStatus);
+        response.setSuccess(true);
+        
+        // Custom message based on the action taken
+        if ("APPROVED".equalsIgnoreCase(finalStatus)) {
+            response.setMessage("Application #" + request.getApplicationId() + " has been successfully approved.");
+            // FUTURE LOGIC: entitlementRepo.updateUsedDays(employeeId, days);
+        } else {
+            response.setMessage("Application #" + request.getApplicationId() + " has been rejected.");
+        }
+        // --- MOCK LOGIC END ---
+
+        return response;
 	}
 
 }
