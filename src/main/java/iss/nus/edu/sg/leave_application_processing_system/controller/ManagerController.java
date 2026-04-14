@@ -6,9 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.TeamManagementService;
 import jakarta.servlet.http.HttpSession;
@@ -73,6 +78,33 @@ public class ManagerController {
 	    }
 	    
 		return "manage-leave-requests";       
+	}
+	
+	@PostMapping("/process-leave")
+	public String processLeaveAction(@RequestParam("appId") Long applicationId, @RequestParam("action") String action,
+			@RequestParam(value = "remarks", required = false) String remarks, RedirectAttributes ra) {
+
+		// Create ServiceDTO
+		// Later, we need to get the current manager's ID from the session/security context
+		Long currentManagerId = 1L;
+		LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(applicationId, action, currentManagerId);
+
+		// Optional: Add the comment if your DTO supports it
+		requestDto.setManagerRemarks(remarks);
+
+		// Call the Service
+		// The service returns a LeaveApprovalControllerDTO
+		LeaveApprovalControllerDTO result = (LeaveApprovalControllerDTO) teamMngService.processApproval(requestDto);
+
+		// 3. Handle the result and prepare feedback for the UI
+		if (result.isSuccess()) {
+			ra.addFlashAttribute("successMessage", result.getMessage());
+		} else {
+			ra.addFlashAttribute("errorMessage", "Failed to process leave: " + result.getMessage());
+		}
+
+		// 4. Redirect back to the pending list page
+		return "redirect:/manager/manage-leave-requests";
 	}
 	
 	@GetMapping("/approve-ot-claim")
