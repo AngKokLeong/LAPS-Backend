@@ -38,7 +38,7 @@
                 <option value="manager">Manager</option>
                 <option value="admin">Admin</option>
               </select>
-              <button
+              <a th:href="@{/admin/employees/add}"
                 class="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <svg
@@ -55,7 +55,8 @@
                   ></path>
                 </svg>
                 Add Employee
-              </button>
+              </a>
+			  
             </div>
           </div>
         </div>
