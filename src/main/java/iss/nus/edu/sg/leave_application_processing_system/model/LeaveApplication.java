@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,49 +16,51 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "LeaveApplications")
+@Table(name = "leave_applications")
 public class LeaveApplication {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@ManyToOne
-	@JoinColumn(name = "employee_id")
-	private Employee employee;
-	
-	@ManyToOne
-	@JoinColumn(name = "ledger_id")
-	private CompensationLedger ledger;
-	
-	@ManyToOne
-	@JoinColumn(name = "leaveEntitlement_id")
-	private LeaveEntitlement entitlement;
-	
 	@Enumerated(EnumType.STRING)
 	private LeaveType leaveType;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "employee_id")
+	private Employee employee;
+
+	@ManyToOne
+	@JoinColumn(name = "ledger_id")
+	private CompensationLedger ledger; // nullable
+
+	@ManyToOne
+	@JoinColumn(name = "entitlement_id")
+	private LeaveEntitlement entitlement; // nullable	
+	
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private LocalDateTime appliedAt;
 	
 	@Enumerated(EnumType.STRING)
 	private LeaveStatus status;
+	
 	private String reason;
 	private String mgrRemarks;
 	private LocalDate updatedDate;
 	private boolean halfDay;
 	
+	// Constructors for testing
 	public LeaveApplication() {}
-	
-	
-	public LeaveApplication(Employee employee, CompensationLedger ledger, LeaveEntitlement entitlement,
-			LeaveType leaveType, LocalDate startDate, LocalDate endDate, LocalDateTime appliedAt, LeaveStatus status,
-			String reason, String mgrRemarks, LocalDate updatedDate, boolean halfDay) {
-	
+
+	public LeaveApplication(LeaveType leaveType, Employee employee, CompensationLedger ledger,
+			LeaveEntitlement entitlement, LocalDate startDate, LocalDate endDate, LocalDateTime appliedAt,
+			LeaveStatus status, String reason, String mgrRemarks, LocalDate updatedDate, boolean halfDay) {
+
+		this.leaveType = leaveType;
 		this.employee = employee;
 		this.ledger = ledger;
 		this.entitlement = entitlement;
-		this.leaveType = leaveType;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.appliedAt = appliedAt;
@@ -70,11 +72,7 @@ public class LeaveApplication {
 	}
 
 	
-	//getters and setters
-	public Long getId() {
-		return id;
-	}
-
+	public Long getId() { return id; }
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -82,8 +80,7 @@ public class LeaveApplication {
 	public Employee getEmployee() {
 		return employee;
 	}
-
-	public void setEmployee(Employee employee) {
+public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
 
@@ -143,6 +140,7 @@ public class LeaveApplication {
 	public void setStatus(LeaveStatus status) {
 		this.status = status;
 	}
+
 		
 	public String getReason() {
 		return reason;
@@ -179,29 +177,15 @@ public class LeaveApplication {
 	}
 
 
+	public void setHalfDay(boolean halfDay) {
+		this.halfDay = halfDay;
+	}
+
 	public void setHalfday(boolean halfDay) {
 		this.halfDay = halfDay;
 	}
 
-	public enum LeaveType {
-		
-		ANNUAL,
-		MEDICAL,
-		COMPENSATION
-		
-	}
-	
-	public enum LeaveStatus {
-		
-		APPLIED,
-		UPDATED,
-		APPROVED,
-		REJECTED,
-		DELETED,
-		CANCELLED,
-		ARCHIVED,
-		
-	}
+
 	
 	// Good to have for your business logic later
 	public long getDurationInDays() {
