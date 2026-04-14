@@ -10,9 +10,9 @@ import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
 
 @Repository
 public interface OverTimeRepository extends JpaRepository<OverTimeClaim, Long> {
+  
+    List<OverTimeClaim> findByEmployeeId(Long employeeId);
 
-  /*
-   List<OverTimeClaim> findByEmployee_EmployeeId(Long employeeId);
-   List<OverTimeClaim> findByStatus(OTClaimStatus status);
-   */
+    List<OverTimeClaim> findByStatus(OTClaimStatus status);
+
 }

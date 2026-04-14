@@ -26,7 +26,9 @@ public class AuthenticateController {
 	@GetMapping ("/logout")
 	public String logout(HttpSession session) {	
 		session.invalidate();
-		return "redirect:/";
+		// Adding ?logout tells Thymeleaf to show the green box
+	    return "redirect:/authenticate/?logout"; 
+
 	}
 	
 	@PostMapping ("/login") 
