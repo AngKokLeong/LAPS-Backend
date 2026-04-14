@@ -1,6 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.model;
 
-import java.util.List;
+import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,12 +10,24 @@ public class Employee {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(unique = true, nullable = false)
   private String email;
+
+  @Column(nullable = false)
   private String password;
+
   private String name;
-  private String role; // STAFF, MANAGER, ADMIN
+
+  @Enumerated(EnumType.STRING)
+  private Role role; // STAFF, MANAGER, ADMIN (enum)
   private String department;
-  
+
+  @ManyToOne
+  @JoinColumn(name = "manager_id")
+  private Employee manager;
+
+  // Constructors for testing
   public Employee() {}
   
   public Employee(String name, String email) {
@@ -23,6 +35,7 @@ public class Employee {
     this.email = email;
   }
 
+  // Getters & Setters
   public Long getId() {
     return id;
   }
@@ -55,11 +68,11 @@ public class Employee {
     this.name = name;
   }
 
-  public String getRole() {
+  public Role getRole() {
     return role;
   }
 
-  public void setRole(String role) {
+  public void setRole(Role role) {
     this.role = role;
   }
 
@@ -71,7 +84,13 @@ public class Employee {
     this.department = department;
   }
 
-  
+  public Employee getManager() {
+    return manager;
+  }
 
-  
+  public void setManager(Employee manager) {
+    this.manager = manager;
+  }
+
+
 }

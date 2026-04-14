@@ -8,7 +8,7 @@ public class CompensationLedger {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ledgerId;
+    private Long id;
 
     private int yearApplied;
 
@@ -16,17 +16,28 @@ public class CompensationLedger {
 
     private double usedDays;
 
-    /* 
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
-     
-    public Long getLedgerId() {
-        return ledgerId;
+
+    // Constructor
+    public CompensationLedger() {}
+
+    public CompensationLedger(Long id, int yearApplied, double earnedDays, double usedDays, Employee employee) {
+        this.id = id;
+        this.yearApplied = yearApplied;
+        this.earnedDays = earnedDays;
+        this.usedDays = usedDays;
+        this.employee = employee;
     }
 
-    public void setLedgerId(Long ledgerId) {
-        this.ledgerId = ledgerId;
+    // Getters & Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public int getYearApplied() {
@@ -60,6 +71,4 @@ public class CompensationLedger {
     public void setEmployee(Employee employee) {
         this.employee = employee;
     }
-
-    */
 }
