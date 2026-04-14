@@ -68,14 +68,24 @@ public class ManagerController {
 	}
 	
 	@GetMapping("/manage-leave-requests")
-	public String manageLeaveRequests(HttpSession session) {
-		String role = (String) session.getAttribute("userRole");
+	public String manageLeaveRequests(HttpSession session, Model model) {
 		
+		//check session role
+		String role = (String) session.getAttribute("userRole");
 		if (role == null || role.toString().isEmpty()) return "redirect:/";
 
 	    if (!"manager".equals(role)) {
 	        return "redirect:/staff";
 	    }
+
+	    // Create serviceDTO (Who is the manager?)
+	    ManagerQueryServiceDTO query = new ManagerQueryServiceDTO(1L);
+
+	    // Fetch the list from the service
+	    List<ControllerDTO> teamRequests = teamMngService.getSubordinateLeaveRequests(query);
+
+	    // Add to the Model for Thymeleaf
+	    model.addAttribute("teamRequests", teamRequests);
 	    
 		return "manage-leave-requests";       
 	}
