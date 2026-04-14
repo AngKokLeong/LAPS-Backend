@@ -35,11 +35,11 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            <!-- Employee 1 -->
+							<tr th:each="staff : ${teamBalances}">
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4">
                                     <div>
-                                        <div class="font-medium text-gray-900">John Doe</div>
+                                        <div th:text="${staff.employeeName}" class="font-medium text-gray-900">Staff Name</div>
                                         <div class="text-sm text-gray-500">john@company.com</div>
                                     </div>
                                 </td>

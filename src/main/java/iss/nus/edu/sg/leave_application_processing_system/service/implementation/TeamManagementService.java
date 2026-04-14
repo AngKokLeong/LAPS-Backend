@@ -25,7 +25,8 @@ public class TeamManagementService implements ManagerService {
         // USE MOCK DATA HERE
         // Will need to call the Repository later
         SubordinateLeaveBalanceControllerDTO mock1 = new SubordinateLeaveBalanceControllerDTO();
-        mock1.setEmployeeName("Alice Tan");
+        mock1.setEmployeeName("AhBeng Tan");
+        mock1.setEmail("ahbeng_tan@company.com");
         mock1.setDepartment("Engineering");
         mock1.setAnnualBalance(12 - 2); //simulate totalDays - usedDays
         mock1.setMedicalBalance(20 - 3);
@@ -35,7 +36,8 @@ public class TeamManagementService implements ManagerService {
         teamLeaveBalances.add(mock1);
         
         SubordinateLeaveBalanceControllerDTO mock2 = new SubordinateLeaveBalanceControllerDTO();
-        mock2.setEmployeeName("Henry Lim");
+        mock2.setEmployeeName("AhHuat Lim");
+        mock2.setEmail("ahhuat_lim@company.com");
         mock2.setDepartment("Engineering");
         mock2.setAnnualBalance(14 - 2); //simulate totalDays - usedDays
         mock2.setMedicalBalance(40 - 5);
@@ -46,6 +48,7 @@ public class TeamManagementService implements ManagerService {
         
         SubordinateLeaveBalanceControllerDTO mock3 = new SubordinateLeaveBalanceControllerDTO();
         mock3.setEmployeeName("David Ong");
+        mock3.setEmail("david_ong@company.com");
         mock3.setDepartment("IT");
         mock3.setAnnualBalance(18 - 5); //simulate totalDays - usedDays
         mock3.setMedicalBalance(40 - 3);

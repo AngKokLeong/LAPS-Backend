@@ -3,6 +3,7 @@ package iss.nus.edu.sg.leave_application_processing_system.service.DTO;
 public class SubordinateLeaveBalanceServiceDTO implements ServiceDTO {
 	
 	private String employeeName;
+	private String email;
 	private String department;
 	private int annualBalance;
 	private int medicalBalance;
@@ -21,6 +22,14 @@ public class SubordinateLeaveBalanceServiceDTO implements ServiceDTO {
 
 	public void setEmployeeName(String employeeName) {
 		this.employeeName = employeeName;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
 	public String getDepartment() {

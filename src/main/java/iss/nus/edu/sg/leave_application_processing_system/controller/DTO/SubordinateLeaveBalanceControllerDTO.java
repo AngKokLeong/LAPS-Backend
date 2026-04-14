@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class SubordinateLeaveBalanceControllerDTO implements ControllerDTO {
 
 	private String employeeName;
+	private String email;
 	private String department;
 	private int annualBalance;
 	private int medicalBalance;
@@ -29,6 +30,14 @@ public class SubordinateLeaveBalanceControllerDTO implements ControllerDTO {
 
 	public void setEmployeeName(String employeeName) {
 		this.employeeName = employeeName;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public String getDepartment() {
