@@ -92,7 +92,7 @@ public class ManagerController {
 
 	    // Add to the Model for Thymeleaf
 	    model.addAttribute("teamRequests", teamRequests);
-	    model.addAttribute("pendingCount", pendingCount)
+	    model.addAttribute("pendingCount", pendingCount);
 	    
 		return "manage-leave-requests";       
 	}

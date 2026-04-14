@@ -20,7 +20,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600">Pending Approvals</p>
-                        <p class="text-3xl font-semibold text-gray-900 mt-1">2</p>
+                        <p th:text="${pendingCount}" class="text-3xl font-semibold text-gray-900 mt-1">count</p>
                     </div>
                     <div class="flex gap-2">
                         <button class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white">
@@ -42,7 +42,7 @@
             <!-- Leave Request Cards -->
             <div class="space-y-4">
                 <!-- Pending Request 1 - John Doe -->
-                <div class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm">
+                <div th:each="request : ${teamRequests}" class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm">
                     <div class="flex items-start gap-4 mb-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white font-semibold text-lg">JD</span>
@@ -50,21 +50,21 @@
                         <div class="flex-1">
                             <div class="flex items-start justify-between mb-2">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">John Doe</h3>
-                                    <p class="text-sm text-gray-500">Engineering</p>
+                                    <h3 th:text="${request.employeeName}" class="text-lg font-semibold text-gray-900">Name</h3>
+                                    <p th:text="${request.department}" class="text-sm text-gray-500">Department</p>
                                 </div>
                                 <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-200">
                                     <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                                     </svg>
-                                    <span class="text-sm font-medium text-yellow-700">Awaiting Review</span>
+                                    <span th:text="${request.status}" class="text-sm font-medium text-yellow-700">Status</span>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
                                 <div class="bg-gray-50 rounded-lg p-3">
                                     <p class="text-xs text-gray-500 mb-1">Leave Type</p>
-                                    <p class="text-sm font-medium text-gray-900 capitalize">Personal</p>
+                                    <p th:text="${request.leaveType}" class="text-sm font-medium text-gray-900 capitalize">Type</p>
                                 </div>
                                 <div class="bg-gray-50 rounded-lg p-3">
                                     <div class="flex items-center gap-2">
@@ -73,7 +73,8 @@
                                         </svg>
                                         <div>
                                             <p class="text-xs text-gray-500 mb-1">Duration</p>
-                                            <p class="text-sm font-medium text-gray-900">May 5 - May 6</p>
+                                            <p th:text="${#temporals.format(request.startDate, 'dd MMM')} + ' - ' + ${#temporals.format(request.endDate, 'dd MMM yyyy')}"
+												class="text-sm font-medium text-gray-900">May 5 - May 6</p>
                                         </div>
                                     </div>
                                 </div>
@@ -84,7 +85,8 @@
                                         </svg>
                                         <div>
                                             <p class="text-xs text-gray-500 mb-1">Total Days</p>
-                                            <p class="text-sm font-medium text-gray-900">2 days</p>
+                                            <p th:text="${#numbers.formatDecimal(request.totalDays, 1, 1)} + ' days'" 
+												class="text-sm font-medium text-gray-900">2 days</p>
                                         </div>
                                     </div>
                                 </div>
@@ -92,10 +94,10 @@
 
                             <div class="bg-blue-50 rounded-lg p-4 mb-4">
                                 <p class="text-xs font-medium text-blue-900 mb-1">Reason:</p>
-                                <p class="text-sm text-blue-800">Personal matters</p>
+                                <p th:text="${request.reason} " class="text-sm text-blue-800">reason</p>
                             </div>
 
-                            <div class="text-xs text-gray-500 mb-4">
+                            <div th:text="'Submitted on ' + ${request.submittedDate}" class="text-xs text-gray-500 mb-4">
                                 Submitted on March 30, 2026
                             </div>
 
@@ -117,282 +119,7 @@
                     </div>
                 </div>
 
-                <!-- Pending Request 2 - Alice Johnson -->
-                <div class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-semibold text-lg">AJ</span>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">Alice Johnson</h3>
-                                    <p class="text-sm text-gray-500">Engineering</p>
-                                </div>
-                                <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-200">
-                                    <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-yellow-700">Awaiting Review</span>
-                                </div>
-                            </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-500 mb-1">Leave Type</p>
-                                    <p class="text-sm font-medium text-gray-900 capitalize">Vacation</p>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                                            <p class="text-sm font-medium text-gray-900">Apr 10 - Apr 17</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Total Days</p>
-                                            <p class="text-sm font-medium text-gray-900">7 days</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                                <p class="text-xs font-medium text-blue-900 mb-1">Reason:</p>
-                                <p class="text-sm text-blue-800">Annual vacation</p>
-                            </div>
-
-                            <div class="text-xs text-gray-500 mb-4">
-                                Submitted on March 28, 2026
-                            </div>
-
-                            <div class="flex gap-3">
-                                <button class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    Approve Request
-                                </button>
-                                <button class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    Reject Request
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Approved Request - John Doe Vacation -->
-                <div class="leave-card bg-white rounded-xl border border-green-200 p-6 shadow-sm">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-semibold text-lg">JD</span>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">John Doe</h3>
-                                    <p class="text-sm text-gray-500">Engineering</p>
-                                </div>
-                                <div class="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-lg border border-green-200">
-                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-green-700">Approved</span>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-500 mb-1">Leave Type</p>
-                                    <p class="text-sm font-medium text-gray-900 capitalize">Vacation</p>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                                            <p class="text-sm font-medium text-gray-900">Apr 15 - Apr 20</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Total Days</p>
-                                            <p class="text-sm font-medium text-gray-900">5 days</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                                <p class="text-xs font-medium text-blue-900 mb-1">Reason:</p>
-                                <p class="text-sm text-blue-800">Family vacation</p>
-                            </div>
-
-                            <div class="text-xs text-gray-500 mb-4">
-                                Submitted on March 20, 2026
-                            </div>
-
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <p class="text-sm text-gray-600">
-                                    <span class="font-medium">Reviewed by:</span> Sarah Manager on Mar 21, 2026
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Approved Request - John Doe Sick Leave -->
-                <div class="leave-card bg-white rounded-xl border border-green-200 p-6 shadow-sm">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-semibold text-lg">JD</span>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">John Doe</h3>
-                                    <p class="text-sm text-gray-500">Engineering</p>
-                                </div>
-                                <div class="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-lg border border-green-200">
-                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-green-700">Approved</span>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-500 mb-1">Leave Type</p>
-                                    <p class="text-sm font-medium text-gray-900 capitalize">Sick</p>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                                            <p class="text-sm font-medium text-gray-900">Mar 10 - Mar 11</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Total Days</p>
-                                            <p class="text-sm font-medium text-gray-900">2 days</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                                <p class="text-xs font-medium text-blue-900 mb-1">Reason:</p>
-                                <p class="text-sm text-blue-800">Medical appointment</p>
-                            </div>
-
-                            <div class="text-xs text-gray-500 mb-4">
-                                Submitted on March 8, 2026
-                            </div>
-
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <p class="text-sm text-gray-600">
-                                    <span class="font-medium">Reviewed by:</span> Sarah Manager on Mar 9, 2026
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Approved Request - Bob Smith -->
-                <div class="leave-card bg-white rounded-xl border border-green-200 p-6 shadow-sm">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-semibold text-lg">BS</span>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">Bob Smith</h3>
-                                    <p class="text-sm text-gray-500">Engineering</p>
-                                </div>
-                                <div class="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-lg border border-green-200">
-                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-green-700">Approved</span>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-500 mb-1">Leave Type</p>
-                                    <p class="text-sm font-medium text-gray-900 capitalize">Sick</p>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                                            <p class="text-sm font-medium text-gray-900">Apr 1 - Apr 2</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Total Days</p>
-                                            <p class="text-sm font-medium text-gray-900">2 days</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                                <p class="text-xs font-medium text-blue-900 mb-1">Reason:</p>
-                                <p class="text-sm text-blue-800">Flu</p>
-                            </div>
-
-                            <div class="text-xs text-gray-500 mb-4">
-                                Submitted on March 25, 2026
-                            </div>
-
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <p class="text-sm text-gray-600">
-                                    <span class="font-medium">Reviewed by:</span> Sarah Manager on Mar 26, 2026
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
