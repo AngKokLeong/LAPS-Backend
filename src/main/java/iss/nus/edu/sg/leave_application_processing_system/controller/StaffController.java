@@ -1,7 +1,9 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpSession;
@@ -19,13 +21,13 @@ public class StaffController {
 		return "dashboard";
 	}
 	
-	@GetMapping ("/apply-for-leave") 
+	@GetMapping ("/apply-leave") 
 	public String applyForLeave(HttpSession session) {
 		String role = (String) session.getAttribute("userRole");
 		
 		if (role == null || role.toString().isEmpty()) return "redirect:/";
-		
-		return "apply-for-leave";
+	
+		return "apply-leave";
 	}
 	
 	@GetMapping ("/my-leave-requests")
