@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -97,14 +98,23 @@ public class ManagerController {
 		return "manage-leave-requests";       
 	}
 	
-	@PostMapping("/process-leave")
-	public String processLeaveAction(@RequestParam("appId") Long applicationId, @RequestParam("action") String action,
-			@RequestParam(value = "remarks", required = false) String remarks, RedirectAttributes ra) {
+	@PostMapping("/leave/{id}/approve")
+	public String approveLeave(@PathVariable Long id, @RequestParam(required = false) String remarks,
+			RedirectAttributes ra, HttpSession session) {
+
+		// check session role
+		String role = (String) session.getAttribute("userRole");
+		if (role == null || role.toString().isEmpty())
+			return "redirect:/";
+
+		if (!"manager".equals(role)) {
+			return "redirect:/staff";
+		}
 
 		// Create ServiceDTO
 		// Later, we need to get the current manager's ID from the session/security context
 		Long currentManagerId = 1L;
-		LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(applicationId, action, currentManagerId);
+		LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(id, "APPROVE", currentManagerId);
 
 		// Optional: Add the comment if your DTO supports it
 		requestDto.setManagerRemarks(remarks);
@@ -123,6 +133,43 @@ public class ManagerController {
 
 		// 4. Redirect back to the pending list page
 		return "redirect:/manager/manage-leave-requests";
+	}
+	
+	@PostMapping("/leave/{id}/reject")
+	public String rejectLeave(@PathVariable Long id, @RequestParam(required = false) String remarks, RedirectAttributes ra,
+			HttpSession session) {
+
+		// check session role
+		String role = (String) session.getAttribute("userRole");
+		if (role == null || role.toString().isEmpty())
+			return "redirect:/";
+
+		if (!"manager".equals(role)) {
+			return "redirect:/staff";
+		}
+		
+		// Extra safety check in case JS validation is bypassed
+		if (remarks == null || remarks.isBlank()) {
+			ra.addFlashAttribute("errorMessage", "Remarks are required for rejection.");
+			return "redirect:/manager//manage-leave-requests";
+		}
+
+		// Create ServiceDTO
+		// Later, we need to get the current manager's ID from the session/security
+		// context
+		Long currentManagerId = 1L;
+		LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(id, "REJECT", currentManagerId);
+		requestDto.setManagerRemarks(remarks);
+
+	    LeaveApprovalControllerDTO result = (LeaveApprovalControllerDTO) teamMngService.processApproval(requestDto);
+
+	    if (result.isSuccess()) {
+	        ra.addFlashAttribute("successMessage", result.getMessage());
+	    } else {
+	        ra.addFlashAttribute("errorMessage", "Failed to reject leave: " + result.getMessage());
+	    }
+	    
+	    return "redirect:/manager/manage-leave-requests";
 	}
 	
 	@GetMapping("/approve-ot-claim")

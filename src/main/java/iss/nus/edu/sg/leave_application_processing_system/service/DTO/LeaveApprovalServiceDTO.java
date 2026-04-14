@@ -4,12 +4,13 @@ public class LeaveApprovalServiceDTO implements ServiceDTO{
 
 	private Long applicationId;
     private String status;
+    private String action;
     private String managerRemarks;
     private Long managerId;
     
-	public LeaveApprovalServiceDTO(Long applicationId, String status, Long managerId) {
+	public LeaveApprovalServiceDTO(Long applicationId, String action, Long managerId) {
 		this.applicationId = applicationId;
-		this.status = status;
+		this.action = action;
 		this.managerId = managerId;
 	}
 	
@@ -34,6 +35,14 @@ public class LeaveApprovalServiceDTO implements ServiceDTO{
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}	
 
 	public String getManagerRemarks() {
 		return managerRemarks;

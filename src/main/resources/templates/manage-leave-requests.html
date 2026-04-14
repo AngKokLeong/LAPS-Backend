@@ -147,13 +147,13 @@
 
 							<div class="flex gap-3" th:if="${request.status == 'PENDING'}">
 							    <button type="button" 
-							            th:onclick="'openModal(' + ${request.applicationId} + ', \'APPROVED\')'"
+							            th:onclick="'openModal(' + ${request.applicationId} + ', \'APPROVE\')'"
 							            class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm">
 							        Approve Request
 							    </button>
 							    
 							    <button type="button" 
-							            th:onclick="'openModal(' + ${request.applicationId} + ', \'REJECTED\')'"
+							            th:onclick="'openModal(' + ${request.applicationId} + ', \'REJECT\')'"
 							            class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
 							        Reject Request
 							    </button>
@@ -168,15 +168,12 @@
 							            You are about to <span class="font-bold underline" th:id="'action-text-' + ${request.applicationId}"></span> this request.
 							        </p>
 							        
-							        <form th:action="@{/manager/process-leave}" method="post">
-							            <input type="hidden" name="appId" th:value="${request.applicationId}" />
-							            <input type="hidden" th:id="'action-input-' + ${request.applicationId}" name="action" value="" />
+							        <form th:id="'form-' + ${request.applicationId}" method="post">
 							            
 							            <div class="mb-6">
 							                <label class="block text-sm font-semibold text-gray-700 mb-2">Manager Remarks:</label>
-							                <textarea name="remarks" rows="4" 
-							                          class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
-							                          placeholder="e.g., Project deadline met, or please reschedule..."></textarea>
+											<textarea name="remarks" th:id="'remarks-' + ${request.applicationId}" rows="4" 
+											                  class="w-full border rounded-xl p-3" placeholder="..."></textarea>
 							            </div>
 							            
 							            <div class="flex gap-3">
@@ -205,19 +202,33 @@
 
 	<script>
 	    /* --- 1. MODAL LOGIC (Functional) --- */
-	    function openModal(id, action) {
-	        console.log("Opening modal for ID:", id, "Action:", action);
-	        
-	        const modal = document.getElementById('modal-' + id);
-	        const actionInput = document.getElementById('action-input-' + id);
-	        const actionText = document.getElementById('action-text-' + id);
+		function openModal(id, action) {
+		    const modal = document.getElementById('modal-' + id);
+		    const form = document.getElementById('form-' + id);
+		    const actionText = document.getElementById('action-text-' + id);
+		    const remarksArea = document.getElementById('remarks-' + id);
 
-	        if (modal) {
-	            modal.classList.remove('hidden');
-	            if(actionInput) actionInput.value = action;
-	            if(actionText) actionText.innerText = action.toLowerCase();
-	        }
-	    }
+		    if (modal && form) {
+		        modal.classList.remove('hidden');
+		        
+		        // Convert to lowercase once to make comparisons easier
+		        const normalizedAction = action.toLowerCase(); // will be 'approve' or 'reject'
+		        
+		        actionText.innerText = normalizedAction;
+		        
+		        // Set the URL: /manager/leave/101/approve or /manager/leave/101/reject
+		        form.action = '/manager/leave/' + id + '/' + normalizedAction;
+
+		        // Handle the "Required" requirement for rejection
+		        if (normalizedAction === 'reject') {
+		            remarksArea.required = true;
+		            remarksArea.placeholder = "Reason for rejection (Required)...";
+		        } else {
+		            remarksArea.required = false;
+		            remarksArea.placeholder = "Optional remarks...";
+		        }
+		    }
+		}
 
 	    function closeModal(id) {
 	        const modal = document.getElementById('modal-' + id);

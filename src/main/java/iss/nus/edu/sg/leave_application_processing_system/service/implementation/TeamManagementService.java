@@ -82,16 +82,20 @@ public class TeamManagementService implements ManagerService {
         }
 
         // Simulate a successful update
-        String finalStatus = request.getStatus(); // "APPROVED" or "REJECTED"
-        response.setNewStatus(finalStatus);
+        String actionTaken = request.getAction(); 
+
         response.setSuccess(true);
         
-        // Custom message based on the action taken
-        if ("APPROVED".equalsIgnoreCase(finalStatus)) {
+        if ("APPROVE".equalsIgnoreCase(actionTaken)) {
+            response.setNewStatus("APPROVED");
             response.setMessage("Application #" + request.getApplicationId() + " has been successfully approved.");
-            // FUTURE LOGIC: entitlementRepo.updateUsedDays(employeeId, days);
-        } else {
+        } else if ("REJECT".equalsIgnoreCase(actionTaken)) {
+            response.setNewStatus("REJECTED");
             response.setMessage("Application #" + request.getApplicationId() + " has been rejected.");
+        } else {
+            // Fallback in case the string is something else (like the "REJECTE" typo)
+            response.setSuccess(false);
+            response.setMessage("Error: Unknown action '" + actionTaken + "'");
         }
         // --- MOCK LOGIC END ---
 
