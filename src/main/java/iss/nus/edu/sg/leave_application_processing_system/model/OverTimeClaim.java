@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "overtime_claims")
 public class OverTimeClaim {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,12 +19,15 @@ public class OverTimeClaim {
 
     private String otDescription;
 
-    private OTClaimStatus status;  // SUBMITTED, APPROVED, REJECTED
+    @Enumerated(EnumType.STRING)
+    private OTClaimStatus status;  // PENDING, APPROVED, REJECTED
 
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
+
+    // Getters & Setters
     public Long getId() {
       return id;
     }
@@ -72,4 +76,5 @@ public class OverTimeClaim {
       this.employee = employee;
     }
 
+    
 }
