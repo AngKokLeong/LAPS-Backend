@@ -118,11 +118,11 @@ public class TeamManagementService implements ManagerService {
 
 	    // Staff 3: AhBeng Lim (Medical)
 	    mockList.add(new SubordinateLeaveRequestControllerDTO(104L, "AhBeng Lim", "Engineering", "Medical", 
-	        LocalDate.of(2026, 4, 25), LocalDate.of(2026, 4, 27), 3.0, "Flu and fever", LocalDate.of(2026, 4, 12), "Approved"));
+	        LocalDate.of(2026, 4, 25), LocalDate.of(2026, 4, 27), 3.0, "Flu and fever", LocalDate.of(2026, 4, 12), "APPROVED"));
 
 	    // Staff 4: AhHuat Ng (Annual)
 	    mockList.add(new SubordinateLeaveRequestControllerDTO(105L, "AhHuat Ng", "Design", "Annual", 
-	        LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 14), 10.0, "Overseas wedding", LocalDate.of(2026, 4, 14), "Rejected"));
+	        LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 14), 10.0, "Overseas wedding", LocalDate.of(2026, 4, 14), "REJECTED"));
 
 	    return mockList;
 	}

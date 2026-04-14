@@ -53,12 +53,29 @@
                                     <h3 th:text="${request.employeeName}" class="text-lg font-semibold text-gray-900">Name</h3>
                                     <p th:text="${request.department}" class="text-sm text-gray-500">Department</p>
                                 </div>
-                                <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-200">
-                                    <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
-                                    <span th:text="${request.status}" class="text-sm font-medium text-yellow-700">Status</span>
-                                </div>
+								<div class="flex items-center gap-2 px-3 py-1 rounded-lg border"
+								     th:classappend="${request.status == 'APPROVED' ? 'bg-green-50 border-green-200' : 
+								                     (request.status == 'REJECTED' ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200')}">
+								    
+								    <svg class="w-4 h-4" 
+								         th:classappend="${request.status == 'APPROVED' ? 'text-green-600' : 
+								                         (request.status == 'REJECTED' ? 'text-red-600' : 'text-yellow-600')}"
+								         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								        
+								        <path th:if="${request.status == 'APPROVED'}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								        
+								        <path th:if="${request.status == 'REJECTED'}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+								        
+								        <path th:if="${request.status == 'PENDING'}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+								    </svg>
+
+								    <span th:text="${request.status}" 
+								          class="text-sm font-medium"
+								          th:classappend="${request.status == 'APPROVED' ? 'text-green-700' : 
+								                          (request.status == 'Rejected' ? 'text-red-700' : 'text-yellow-700')}">
+								        Status
+								    </span>
+								</div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
