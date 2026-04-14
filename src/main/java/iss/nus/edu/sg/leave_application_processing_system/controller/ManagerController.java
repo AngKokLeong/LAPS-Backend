@@ -16,9 +16,12 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/manager")
 public class ManagerController {
+
+	private final TeamManagementService teamMngService;
 	
-	@Autowired
-	private TeamManagementService teamMngService;
+	public ManagerController(TeamManagementService teamMngService) {
+		this.teamMngService = teamMngService;
+	}
 	
 	@GetMapping("/team-leave-history")
 	public String teamLeaveHistory(HttpSession session) {     
