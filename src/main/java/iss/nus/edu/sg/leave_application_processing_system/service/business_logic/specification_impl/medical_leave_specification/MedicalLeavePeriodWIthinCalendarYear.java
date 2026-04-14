@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.function.BiPredicate;
 
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApplicationServiceDTO;
 
-import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification.composite.CompositeSpecification;
 
-public class MedicalLeavePeriodWIthinCalendarYear extends CompositeSpecification<MedicalLeaveServiceDTO>{
+public class MedicalLeavePeriodWIthinCalendarYear extends CompositeSpecification<LeaveApplicationServiceDTO>{
 
     @Override
-    public BiPredicate<MedicalLeaveServiceDTO, MedicalLeaveServiceDTO> toPredicate() {
+    public BiPredicate<LeaveApplicationServiceDTO, LeaveApplicationServiceDTO> toPredicate() {
         return (currentNumberOfLeavePeriodDays, maxLeavePeriodDays) -> {
             
             LocalDateTime leavePeriodEnds = currentNumberOfLeavePeriodDays.getLeavePeriodEnd();

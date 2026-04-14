@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.EmployeeService;
 
 @Controller
 public class EmployeeController {
@@ -29,6 +30,12 @@ public class EmployeeController {
 		 return "employee-management";
 	     // model.addAttribute("employees", repo.findAll());
 	     // return "employee-management";
+	}
+	
+	private final EmployeeService employeeService;
+	
+	public EmployeeController(EmployeeService employeeService) {
+		this.employeeService = employeeService;
 	}
 	
 }

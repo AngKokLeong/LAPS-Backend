@@ -1,6 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import jakarta.persistence.*;
@@ -13,9 +13,8 @@ public class OverTimeClaim {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate otDate;
-
-    private int otHoursWorked;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
 
     private String otDescription;
 
@@ -26,7 +25,6 @@ public class OverTimeClaim {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-
     // Getters & Setters
     public Long getId() {
       return id;
@@ -36,20 +34,20 @@ public class OverTimeClaim {
       this.id = id;
     }
 
-    public LocalDate getOtDate() {
-      return otDate;
+    public LocalDateTime getStartDateTime() {
+      return startDateTime;
     }
 
-    public void setOtDate(LocalDate otDate) {
-      this.otDate = otDate;
+    public void setStartDateTime(LocalDateTime startDateTime) {
+      this.startDateTime = startDateTime;
     }
 
-    public int getOtHoursWorked() {
-      return otHoursWorked;
+    public LocalDateTime getEndDateTime() {
+      return endDateTime;
     }
 
-    public void setOtHoursWorked(int otHoursWorked) {
-      this.otHoursWorked = otHoursWorked;
+    public void setEndDateTime(LocalDateTime endDateTime) {
+      this.endDateTime = endDateTime;
     }
 
     public String getOtDescription() {
@@ -75,6 +73,4 @@ public class OverTimeClaim {
     public void setEmployee(Employee employee) {
       this.employee = employee;
     }
-
-    
 }

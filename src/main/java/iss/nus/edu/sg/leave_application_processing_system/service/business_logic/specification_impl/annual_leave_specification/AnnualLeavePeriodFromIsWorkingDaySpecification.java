@@ -2,14 +2,15 @@ package iss.nus.edu.sg.leave_application_processing_system.service.business_logi
 
 import java.util.function.BiPredicate;
 
-import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
+
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApplicationServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification.composite.CompositeSpecification;
 
 
-public class LeavePeriodFromIsWorkingDaySpecification extends CompositeSpecification<AnnualLeaveServiceDTO>{
+public class AnnualLeavePeriodFromIsWorkingDaySpecification extends CompositeSpecification<LeaveApplicationServiceDTO>{
 
     @Override
-    public BiPredicate<AnnualLeaveServiceDTO, AnnualLeaveServiceDTO> toPredicate() {
+    public BiPredicate<LeaveApplicationServiceDTO, LeaveApplicationServiceDTO> toPredicate() {
         
         return (localDateTimeOne, localDateTimeTwo) ->  localDateTimeOne.getLeavePeriodStart().getDayOfWeek().getValue() <= 5;
     }
