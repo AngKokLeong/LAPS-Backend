@@ -3,12 +3,15 @@ package iss.nus.edu.sg.leave_application_processing_system.service.implementatio
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveBalanceControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.ManagerService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 
+@Service
 public class TeamManagementService implements ManagerService {
 
 	@Override
