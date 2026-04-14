@@ -120,6 +120,7 @@ public class ManagerController {
 			ra.addFlashAttribute("errorMessage", "Failed to process leave: " + result.getMessage());
 		}
 
+
 		// 4. Redirect back to the pending list page
 		return "redirect:/manager/manage-leave-requests";
 	}
