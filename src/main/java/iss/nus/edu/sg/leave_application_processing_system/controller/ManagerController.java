@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.TeamManagementService;
@@ -83,9 +84,15 @@ public class ManagerController {
 
 	    // Fetch the list from the service
 	    List<ControllerDTO> teamRequests = teamMngService.getSubordinateLeaveRequests(query);
+	    
+	    // Count  those with "PENDING" status
+	    long pendingCount = teamRequests.stream()
+	        .filter(req -> "PENDING".equals(((SubordinateLeaveRequestControllerDTO)req).getStatus()))
+	        .count();
 
 	    // Add to the Model for Thymeleaf
 	    model.addAttribute("teamRequests", teamRequests);
+	    model.addAttribute("pendingCount", pendingCount)
 	    
 		return "manage-leave-requests";       
 	}
