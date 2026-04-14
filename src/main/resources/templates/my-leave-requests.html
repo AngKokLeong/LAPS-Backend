@@ -34,7 +34,9 @@
             <!-- Leave Requests List -->
             <div class="space-y-4">
                 <!-- Pending Leave Request -->
-                <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+
+
+                <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow" th:each="leave_request : ${leave_request_list}">
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background-color: rgba(59, 130, 246, 0.2);">
@@ -43,200 +45,90 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900">Annual Leave</h3>
-                                <p class="text-sm text-gray-500 mt-1">April 15 - April 17, 2026</p>
+                                <h3 class="font-semibold text-gray-900" th:text="${leave_request.type}"></h3>
+                                <p class="text-sm text-gray-500 mt-1" th:text="${leave_request.leavePeriod}"></p>
                             </div>
                         </div>
-                        <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-200">
-                            Pending
-                        </span>
+                        <div th:switch="${leave_request.leaveRequestStatus}">
+                            <span th:case="'PENDING'" class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-200">Pending</span>
+                            <span th:case="'APPROVED'" class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">Approved</span>
+                            <span th:case="'REJECTED'" class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700 border border-red-200">Rejected</span>
+                            <span th:case="'CANCELLED'" class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700 border border-orange-200">Cancelled</span>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
                             <p class="text-xs text-gray-500 mb-1">Duration</p>
-                            <p class="text-sm font-medium text-gray-900">3 days</p>
+                            <p class="text-sm font-medium text-gray-900" th:text="${leave_request.leavePeriod}"></p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500 mb-1">Applied On</p>
-                            <p class="text-sm font-medium text-gray-900">April 1, 2026</p>
+                            <p class="text-sm font-medium text-gray-900" th:text="${leave_request.leaveAppliedOn}"></p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500 mb-1">Approver</p>
-                            <p class="text-sm font-medium text-gray-900">Sarah Manager</p>
+                            <p class="text-sm font-medium text-gray-900" th:text="${leave_request.leaveApprover}"></p>
                         </div>
                     </div>
 
                     <div class="bg-gray-50 rounded-lg p-3 mb-4">
                         <p class="text-xs text-gray-500 mb-1">Reason</p>
-                        <p class="text-sm text-gray-700">Family vacation trip</p>
+                        <p class="text-sm text-gray-700" th:text="${leave_request.reason}"></p>
                     </div>
 
-                    <div class="flex gap-2">
-                        <button class="flex-1 px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            View Details
-                        </button>
-                        <button class="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors">
-                            Cancel Request
-                        </button>
+                    <div th:switch="${leave_request.leaveRequestStatus}">
+                        <div th:case="'PENDING'" >
+                            <div class="flex gap-2">
+                                <button class=" w-full px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors">
+                                    Cancel Request
+                                </button>
+                            </div>
+                        </div>
+
+                        <div th:case="'APPROVED'">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-green-900" text="Approved on " th:text="${leave_request.leaveApprovalTransactionDate}">Approved on March 19, 2026</p>
+                                        <p class="text-xs text-green-700 mt-1"  th:text="${leave_request.leaveApprovalReason}">Sarah Manager</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:case="'REJECTED'">
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-red-900" th:text="${leave_request.leaveApprovalTransactionDate}"></p>
+                                        <p class="text-xs text-red-700 mt-1"  th:text="${leave_request.leaveApprovalReason}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:case="'CANCELLED'">
+                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-orange-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-orange-900" th:text="${leave_request.leaveApprovalTransactionDate}"></p>
+                                        <p class="text-xs text-orange-700 mt-1"  th:text="${leave_request.leaveApprovalReason}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Approved Leave Request -->
-                <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background-color: rgba(239, 68, 68, 0.2);">
-                                <svg class="w-6 h-6" style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">Sick Leave</h3>
-                                <p class="text-sm text-gray-500 mt-1">March 20 - March 22, 2026</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">
-                            Approved
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                            <p class="text-sm font-medium text-gray-900">3 days</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Applied On</p>
-                            <p class="text-sm font-medium text-gray-900">March 18, 2026</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Approved By</p>
-                            <p class="text-sm font-medium text-gray-900">Sarah Manager</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
-                        <p class="text-xs text-gray-500 mb-1">Reason</p>
-                        <p class="text-sm text-gray-700">Flu and fever, doctor advised rest</p>
-                    </div>
-
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                        <div class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div>
-                                <p class="text-sm font-medium text-green-900">Approved on March 19, 2026</p>
-                                <p class="text-xs text-green-700 mt-1">Approved by Sarah Manager</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        View Details
-                    </button>
-                </div>
-
-                <!-- Rejected Leave Request -->
-                <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background-color: rgba(34, 197, 94, 0.2);">
-                                <svg class="w-6 h-6" style="color: #22c55e;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">Personal Leave</h3>
-                                <p class="text-sm text-gray-500 mt-1">February 10 - February 11, 2026</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700 border border-red-200">
-                            Rejected
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                            <p class="text-sm font-medium text-gray-900">2 days</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Applied On</p>
-                            <p class="text-sm font-medium text-gray-900">February 5, 2026</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Rejected By</p>
-                            <p class="text-sm font-medium text-gray-900">Sarah Manager</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
-                        <p class="text-xs text-gray-500 mb-1">Reason</p>
-                        <p class="text-sm text-gray-700">Personal matters</p>
-                    </div>
-
-                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                        <div class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div>
-                                <p class="text-sm font-medium text-red-900">Rejected on February 6, 2026</p>
-                                <p class="text-xs text-red-700 mt-1">Reason: Critical project deadline during requested period</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        View Details
-                    </button>
-                </div>
-
-                <!-- Another Approved Leave -->
-                <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background-color: rgba(59, 130, 246, 0.2);">
-                                <svg class="w-6 h-6" style="color: #3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">Annual Leave</h3>
-                                <p class="text-sm text-gray-500 mt-1">January 5 - January 10, 2026</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">
-                            Approved
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                            <p class="text-sm font-medium text-gray-900">6 days</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Applied On</p>
-                            <p class="text-sm font-medium text-gray-900">December 20, 2025</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Approved By</p>
-                            <p class="text-sm font-medium text-gray-900">Sarah Manager</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
-                        <p class="text-xs text-gray-500 mb-1">Reason</p>
-                        <p class="text-sm text-gray-700">New Year holiday with family</p>
-                    </div>
-
-                    <button class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        View Details
-                    </button>
-                </div>
             </div>
         </main>
     </div>
