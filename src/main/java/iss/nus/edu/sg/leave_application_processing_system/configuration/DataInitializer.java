@@ -1,6 +1,7 @@
 package iss.nus.edu.sg.leave_application_processing_system.configuration;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -9,14 +10,17 @@ import org.springframework.stereotype.Component;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Designation;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
 import iss.nus.edu.sg.leave_application_processing_system.model.PublicHoliday;
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
+import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.PublicHolidayRepository;
 
 @Component
@@ -28,13 +32,16 @@ public class DataInitializer implements CommandLineRunner {
     private LeaveApplicationRepository leaveRepo;
     private LeaveEntitlementRepository entitlementRepo;
     private PublicHolidayRepository phRepo;
+    private OverTimeClaimRepository otClaimRepo;
     
     public DataInitializer(EmployeeRepository empRepo, LeaveApplicationRepository leaveRepo,
-    		LeaveEntitlementRepository entitlementRepo, PublicHolidayRepository phRepo) {
+    		LeaveEntitlementRepository entitlementRepo, PublicHolidayRepository phRepo,
+    		OverTimeClaimRepository otClaimRepo) {
     	this.empRepo = empRepo;
     	this.leaveRepo = leaveRepo;
     	this.entitlementRepo = entitlementRepo;  
     	this.phRepo = phRepo;
+    	this.otClaimRepo = otClaimRepo;
     }
     
 	@Override
@@ -291,6 +298,38 @@ public class DataInitializer implements CommandLineRunner {
 		xm.setPhName("Christmas Day");
 		xm.setPhDate(LocalDate.of(2026, 12, 25));
 		phRepo.save(xm);
+		
+		
+		// --- OT Claims for JASON ---
+
+		// 1. A Pending Claim (Needs Manager Approval)
+		OverTimeClaim jasonPendingOT = new OverTimeClaim();
+		jasonPendingOT.setEmployee(jason);
+		jasonPendingOT.setStartDateTime(LocalDateTime.of(2026, 4, 14, 18, 0));
+		jasonPendingOT.setEndDateTime(LocalDateTime.of(2026, 4, 14, 22, 30));   
+		jasonPendingOT.setOtDescription("Finalizing GetFreshFood documentation");
+		jasonPendingOT.setStatus(OTClaimStatus.PENDING);
+		otClaimRepo.save(jasonPendingOT);
+
+		// 2. An already Approved Claim
+		OverTimeClaim jasonApprovedOT = new OverTimeClaim();
+		jasonApprovedOT.setEmployee(jason);
+		jasonApprovedOT.setStartDateTime(LocalDateTime.of(2026, 4, 10, 18, 30)); // Last Friday
+		jasonApprovedOT.setEndDateTime(LocalDateTime.of(2026, 4, 10, 20, 0));
+		jasonApprovedOT.setOtDescription("Emergency server maintenance");
+		jasonApprovedOT.setStatus(OTClaimStatus.APPROVED);
+		otClaimRepo.save(jasonApprovedOT);
+
+		// --- OT Claim for MARIA ---
+
+		// 3. A Rejected Claim
+		OverTimeClaim mariaRejectedOT = new OverTimeClaim();
+		mariaRejectedOT.setEmployee(maria);
+		mariaRejectedOT.setStartDateTime(LocalDateTime.of(2026, 4, 13, 17, 30)); 
+		mariaRejectedOT.setEndDateTime(LocalDateTime.of(2026, 4, 13, 19, 30));
+		mariaRejectedOT.setOtDescription("General admin work");
+		mariaRejectedOT.setStatus(OTClaimStatus.REJECTED);
+		otClaimRepo.save(mariaRejectedOT);
     }
 	
 	private void createLeaveApplication(Employee emp, LeaveEntitlement LE, int startDaysFromNow, int durationDays, LeaveStatus status, String reason, String mgrRemarks) {

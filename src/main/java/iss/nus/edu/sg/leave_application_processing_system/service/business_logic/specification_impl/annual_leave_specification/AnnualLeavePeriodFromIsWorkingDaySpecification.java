@@ -6,7 +6,7 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeav
 import iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification.composite.CompositeSpecification;
 
 
-public class LeavePeriodFromIsWorkingDaySpecification extends CompositeSpecification<AnnualLeaveServiceDTO>{
+public class AnnualLeavePeriodFromIsWorkingDaySpecification extends CompositeSpecification<AnnualLeaveServiceDTO>{
 
     @Override
     public BiPredicate<AnnualLeaveServiceDTO, AnnualLeaveServiceDTO> toPredicate() {
