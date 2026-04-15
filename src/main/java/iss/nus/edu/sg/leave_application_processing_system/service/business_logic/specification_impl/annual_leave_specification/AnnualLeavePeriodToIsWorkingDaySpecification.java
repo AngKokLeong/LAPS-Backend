@@ -5,7 +5,7 @@ import java.util.function.BiPredicate;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification.composite.CompositeSpecification;
 
-public class LeavePeriodToIsWorkingDaySpecification extends CompositeSpecification<AnnualLeaveServiceDTO>{
+public class AnnualLeavePeriodToIsWorkingDaySpecification extends CompositeSpecification<AnnualLeaveServiceDTO>{
 
 
     @Override

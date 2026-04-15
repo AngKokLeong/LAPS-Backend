@@ -2,16 +2,16 @@ package iss.nus.edu.sg.leave_application_processing_system.service.business_logi
 
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 
 import java.util.function.BiPredicate;
+
 
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification.composite.CompositeSpecification;
 
 
-public class LeavePeriodLessThanOrEqualFourteenDaysSpecification extends CompositeSpecification<AnnualLeaveServiceDTO>{
+public class AnnualLeavePeriodLessThanOrEqualFourteenDaysSpecification extends CompositeSpecification<AnnualLeaveServiceDTO>{
 
     //private static final int NUMBER_OF_LEAVE_PERIOD_DAYS = 14;
 
@@ -19,8 +19,8 @@ public class LeavePeriodLessThanOrEqualFourteenDaysSpecification extends Composi
     public BiPredicate<AnnualLeaveServiceDTO, AnnualLeaveServiceDTO> toPredicate() {
         return (currentNumberOfLeavePeriodDays, maxLeavePeriodDays) -> {
             
-            LocalDateTime leavePeriodEnds = currentNumberOfLeavePeriodDays.getLeavePeriodEnd();
-            LocalDateTime leavePeriodStarts = currentNumberOfLeavePeriodDays.getLeavePeriodStart();
+            LocalDate leavePeriodEnds = currentNumberOfLeavePeriodDays.getLeavePeriodEnd();
+            LocalDate leavePeriodStarts = currentNumberOfLeavePeriodDays.getLeavePeriodStart();
 
             
 

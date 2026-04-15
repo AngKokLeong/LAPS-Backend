@@ -20,7 +20,7 @@ public class MedicalLeaveApplicationService implements LeaveApplicationService{
     }
 
     @Override
-    public Boolean submitApplication(ServiceDTO serviceDTO) {
+    public ControllerDTO submitApplication(ServiceDTO serviceDTO) {
         
         MedicalLeaveServiceDTO dto = (MedicalLeaveServiceDTO) serviceDTO.getAllAttribute();
 
@@ -29,7 +29,7 @@ public class MedicalLeaveApplicationService implements LeaveApplicationService{
                     .and(new MedicalLeavePeriodWithinSixtyDays())
                     .toPredicate()
                     .test(dto, dto);
-        return status;
+        return null;
     }
     
 }
