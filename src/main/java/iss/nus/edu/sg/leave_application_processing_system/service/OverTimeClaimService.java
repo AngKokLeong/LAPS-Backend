@@ -35,27 +35,26 @@ public class OverTimeClaimService {
     public void approveOTClaim(Long claimId) {
 
         OverTimeClaim claim = otRepo.findById(claimId).orElseThrow();
+
+        if (claim.getStatus() != OTClaimStatus.PENDING) {
+            throw new IllegalStateException("OT Claim already processed");
+        }
         claim.setStatus(OTClaimStatus.APPROVED);
 
         // 1. Calculate OT duration
-        double hoursWorked = calculateHours(
+        double hoursWorked = Math.round(calculateHours(
                 claim.getStartDateTime(),
-                claim.getEndDateTime()
-        );
+                claim.getEndDateTime()) * 100.0) / 100.0;
 
-        // 2. Convert OT hours to compensation days
-        double earnedDays = Math.floor(hoursWorked / 4) * 0.5;
-
-        if (earnedDays > 0) {
-            int year = claim.getStartDateTime().getYear();
-
-            // Add to compensationledger via compensationService
-            compensationService.addEarnedDays(
-                    claim.getEmployee().getId(),
-                    year,
-                    earnedDays
-            );
+        if (hoursWorked <= 0) {
+            throw new IllegalArgumentException("Invalid OT Duration");
         }
+
+        int year = claim.getStartDateTime().getYear();
+
+        compensationService.addOvertimeHours(
+            claim.getEmployee().getId(), year, hoursWorked
+        );
 
         otRepo.save(claim);
     }

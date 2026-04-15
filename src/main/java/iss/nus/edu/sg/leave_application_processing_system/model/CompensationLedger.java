@@ -16,6 +16,8 @@ public class CompensationLedger {
 
     private double usedDays;
 
+    private double unconvertedHours = 0.0; // default is 0
+
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
@@ -23,11 +25,12 @@ public class CompensationLedger {
     // Constructor
     public CompensationLedger() {}
 
-    public CompensationLedger(Long id, int yearApplied, double earnedDays, double usedDays, Employee employee) {
+    public CompensationLedger(Long id, int yearApplied, double earnedDays, double usedDays, double unconvertedHours, Employee employee) {
         this.id = id;
         this.yearApplied = yearApplied;
         this.earnedDays = earnedDays;
         this.usedDays = usedDays;
+        this.unconvertedHours = unconvertedHours;
         this.employee = employee;
     }
 
@@ -62,6 +65,14 @@ public class CompensationLedger {
 
     public void setUsedDays(double usedDays) {
         this.usedDays = usedDays;
+    }
+
+    public double getUnconvertedHours() {
+        return unconvertedHours;
+    }
+
+    public void setUnconvertedHours(double unconvertedHours) {
+        this.unconvertedHours = unconvertedHours;
     }
 
     public Employee getEmployee() {
