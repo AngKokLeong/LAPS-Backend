@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
@@ -23,6 +25,12 @@ public interface OverTimeClaimRepository extends JpaRepository<OverTimeClaim, Lo
             LocalDateTime start,
             LocalDateTime end
     );
+    
+    @Query("SELECT o FROM OverTimeClaim o " +
+            "WHERE o.employee.manager.id = :managerId " +
+            "ORDER BY CASE WHEN o.status = 'PENDING' THEN 0 ELSE 1 END ASC, " +
+            "o.startDateTime DESC")
+    List<OverTimeClaim> findSubordinateClaimsCustomSort(@Param("managerId") Long managerId);
 
 
 }

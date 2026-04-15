@@ -1,5 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.service.implementation;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +9,11 @@ import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.OTClaimControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveBalanceControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.ManagerService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
@@ -17,6 +21,13 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO
 
 @Service
 public class TeamManagementService implements ManagerService {
+
+	private final OverTimeClaimRepository otClaimRepo;
+	
+	public TeamManagementService(OverTimeClaimRepository otClaimRepo) {
+		this.otClaimRepo = otClaimRepo;
+	}
+	
 
 	@Override
 	public List<ControllerDTO> viewTeamLeaveBalances(ServiceDTO serviceDTO) {
@@ -131,5 +142,33 @@ public class TeamManagementService implements ManagerService {
 	    return mockList;
 	}
 
+	public List<ControllerDTO> getSubordinateOTClaims(ServiceDTO serviceDTO) {
+		ManagerQueryServiceDTO query = (ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
+		
+		List<OverTimeClaim> claims = otClaimRepo.findSubordinateClaimsCustomSort(query.getManagerId()); 
+		List<ControllerDTO> otList = new ArrayList<>();
+		
+		for (OverTimeClaim claim : claims) {
+	        Duration d = Duration.between(claim.getStartDateTime(), claim.getEndDateTime());
+	        long hours = d.toHours();
+	        long mins = d.toMinutes() % 60;
+	        String formattedDuration = hours + "h " + mins + "m";
+	        
+	        OTClaimControllerDTO dto = new OTClaimControllerDTO(
+		            claim.getId(),
+		            claim.getEmployee().getName(),
+		            claim.getEmployee().getDepartment(),
+		            claim.getStartDateTime(),
+		            claim.getEndDateTime(),
+		            formattedDuration,
+		            claim.getStatus(),
+		            claim.getOtDescription()
+		    );
 
+	        otList.add(dto);
+	    }
+
+	    return otList;
+	}
+	
 }
