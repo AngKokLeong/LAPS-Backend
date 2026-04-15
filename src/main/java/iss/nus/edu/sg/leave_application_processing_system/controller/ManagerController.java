@@ -14,6 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.TeamManagementService;
@@ -173,6 +175,8 @@ public class ManagerController {
 	    return "redirect:/manager/manage-leave-requests";
 	}
 	
+
+	// OVERTIME WORKFLOW
 	@GetMapping("/approve-ot-claim")
 	public String approveOTClaim(HttpSession session) {
 		String role = (String) session.getAttribute("userRole");
@@ -185,6 +189,7 @@ public class ManagerController {
 	    
 		return "approve-ot-claim";       
 	}
+
 	
 	// To View OT /manager/approve-ot-claim/list?status=PENDING
 	@GetMapping("/approve-ot-claim/list")
@@ -226,4 +231,15 @@ public class ManagerController {
 		overTimeClaimService.rejectOTClaim(id);
 		return "redirect:/manager/approve-ot-claim/list?status=PENDING";
 	}
+
+
+
+
+	
+	
+
+
+	
+
+
 }
