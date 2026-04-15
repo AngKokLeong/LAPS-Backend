@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
@@ -29,9 +30,10 @@ public class ViewLeaveRequestsService {
         //Retrieve the data from the database
 		//need to pass the staffId into the method
         List<LeaveApplication> leaveApplicationList = leaveApplicationRepository.findByEmployeeId(viewLeaveRequestsServiceDTO.getStaffId());
-
+        List<LeaveEntitlement> leaveEntitlementList = leaveEntitlementRepository.findByEmployeeId(viewLeaveRequestsServiceDTO.getStaffId());
 
         
+
 		// Leave Request Card Structure
 			// Leave Application Id
 			// Leave Type
