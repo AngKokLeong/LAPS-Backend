@@ -29,7 +29,7 @@ public interface OverTimeClaimRepository extends JpaRepository<OverTimeClaim, Lo
     @Query("SELECT o FROM OverTimeClaim o " +
             "WHERE o.employee.manager.id = :managerId " +
             "ORDER BY CASE WHEN o.status = 'PENDING' THEN 0 ELSE 1 END ASC, " +
-            "o.submittedOn DESC")
+            "o.startDateTime DESC")
     List<OverTimeClaim> findSubordinateClaimsCustomSort(@Param("managerId") Long managerId);
 
 
