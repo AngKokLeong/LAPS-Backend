@@ -7,5 +7,5 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO
 
 public interface LeaveApplicationService {
     List<ControllerDTO> viewApplicationStatus(ServiceDTO serviceDTO);
-    Boolean submitApplication(ServiceDTO serviceDTO);
+    ControllerDTO submitApplication(ServiceDTO serviceDTO);
 }
