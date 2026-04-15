@@ -2,6 +2,7 @@ package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
 import java.time.LocalDateTime;
 
+import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import lombok.Data;
 
 @Data
@@ -13,15 +14,14 @@ public class OTClaimControllerDTO implements ControllerDTO {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private String duration;
-    private String status; // APPROVED, PENDING, REJECTED
+    private OTClaimStatus status; // APPROVED, PENDING, REJECTED
     private String description;
-    private LocalDateTime submittedOn;
 	
        
 	public OTClaimControllerDTO() {}
 	
 	public OTClaimControllerDTO(Long claimId, String employeeName, String department, LocalDateTime startDateTime,
-			LocalDateTime endDateTime, String duration, String status, String description, LocalDateTime submittedOn) {
+			LocalDateTime endDateTime, String duration, OTClaimStatus status, String description) {
 		this.claimId = claimId;
 		this.employeeName = employeeName;
 		this.department = department;
@@ -30,7 +30,6 @@ public class OTClaimControllerDTO implements ControllerDTO {
 		this.duration = duration;
 		this.status = status;
 		this.description = description;
-		this.submittedOn = submittedOn;
 	}
 
 	@Override
@@ -87,11 +86,11 @@ public class OTClaimControllerDTO implements ControllerDTO {
 		this.duration = duration;
 	}
 
-	public String getStatus() {
+	public OTClaimStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(OTClaimStatus status) {
 		this.status = status;
 	}
 
@@ -103,13 +102,6 @@ public class OTClaimControllerDTO implements ControllerDTO {
 		this.description = description;
 	}
 
-	public LocalDateTime getSubmittedOn() {
-		return submittedOn;
-	}
-
-	public void setSubmittedOn(LocalDateTime submittedOn) {
-		this.submittedOn = submittedOn;
-	}
 	
 	
 
