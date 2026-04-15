@@ -58,7 +58,8 @@ public class AnnualLeaveApplicationService implements LeaveApplicationService{
             }
         }
 
-        double totalNumberOfLeaveApplied = dto.getLeavePeriodEnd().getDayOfYear() - dto.getLeavePeriodStart().getDayOfYear() - numberOfWeekEnds;
+        // increment the total leave applied by 1 to include the date from and date to
+        double totalNumberOfLeaveApplied = (dto.getLeavePeriodEnd().getDayOfYear() - dto.getLeavePeriodStart().getDayOfYear() + 1) - numberOfWeekEnds;
 
         if (dto.isHalfDay()){
             totalNumberOfLeaveApplied = totalNumberOfLeaveApplied / 2;
