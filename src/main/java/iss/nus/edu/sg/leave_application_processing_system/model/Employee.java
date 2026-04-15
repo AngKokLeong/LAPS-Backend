@@ -88,6 +88,14 @@ public class Employee {
   public void setRole(Role role) {
     this.role = role;
   }
+  
+  public Designation getDesignation() {
+	  return designation;
+  }
+  
+  public void setDesignation(Designation designation) {
+	  this.designation = designation;
+  }
 
   public String getDepartment() {
     return department;

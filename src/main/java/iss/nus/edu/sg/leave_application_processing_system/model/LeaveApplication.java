@@ -70,6 +70,110 @@ public class LeaveApplication {
 		this.mgrRemarks = mgrRemarks;
 		this.halfDay = halfDay;
 	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public LeaveType getLeaveType() {
+		return leaveType;
+	}
+
+	public void setLeaveType(LeaveType leaveType) {
+		this.leaveType = leaveType;
+	}
+
+	public Employee getEmployee() {
+		return employee;
+	}
+
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+
+	public CompensationLedger getLedger() {
+		return ledger;
+	}
+
+	public void setLedger(CompensationLedger ledger) {
+		this.ledger = ledger;
+	}
+
+	public LeaveEntitlement getEntitlement() {
+		return entitlement;
+	}
+
+	public void setEntitlement(LeaveEntitlement entitlement) {
+		this.entitlement = entitlement;
+	}
+
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+
+	public LocalDate getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+
+	public LeaveStatus getLeaveStatus() {
+		return leaveStatus;
+	}
+
+	public void setLeaveStatus(LeaveStatus leaveStatus) {
+		this.leaveStatus = leaveStatus;
+	}
+
+	public LocalDate getAppliedDate() {
+		return appliedDate;
+	}
+
+	public void setAppliedDate(LocalDate appliedDate) {
+		this.appliedDate = appliedDate;
+	}
+
+	public LocalDate getUpdatedDate() {
+		return updatedDate;
+	}
+
+	public void setUpdatedDate(LocalDate updatedDate) {
+		this.updatedDate = updatedDate;
+	}
+
+	public String getMgrRemarks() {
+		return mgrRemarks;
+	}
+
+	public void setMgrRemarks(String mgrRemarks) {
+		this.mgrRemarks = mgrRemarks;
+	}
+
+	public boolean isHalfDay() {
+		return halfDay;
+	}
+
+	public void setHalfDay(boolean halfDay) {
+		this.halfDay = halfDay;
+	}
 	
 	
 
