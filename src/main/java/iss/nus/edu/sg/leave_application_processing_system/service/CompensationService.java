@@ -22,19 +22,29 @@ public class CompensationService {
   }
 
 
-  // ADD earned compensation days (called ONLY after OT claim is APPROVED)
+  // ADD to compensation ledger (called ONLY after OT claim is APPROVED)
   @Transactional
-  public void addEarnedDays(
-    Long employeeId,
-    int year,
-    double earnedDays) {
-      CompensationLedger ledger =
-      ledgerRepo.findByEmployeeIdAndYearApplied(employeeId, year)
-      .orElseGet(() -> createNewLedger(employeeId, year));
+  public void addOvertimeHours(Long employeeId, int year, double otHours) {
 
-      ledger.setEarnedDays(ledger.getEarnedDays() + earnedDays);
-      ledgerRepo.save(ledger);
-    }
+    // find ledger OR create ledger if new
+    CompensationLedger ledger = ledgerRepo.findByEmployeeIdAndYearApplied(employeeId, year)
+    .orElseGet(() -> createNewLedger(employeeId, year));
+
+    // 1. Combine with exisiting unconverted hours
+    double totalHours = ledger.getUnconvertedHours() + otHours;
+
+    // 2. Convert full 4-hour blocks
+    int fullBlocks = (int) (totalHours / 4);
+    double earnedDays = fullBlocks * 0.5;
+
+    // 3. Update ledger
+    ledger.setEarnedDays(ledger.getEarnedDays() + earnedDays);
+    ledger.setUnconvertedHours(
+      Math.round((totalHours % 4)*100.0)/100.0 // keep values like 1.999 from appearing
+    );
+
+    ledgerRepo.save(ledger);
+  }
 
 
   // DEDUCT compensation days (called ONLY after compensation leave is APPROVED)
@@ -70,9 +80,13 @@ public class CompensationService {
       }
       
       // ✅ Check available compensation balance
-      public double getAvailableDays(CompensationLedger ledger) {
+      public double getAvailableCompensationDays(CompensationLedger ledger) {
         return ledger.getEarnedDays() - ledger.getUsedDays();
       }
 
-
+      public double getUnconvertedHours(Long employeeId, int year) {
+        return ledgerRepo.findByEmployeeIdAndYearApplied(employeeId, year)
+        .map(CompensationLedger::getUnconvertedHours)
+        .orElse(0.0);
+      }
 }
