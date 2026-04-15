@@ -2,7 +2,6 @@ package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.TeamManagementService;
@@ -25,9 +26,11 @@ import jakarta.servlet.http.HttpSession;
 public class ManagerController {
 
 	private final TeamManagementService teamMngService;
+	private final OverTimeClaimService overTimeClaimService;
 	
-	public ManagerController(TeamManagementService teamMngService) {
+	public ManagerController(TeamManagementService teamMngService, OverTimeClaimService overTimeClaimService) {
 		this.teamMngService = teamMngService;
+		this.overTimeClaimService = overTimeClaimService;
 	}
 	
 	@GetMapping("/team-leave-history")
@@ -172,6 +175,8 @@ public class ManagerController {
 	    return "redirect:/manager/manage-leave-requests";
 	}
 	
+
+	// OVERTIME WORKFLOW
 	@GetMapping("/approve-ot-claim")
 	public String approveOTClaim(HttpSession session) {
 		String role = (String) session.getAttribute("userRole");
@@ -184,4 +189,57 @@ public class ManagerController {
 	    
 		return "approve-ot-claim";       
 	}
+
+	
+	// To View OT /manager/approve-ot-claim/list?status=PENDING
+	@GetMapping("/approve-ot-claim/list")
+	public String viewOTClaims(
+		@RequestParam(defaultValue = "PENDING") OTClaimStatus status,
+		HttpSession session,
+		Model model) {
+
+    String role = (String) session.getAttribute("userRole");
+    if (role == null || !"manager".equals(role)) return "redirect:/staff";
+
+    model.addAttribute(
+            "otClaims",
+            overTimeClaimService.findByStatus(status)
+    );
+    model.addAttribute("selectedStatus", status);
+
+    return "approve-ot-claim";
+	} 
+	
+	// APPROVE OT
+	@PostMapping("/approve-ot-claim/{id}/approve")
+	public String approveOT(@PathVariable Long id, HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		if (role == null || !"manager".equals(role))
+			return "redirect:/staff";
+		
+		overTimeClaimService.approveOTClaim(id);
+		
+		return "redirect:/manager/approve-ot-claim/list?status=PENDING";
+	}
+
+	// REJECT OT
+	@PostMapping("/approve-ot-claim/{id}/reject")
+	public String rejectOT(@PathVariable Long id, HttpSession session) {
+		String role = (String) session.getAttribute("userRole");
+		if (role == null || !"manager".equals(role)) return "redirect:/staff";
+		
+		overTimeClaimService.rejectOTClaim(id);
+		return "redirect:/manager/approve-ot-claim/list?status=PENDING";
+	}
+
+
+
+
+	
+	
+
+
+	
+
+
 }

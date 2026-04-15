@@ -1,5 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.model;
 
+import iss.nus.edu.sg.leave_application_processing_system.helper.Designation;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import jakarta.persistence.*;
 
@@ -21,6 +22,10 @@ public class Employee {
 
   @Enumerated(EnumType.STRING)
   private Role role; // STAFF, MANAGER, ADMIN (enum)
+  
+  @Enumerated(EnumType.STRING)
+  private Designation designation;
+
   private String department;
 
   @ManyToOne
