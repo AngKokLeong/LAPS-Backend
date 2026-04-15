@@ -205,15 +205,16 @@ public class DataInitializer implements CommandLineRunner {
 
 		// Create a Leave Application
 
-		createLeaveApplication(jason, LeaveType.ANNUAL, 5, 3, LeaveStatus.APPLIED, "Family vacation");
+		createLeaveApplication(jason, jasonAnnual, 5, 3, LeaveStatus.APPLIED, "Family vacation", "");
 
-		createLeaveApplication(john, LeaveType.MEDICAL, 1, 2, LeaveStatus.APPROVED, "Doctor's appointment");
+		createLeaveApplication(john, johnMedical, 1, 2, LeaveStatus.APPROVED, "Doctor's appointment", "");
 
-		createLeaveApplication(maria, LeaveType.ANNUAL, 10, 5, LeaveStatus.REJECTED, "Short handed at work");
-
-		createLeaveApplication(admin, LeaveType.ANNUAL, 15, 2, LeaveStatus.APPLIED, "Personal matters");
+		createLeaveApplication(maria, mariaAnnual, 10, 5, LeaveStatus.REJECTED, "Staycation", "Short handed at work");
 		
-		createLeaveApplication(john, LeaveType.ANNUAL, 20, 9, LeaveStatus.UPDATED, "Overseas vacation");
+
+		createLeaveApplication(admin, adminAnnual, 15, 2, LeaveStatus.APPLIED, "Personal matters", "");
+		
+		createLeaveApplication(john, johnAnnual, 20, 9, LeaveStatus.UPDATED, "Overseas vacation", "");
 		
 		// create public holidays
 		PublicHoliday ny2026 = new PublicHoliday();
@@ -290,10 +291,11 @@ public class DataInitializer implements CommandLineRunner {
 		phRepo.save(xm);
     }
 	
-	private void createLeaveApplication(Employee emp, LeaveType type, int startDaysFromNow, int durationDays, LeaveStatus status, String reason) {
+	private void createLeaveApplication(Employee emp, LeaveEntitlement LE, int startDaysFromNow, int durationDays, LeaveStatus status, String reason, String mgrRemarks) {
 	    LeaveApplication app = new LeaveApplication();
 	    app.setEmployee(emp);
-	    app.setLeaveType(type);
+	    app.setEntitlement(LE);
+	    app.setLeaveType(LE.getLeaveType());
 
 	    LocalDate start = LocalDate.now().plusDays(startDaysFromNow);
 	    LocalDate end = start.plusDays(durationDays - 1); 
@@ -302,6 +304,7 @@ public class DataInitializer implements CommandLineRunner {
 	    app.setEndDate(end);
 	    app.setLeaveStatus(status);
 	    app.setReason(reason);
+	    app.setMgrRemarks(mgrRemarks);
 	    
 	    app.setAppliedDate(LocalDate.now());
 	    
