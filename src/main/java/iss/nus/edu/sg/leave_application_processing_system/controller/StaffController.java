@@ -20,6 +20,7 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRe
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.constant.LeaveRequestStatusConstant;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.constant.LeaveRequestTypeConstant;
 import iss.nus.edu.sg.leave_application_processing_system.controller.helper.LeaveRequestUtilities;
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
@@ -125,8 +126,37 @@ public class StaffController {
 		
 		if (role == null || role.toString().isEmpty()) return "redirect:/";
 		
-		List<LeaveRequestControllerDTO> leaveRequestControllerDTO = new ArrayList<LeaveRequestControllerDTO>();
 
+		//Retrieve the data from the database
+			//need to pass the staffId into the method
+
+		// Leave Request Card Structure
+			// Leave Application Id
+			// Leave Type
+			// Date of the Leave Request Submitted
+			// Duration
+				// Leave Date From - Leave Date To
+			
+			// Total Number of Leave Days
+				// N days
+			
+			// Leave Status (Leave Request Status)
+			
+			// Applied , Updated
+				// Show Edit Request button and Delete Request button
+			
+			// Approved
+				// Show Cancel Request button when the Leave Period have started
+			
+			// Rejected
+
+			// Cancelled
+
+			// Deleted
+
+
+		List<LeaveRequestControllerDTO> leaveRequestControllerDTO = new ArrayList<LeaveRequestControllerDTO>();
+		
 
 		/*
 		LeaveRequestTypeConstant.ANNUAL_LEAVE,
@@ -138,22 +168,22 @@ public class StaffController {
 					LeaveRequestStatusConstant.PENDING
 		*/
 
-
+		
 		leaveRequestControllerDTO.add(
 			new LeaveRequestControllerDTO(
-				LeaveRequestTypeConstant.ANNUAL_LEAVE,
+				LeaveType.ANNUAL,
 				LeaveRequestUtilities.GenerateLeavePeriod(LocalDateTime.of(2026, 4, 15, 11, 30), LocalDateTime.of(2026, 4, 17, 11,30)),
 				LeaveRequestUtilities.RetrieveDateDifferenceText(LocalDateTime.of(2026, 4, 15, 11, 30), LocalDateTime.of(2026, 4, 17, 11,30)),
 				LeaveRequestUtilities.GenerateStandardDateFormat(LocalDateTime.of(2026, 4, 01, 11, 30)),
 				"Family Vacation Trip",
-				LeaveRequestStatusConstant.PENDING,
+				LeaveStatus.APPLIED,
 				"",
 				null,
 				""
 			)
 			
 		);
-
+		/* 
 		leaveRequestControllerDTO.add(
 			new LeaveRequestControllerDTO(
 				LeaveRequestTypeConstant.MEDICAL_LEAVE, 
@@ -193,9 +223,9 @@ public class StaffController {
 				LeaveRequestUtilities.GenerateLeaveCancellationStatement()
 			)
 		);
+		*/
 
-
-		model.addAttribute("leave_request_list", leaveRequestControllerDTO);
+		model.addAttribute("leaveRequestList", leaveRequestControllerDTO);
 
 		return "my-leave-requests";
 	}
