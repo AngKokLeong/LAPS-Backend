@@ -1,6 +1,7 @@
 package iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification_impl.medical_leave_specification;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+
 import java.time.temporal.ChronoField;
 import java.util.function.BiPredicate;
 
@@ -13,8 +14,8 @@ public class MedicalLeavePeriodAreInChronologicalIncreasingOrder extends Composi
     public BiPredicate<MedicalLeaveServiceDTO, MedicalLeaveServiceDTO> toPredicate() {
          return (currentNumberOfLeavePeriodDays, maxLeavePeriodDays) -> {
             
-            LocalDateTime leavePeriodEnds = currentNumberOfLeavePeriodDays.getLeavePeriodEnd();
-            LocalDateTime leavePeriodStarts = currentNumberOfLeavePeriodDays.getLeavePeriodStart();
+            LocalDate leavePeriodEnds = currentNumberOfLeavePeriodDays.getLeavePeriodEnd();
+            LocalDate leavePeriodStarts = currentNumberOfLeavePeriodDays.getLeavePeriodStart();
 
     
 
