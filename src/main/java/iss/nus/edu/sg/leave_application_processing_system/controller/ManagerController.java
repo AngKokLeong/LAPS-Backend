@@ -254,7 +254,7 @@ public class ManagerController {
 
 	// APPROVE OT
 	@PostMapping("/approve-ot-claim/{id}/approve")
-	public String approveOT(@PathVariable Long id, HttpSession session) {
+	public String approveOT(@PathVariable Long id, HttpSession session, RedirectAttributes ra) {
 		String extractedRoleData = (String) session.getAttribute("userRole");
 
 		if (extractedRoleData == null || extractedRoleData.toString().isEmpty())
@@ -265,15 +265,17 @@ public class ManagerController {
 		if (!role.equals(Role.MANAGER)) {
 			return "redirect:/staff"; // Send them home if they aren't a manager
 		}
+		
+		ra.addFlashAttribute("successMessage", "OT Claim Approved");
 
 		overTimeClaimService.approveOTClaim(id);
 
-		return "redirect:/manager/approve-ot-claim/list?status=PENDING";
+		return "redirect:/manager/approve-ot-claim";
 	}
 
 	// REJECT OT
 	@PostMapping("/approve-ot-claim/{id}/reject")
-	public String rejectOT(@PathVariable Long id, HttpSession session) {
+	public String rejectOT(@PathVariable Long id, HttpSession session, RedirectAttributes ra) {
 		String extractedRoleData = (String) session.getAttribute("userRole");
 
 		if (extractedRoleData == null || extractedRoleData.toString().isEmpty())
@@ -284,9 +286,11 @@ public class ManagerController {
 		if (!role.equals(Role.MANAGER)) {
 			return "redirect:/staff"; // Send them home if they aren't a manager
 		}
+		
+		ra.addFlashAttribute("successMessage", "OT Claim Rejected");
 
 		overTimeClaimService.rejectOTClaim(id);
-		return "redirect:/manager/approve-ot-claim/list?status=PENDING";
+		return "redirect:/manager/approve-ot-claim";
 	}
 
 }
