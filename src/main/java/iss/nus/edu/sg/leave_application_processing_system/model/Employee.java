@@ -1,5 +1,7 @@
 package iss.nus.edu.sg.leave_application_processing_system.model;
 
+import java.time.LocalDate;
+
 import iss.nus.edu.sg.leave_application_processing_system.helper.Designation;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import jakarta.persistence.*;
@@ -32,9 +34,15 @@ public class Employee {
   @JoinColumn(name = "manager_id")
   private Employee manager;
 
+  private LocalDate joindate;
+  
+  private String status;
+
   // Constructors for testing
   public Employee() {}
   
+
+
   public Employee(String name, String email) {
     this.name = name;
     this.email = email;
@@ -97,5 +105,19 @@ public class Employee {
     this.manager = manager;
   }
 
+  public String getStatus() {
+    return status;
+  }
 
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public LocalDate getJoindate() {
+    return joindate;
+  }
+
+  public void setJoindate(LocalDate joindate) {
+    this.joindate = joindate;
+  }
 }

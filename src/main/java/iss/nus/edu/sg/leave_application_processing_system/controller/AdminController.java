@@ -1,14 +1,26 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpSession;
+import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.service.EmployeeService;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
+
+	private final EmployeeService employeeService;
+
+	AdminController(EmployeeService employeeService) {
+		this.employeeService = employeeService;
+	}
 
 	@GetMapping("/employee-management")
 	public String employeeManagement(HttpSession session) {  
@@ -73,6 +85,13 @@ public class AdminController {
 	    }
 	    
 	    return "email-template";       
+	}
+	
+	
+	@PostMapping("/employee-management/add-employee")
+	public String saveNewEmployee (@ModelAttribute Employee employee) {
+		employeeService.save(employee);
+		return "employee-management";
 	}
 
 }
