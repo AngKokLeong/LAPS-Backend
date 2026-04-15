@@ -15,8 +15,13 @@ public class EmployeeService {
 		this.employeeRepository = employeeRepository;
 	}
 	
-	public void save(Employee employee) {
-		employeeRepository.save(employee);
+	public boolean save(Employee employee) {
+		Employee result = employeeRepository.save(employee);
+		if (result != null){
+			return true;
+		}
+
+		return false;
 	}
 
 }
