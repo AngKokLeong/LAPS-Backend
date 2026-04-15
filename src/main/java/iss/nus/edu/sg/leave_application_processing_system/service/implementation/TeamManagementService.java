@@ -143,7 +143,9 @@ public class TeamManagementService implements ManagerService {
 	}
 
 	public List<ControllerDTO> getSubordinateOTClaims(ServiceDTO serviceDTO) {
-		List<OverTimeClaim> claims = otClaimRepo.findAll(); 
+		ManagerQueryServiceDTO query = (ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
+		
+		List<OverTimeClaim> claims = otClaimRepo.findSubordinateClaimsCustomSort(query.getManagerId()); 
 		List<ControllerDTO> otList = new ArrayList<>();
 		
 		for (OverTimeClaim claim : claims) {

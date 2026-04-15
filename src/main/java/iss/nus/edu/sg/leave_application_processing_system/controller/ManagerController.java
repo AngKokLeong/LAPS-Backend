@@ -210,7 +210,8 @@ public class ManagerController {
 		
 		// 1. Get the current manager's ID 
 	    // (For now hardcode this, later get it from Session/Security context)
-		ManagerQueryServiceDTO query = new ManagerQueryServiceDTO(2L);
+		Long managerId = (Long) session.getAttribute("id");
+		ManagerQueryServiceDTO query = new ManagerQueryServiceDTO(managerId);
 
 	    // 2. Call the service to get the list of DTOs
 	    List<ControllerDTO> otClaims = teamMngService.getSubordinateOTClaims(query);
