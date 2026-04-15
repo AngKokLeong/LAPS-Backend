@@ -215,9 +215,13 @@ public class ManagerController {
 
 	    // 2. Call the service to get the list of DTOs
 	    List<ControllerDTO> otClaims = teamMngService.getSubordinateOTClaims(query);
+	    long pendingCount = otClaims.stream()
+				.filter(claim -> ((OTClaimControllerDTO) claim).getStatus() == OTClaimStatus.PENDING)
+				.count();
 
 	    // 3. Add the list to the Model
 	    model.addAttribute("otClaims", otClaims);
+	    model.addAttribute("pendingCount", pendingCount);
 
 		return "approve-ot-claim";
 	}
