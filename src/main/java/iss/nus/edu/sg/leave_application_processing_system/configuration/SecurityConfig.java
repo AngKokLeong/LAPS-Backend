@@ -27,9 +27,10 @@ public class SecurityConfig {
                         .requestMatchers("/", "/authenticate/**", "/h2-console/**", "/css/**", "/js/**", "/images/**",
                                 "/webjars/**")
                         .permitAll()
-                        .requestMatchers("/staff/**").hasRole("STAFF")
+                        .requestMatchers("/api/compensation/**").hasAnyRole("STAFF", "MANAGER", "ADMIN")
+                        .requestMatchers("/staff/**").hasAnyRole("STAFF", "MANAGER", "ADMIN")
+                        .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/manager/**").hasRole("MANAGER")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/")
