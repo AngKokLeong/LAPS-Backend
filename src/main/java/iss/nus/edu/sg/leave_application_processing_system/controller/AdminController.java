@@ -87,17 +87,11 @@ public class AdminController {
 	    return "email-template";       
 	}
 	
-	@GetMapping("/employees/add")
-	public String addNewEmployee (Model model) {
-		model.addAttribute("employee", new Employee());
-		return "add-new-employee.html";
-	}
 	
-	@PostMapping("/employees/add")
-	@ResponseBody
+	@PostMapping("/employee-management/add-employee")
 	public String saveNewEmployee (@ModelAttribute Employee employee) {
 		employeeService.save(employee);
-		return "for testing";
+		return "employee-management";
 	}
 
 }
