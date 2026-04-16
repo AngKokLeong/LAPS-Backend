@@ -279,7 +279,7 @@ public class StaffController {
 public String movementRegister(
         @RequestParam(required = false) String month,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "3") int size, // Records of 3 per page, can be changed
         Model model,
         HttpSession session) {
 
@@ -292,7 +292,7 @@ public String movementRegister(
             ? YearMonth.now()
             : YearMonth.parse(month);
 
-    Pageable pageable = PageRequest.of(page, 3); // Fixed page size of 3 for better readability
+    Pageable pageable = PageRequest.of(page, size);
 
     Page<LeaveMovementDTO> leavePage =
             leaveMovementService.getApprovedLeaveForMonth(selectedMonth, pageable);
