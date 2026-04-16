@@ -2,6 +2,7 @@ package iss.nus.edu.sg.leave_application_processing_system.configuration;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -15,9 +16,11 @@ import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedger;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
 import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
 import iss.nus.edu.sg.leave_application_processing_system.model.PublicHoliday;
+import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
@@ -34,16 +37,19 @@ public class DataInitializer implements CommandLineRunner {
     private LeaveEntitlementRepository entitlementRepo;
     private PublicHolidayRepository phRepo;
     private OverTimeClaimRepository otClaimRepo;
+    private CompensationLedgerRepository compensationLedgerRepo;
     private PasswordEncoder passwordEncoder;
     
     public DataInitializer(EmployeeRepository empRepo, LeaveApplicationRepository leaveRepo,
     		LeaveEntitlementRepository entitlementRepo, PublicHolidayRepository phRepo,
-    		OverTimeClaimRepository otClaimRepo, PasswordEncoder passwordEncoder) {
+    		OverTimeClaimRepository otClaimRepo, CompensationLedgerRepository compensationLedgerRepo,
+    		PasswordEncoder passwordEncoder) {
     	this.empRepo = empRepo;
     	this.leaveRepo = leaveRepo;
     	this.entitlementRepo = entitlementRepo;  
     	this.phRepo = phRepo;
     	this.otClaimRepo = otClaimRepo;
+    	this.compensationLedgerRepo = compensationLedgerRepo;
     	this.passwordEncoder = passwordEncoder;
     }
     
@@ -128,6 +134,11 @@ public class DataInitializer implements CommandLineRunner {
 		admin.setStatus("Active");
 
 		empRepo.save(admin);
+
+		int currentYear = Year.now().getValue();
+		createCompensationLedger(john, currentYear, 2.0, 0.5, 3.0);
+		createCompensationLedger(sarah, currentYear, 3.5, 1.0, 1.5);
+		createCompensationLedger(admin, currentYear, 1.5, 0.0, 2.0);
 		
 		// Leave Entitlement for Sarah
 		LeaveEntitlement sarahAnnual = new LeaveEntitlement();
@@ -357,6 +368,17 @@ public class DataInitializer implements CommandLineRunner {
 
 	private String encodedPassword(String rawPassword) {
 		return passwordEncoder.encode(rawPassword);
+	}
+
+	private void createCompensationLedger(Employee employee, int yearApplied, double earnedDays, double usedDays,
+			double unconvertedHours) {
+		CompensationLedger ledger = new CompensationLedger();
+		ledger.setEmployee(employee);
+		ledger.setYearApplied(yearApplied);
+		ledger.setEarnedDays(earnedDays);
+		ledger.setUsedDays(usedDays);
+		ledger.setUnconvertedHours(unconvertedHours);
+		compensationLedgerRepo.save(ledger);
 	}
 
 
