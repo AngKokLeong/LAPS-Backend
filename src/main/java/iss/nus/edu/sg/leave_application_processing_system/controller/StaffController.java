@@ -224,13 +224,13 @@ public class StaffController {
 		
 		if (role == null || role.toString().isEmpty()) return "redirect:/";
 		
-		model.addAttribute("ot-Claim", new OverTimeClaim());
+		model.addAttribute("otClaim", new OverTimeClaim());
 		
 		return "submit-ot-claim";
 	}
 	
 	@PostMapping("/submit-ot-claim")
-	public String processOTSubmission(@ModelAttribute("ot-claim") OverTimeClaim otClaim,
+	public String processOTSubmission(@ModelAttribute OverTimeClaim otClaim,
 			HttpSession session ,RedirectAttributes redirectAttrs) {
 
 		Long employeeId = (Long) session.getAttribute("id");

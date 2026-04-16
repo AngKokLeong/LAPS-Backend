@@ -12,8 +12,43 @@
           <p class="text-gray-500 mt-1">
             Submit overtime claims and view your claim history
           </p>
-        </div>
-
+		</div>
+		
+		<!-- Success/Error Message -->
+		<div th:if="${successMessage}"
+			class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded shadow-sm flex items-center justify-between">
+			<div class="flex items-center">
+				<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd"
+						d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+						clip-rule="evenodd"></path>
+				</svg>
+				<span th:text="${successMessage}">Success! Action completed.</span>
+			</div>
+			<button type="button" onclick="this.parentElement.style.display='none'" class="text-green-500 hover:text-green-700">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
+		
+		<div th:if="${errorMessage}"
+			class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow-sm flex items-center justify-between">
+			<div class="flex items-center">
+				<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd"
+						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+						clip-rule="evenodd"></path>
+				</svg>
+				<span th:text="${errorMessage}">An error occurred.</span>
+			</div>
+			<button type="button" onclick="this.parentElement.style.display='none'" class="text-red-500 hover:text-red-700">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
+					
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2">
             <div class="bg-white rounded-xl border border-gray-200 p-6">
@@ -21,111 +56,86 @@
                 Submit Overtime Claim
               </h2>
 
-              <form id="otForm" class="space-y-5">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="startDate" class="block text-sm font-medium text-gray-700 mb-2">
-                      Start Date <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="startDate"
-                      name="startDate"
-                      type="date"
-                      required
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    />
-                  </div>
+			  <form th:action="@{/staff/submit-ot-claim}" th:object="${otClaim}" method="post" id="otForm" class="space-y-5">
+			      
+			      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			          <div>
+			              <label for="startDateTime" class="block text-sm font-medium text-gray-700 mb-2">
+			                  Start Date & Time <span class="text-red-500">*</span>
+			              </label>
+			              <input
+			                  th:field="*{startDateTime}"
+			                  type="datetime-local"
+			                  required
+			                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+			              />
+			          </div>
 
-                  <div>
-                    <label for="startTime" class="block text-sm font-medium text-gray-700 mb-2">
-                      Start Time <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="startTime"
-                      name="startTime"
-                      type="time"
-                      step="300"
-                      required
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    />
-                  </div>
-                </div>
+			          <div class="hidden md:block">
+			              <p class="text-xs text-gray-500 mt-10">Select the exact start point of your overtime.</p>
+			          </div>
+			      </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="endDate" class="block text-sm font-medium text-gray-700 mb-2">
-                      End Date <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="endDate"
-                      name="endDate"
-                      type="date"
-                      required
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    />
-                  </div>
+			      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			          <div>
+			              <label for="endDateTime" class="block text-sm font-medium text-gray-700 mb-2">
+			                  End Date & Time <span class="text-red-500">*</span>
+			              </label>
+			              <input
+			                  th:field="*{endDateTime}"
+			                  type="datetime-local"
+			                  required
+			                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+			              />
+			          </div>
+			      </div>
 
-                  <div>
-                    <label for="endTime" class="block text-sm font-medium text-gray-700 mb-2">
-                      End Time <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="endTime"
-                      name="endTime"
-                      type="time"
-                      step="300"
-                      required
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    />
-                  </div>
-                </div>
+			      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+			          <div class="flex items-center justify-between">
+			              <div class="flex items-center gap-2 text-gray-700">
+			                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+			                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+			                  </svg>
+			                  <span class="text-sm font-medium">Total OT Duration:</span>
+			              </div>
+			              <span id="calculatedHours" class="text-lg font-bold text-blue-600">0 hours</span>
+			          </div>
+			      </div>
 
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-gray-700">
-                      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      <span class="text-sm font-medium">Total OT Duration:</span>
-                    </div>
-                    <span id="calculatedHours" class="text-lg font-bold text-blue-600">0 hours</span>
-                  </div>
-                </div>
+			      <div>
+			          <label for="otDescription" class="block text-sm font-medium text-gray-700 mb-2">
+			              Description/Reason <span class="text-red-500">*</span>
+			          </label>
+			          <textarea
+			              th:field="*{otDescription}"
+			              rows="4"
+			              required
+			              placeholder="Please provide details about the overtime work performed..."
+			              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+			          ></textarea>
+			          <p class="text-xs text-gray-500 mt-1">
+			              Provide clear details to help your manager review the claim
+			          </p>
+			      </div>
 
-                <div>
-                  <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                    Description/Reason <span class="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    rows="4"
-                    required
-                    placeholder="Please provide details about the overtime work performed..."
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-                  ></textarea>
-                  <p class="text-xs text-gray-500 mt-1">
-                    Provide clear details to help your manager review the claim
-                  </p>
-                </div>
-
-                <div class="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onclick="resetForm()"
-                    class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-                  >
-                    Clear Form
-                  </button>
-                  <button
-                    type="submit"
-                    class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
-                  >
-                    Submit OT Claim
-                  </button>
-                </div>
-              </form>
+			      <div class="flex gap-3 pt-2">
+			          <button
+			              type="button"
+			              onclick="resetForm()"
+			              class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+			          >
+			              Clear Form
+			          </button>
+			          <button
+			              type="submit"
+			              class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+			          >
+			              Submit OT Claim
+			          </button>
+			      </div>
+			  </form>
+			  
             </div>
           </div>
 
@@ -432,71 +442,57 @@
         });
     }
 
-    function calculateOTHours() {
-      const startDate = document.getElementById("startDate").value;
-      const startTime = document.getElementById("startTime").value;
-      const endDate = document.getElementById("endDate").value;
-      const endTime = document.getElementById("endTime").value;
+	function calculateOTHours() {
+	  // Use the IDs generated by th:field
+	  const startVal = document.getElementById("startDateTime").value;
+	  const endVal = document.getElementById("endDateTime").value;
 
-      if (startDate && startTime && endDate && endTime) {
-        const start = new Date(`${startDate}T${startTime}`);
-        const end = new Date(`${endDate}T${endTime}`);
+	  if (startVal && endVal) {
+	    const start = new Date(startVal);
+	    const end = new Date(endVal);
 
-        const diffMs = end - start;
-        const diffHours = diffMs / (1000 * 60 * 60);
+	    const diffHours = (end - start) / (1000 * 60 * 60);
 
-        if (diffHours > 0) {
-          document.getElementById("calculatedHours").textContent = diffHours.toFixed(2) + " hours";
-        } else {
-          document.getElementById("calculatedHours").textContent = "0 hours";
-        }
-      }
-    }
+	    if (diffHours > 0) {
+	      document.getElementById("calculatedHours").textContent = diffHours.toFixed(2) + " hours";
+	    } else {
+	      document.getElementById("calculatedHours").textContent = "0 hours";
+	    }
+	  }
+	}
 
-    document.addEventListener("DOMContentLoaded", function() {
-      loadCompensation();
+	document.addEventListener("DOMContentLoaded", function() {
+	  loadCompensation();
 
-      ["startDate", "startTime", "endDate", "endTime"].forEach((id) => {
-        document.getElementById(id)?.addEventListener("change", calculateOTHours);
-      });
+	  ["startDateTime", "endDateTime"].forEach((id) => {
+	    document.getElementById(id)?.addEventListener("change", calculateOTHours);
+	  });
 
-      document.getElementById("otForm")?.addEventListener("submit", submitOTClaim);
-    });
+	  document.getElementById("otForm")?.addEventListener("submit", submitOTClaim);
+	});
 
-    function submitOTClaim(event) {
-      event.preventDefault();
+	function submitOTClaim(event) {
+	  
+	  const startVal = document.getElementById("startDateTime").value;
+	  const endVal = document.getElementById("endDateTime").value;
+	  const description = document.getElementById("otDescription").value.trim();
 
-      const startDate = document.getElementById("startDate").value;
-      const startTime = document.getElementById("startTime").value;
-      const endDate = document.getElementById("endDate").value;
-      const endTime = document.getElementById("endTime").value;
-      const description = document.getElementById("description").value.trim();
+	  if (!startVal || !endVal || !description) {
+	    event.preventDefault(); // Stop form if empty
+	    alert("Please fill in all required fields");
+	    return;
+	  }
 
-      if (!startDate || !startTime || !endDate || !endTime || !description) {
-        alert("Please fill in all required fields");
-        return;
-      }
+	  const start = new Date(startVal);
+	  const end = new Date(endVal);
 
-      const start = new Date(`${startDate}T${startTime}`);
-      const end = new Date(`${endDate}T${endTime}`);
+	  if (start >= end) {
+	    event.preventDefault(); // Stop form if time is wrong
+	    alert("End date/time must be after start date/time");
+	    return;
+	  }
 
-      if (start >= end) {
-        alert("End date/time must be after start date/time");
-        return;
-      }
-
-      alert("OT claim submitted successfully!");
-      resetForm();
-    }
-
-    function resetForm() {
-      document.getElementById("startDate").value = "";
-      document.getElementById("startTime").value = "";
-      document.getElementById("endDate").value = "";
-      document.getElementById("endTime").value = "";
-      document.getElementById("description").value = "";
-      document.getElementById("calculatedHours").textContent = "0 hours";
-    }
+	}
 
     function filterClaims(status) {
       const claims = document.querySelectorAll(".claim-card");
