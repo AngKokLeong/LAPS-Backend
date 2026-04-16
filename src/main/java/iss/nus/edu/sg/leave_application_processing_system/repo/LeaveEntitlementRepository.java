@@ -9,7 +9,7 @@ import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
 
 public interface LeaveEntitlementRepository extends JpaRepository<LeaveEntitlement, Long>{
-    Optional<LeaveEntitlement> findByEmployeeIdAndLeaveTypeAndYearApplied(
+    Optional<LeaveEntitlement> findByEmployeeId_IdAndLeaveTypeAndYearApplied(
             Long employeeId,
             LeaveType leaveType,
             int yearApplied

@@ -8,31 +8,38 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.OTClaimControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveBalanceControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
 import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.ManagerService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class TeamManagementService implements ManagerService {
 
 	private final OverTimeClaimRepository otClaimRepo;
 	private final LeaveApplicationRepository laRepo;
+	private final LeaveEntitlementRepository lEntitlementRepo;
 	
 	public TeamManagementService(OverTimeClaimRepository otClaimRepo,
-			LeaveApplicationRepository laRepo) {
+			LeaveApplicationRepository laRepo, LeaveEntitlementRepository lEntitlementRepo) {
 		this.otClaimRepo = otClaimRepo;
 		this.laRepo = laRepo;
+		this.lEntitlementRepo = lEntitlementRepo;
 	}
 	
 
@@ -83,6 +90,7 @@ public class TeamManagementService implements ManagerService {
 	}
 	
 	@Override
+	@Transactional
 	public ControllerDTO processApproval(ServiceDTO serviceDTO) {
 		
         LeaveApprovalServiceDTO request = (LeaveApprovalServiceDTO) serviceDTO.getAllAttribute();
@@ -90,33 +98,40 @@ public class TeamManagementService implements ManagerService {
         LeaveApprovalControllerDTO response = new LeaveApprovalControllerDTO();
         response.setApplicationId(request.getApplicationId());
         
-        // --- MOCK LOGIC START ---
-        // Later, use request.getApplicationId() to find the record in the DB
-        
-        if (request.getApplicationId() == null) {
+     // Find the application
+        LeaveApplication application = laRepo.findById(request.getApplicationId())
+                .orElseThrow(() -> new EntityNotFoundException("Application not found"));
+
+        String actionTaken = request.getAction();
+
+        if ("APPROVE".equalsIgnoreCase(actionTaken)) {
+            // Handle Entitlement Update
+            updateEntitlement(application);
+
+            // Update Application Status
+            application.setLeaveStatus(LeaveStatus.APPROVED);
+            application.setMgrRemarks(request.getManagerRemarks());
+            
+            response.setNewStatus("APPROVED");
+            response.setMessage("Application approved and entitlement updated.");
+            response.setSuccess(true);
+        } 
+        else if ("REJECT".equalsIgnoreCase(actionTaken)) {
+            application.setLeaveStatus(LeaveStatus.REJECTED);
+            application.setMgrRemarks(request.getManagerRemarks());
+            
+            response.setNewStatus("REJECTED");
+            response.setMessage("Application has been rejected.");
+            response.setSuccess(true);
+        } 
+        else {
             response.setSuccess(false);
-            response.setMessage("Error: Invalid Application ID.");
+            response.setMessage("Error: Unknown action '" + actionTaken + "'");
             return response;
         }
 
-        // Simulate a successful update
-        String actionTaken = request.getAction(); 
-
-        response.setSuccess(true);
-        
-        if ("APPROVE".equalsIgnoreCase(actionTaken)) {
-            response.setNewStatus("APPROVED");
-            response.setMessage("Application #" + request.getApplicationId() + " has been successfully approved.");
-        } else if ("REJECT".equalsIgnoreCase(actionTaken)) {
-            response.setNewStatus("REJECTED");
-            response.setMessage("Application #" + request.getApplicationId() + " has been rejected.");
-        } else {
-            // Fallback in case the string is something else (like the "REJECTE" typo)
-            response.setSuccess(false);
-            response.setMessage("Error: Unknown action '" + actionTaken + "'");
-        }
-        // --- MOCK LOGIC END ---
-
+        // 4. Save the updated application
+        laRepo.save(application);
         return response;
 	}
 	
@@ -198,6 +213,26 @@ public class TeamManagementService implements ManagerService {
 	    }
 	    
 	    return (double) days;
+	}
+	
+	// helper method to update leave entitlement
+	private void updateEntitlement(LeaveApplication app) {
+	    // Find entitlement by Employee, LeaveType, and Year
+	    int year = app.getStartDate().getYear();
+	    LeaveEntitlement entitlement = lEntitlementRepo
+	            .findByEmployeeId_IdAndLeaveTypeAndYearApplied(app.getEmployee().getId(), app.getLeaveType(), year)
+	            .orElseThrow(() -> new IllegalStateException("No entitlement record found for this employee/year"));
+
+	    // Increment used days
+	    int newUsedDays = entitlement.getUsedDays() + (int) calculateDuration(app.getStartDate(), app.getEndDate());
+	    
+	    // Safety check: Don't exceed total allowed
+	    if (newUsedDays > entitlement.getTotalDays()) {
+	        throw new IllegalArgumentException("Approval failed: Employee has insufficient leave balance.");
+	    }
+
+	    entitlement.setUsedDays(newUsedDays);
+	    lEntitlementRepo.save(entitlement);
 	}
 	
 }
