@@ -212,41 +212,58 @@
     </div>
 
 	<script>
-	    /* --- 1. MODAL LOGIC (Functional) --- */
+		/* --- 1. MODAL LOGIC (Functional) --- */
 		function openModal(id, action) {
-		    const modal = document.getElementById('modal-' + id);
-		    const form = document.getElementById('form-' + id);
-		    const actionText = document.getElementById('action-text-' + id);
-		    const remarksArea = document.getElementById('remarks-' + id);
+			const modal = document.getElementById('modal-' + id);
+			const form = document.getElementById('form-' + id);
+			const actionText = document.getElementById('action-text-' + id);
+			const remarksArea = document.getElementById('remarks-' + id);
 
-		    if (modal && form) {
-		        modal.classList.remove('hidden');
-		        
-		        // Convert to lowercase once to make comparisons easier
-		        const normalizedAction = action.toLowerCase(); // will be 'approve' or 'reject'
-		        
-		        actionText.innerText = normalizedAction;
-		        
-		        // Set the URL: /manager/leave/101/approve or /manager/leave/101/reject
-		        form.action = '/manager/leave/' + id + '/' + normalizedAction;
+			if (modal && form) {
+				modal.classList.remove('hidden');
 
-		        // Handle the "Required" requirement for rejection
-		        if (normalizedAction === 'reject') {
-		            remarksArea.required = true;
-		            remarksArea.placeholder = "Reason for rejection (Required)...";
-		        } else {
-		            remarksArea.required = false;
-		            remarksArea.placeholder = "Optional remarks...";
-		        }
-		    }
+				// Convert to lowercase once to make comparisons easier
+				const normalizedAction = action.toLowerCase(); // will be 'approve' or 'reject'
+
+				actionText.innerText = normalizedAction;
+
+				// Set the URL: /manager/leave/101/approve or /manager/leave/101/reject
+				form.action = '/manager/leave/' + id + '/' + normalizedAction;
+
+				// Handle the "Required" requirement for rejection
+				if (normalizedAction === 'reject') {
+					remarksArea.required = true;
+					remarksArea.placeholder = "Reason for rejection (Required)...";
+				} else {
+					remarksArea.required = false;
+					remarksArea.placeholder = "Optional remarks...";
+				}
+			}
 		}
 
-	    function closeModal(id) {
-	        const modal = document.getElementById('modal-' + id);
-	        if (modal) {
-	            modal.classList.add('hidden');
-	        }
-	    }
+		function closeModal(id) {
+			const modal = document.getElementById('modal-' + id);
+			if (modal) {
+				modal.classList.add('hidden');
+			}
+		}
+
+		/* --- 2. FILTER BUTTONS (Visibility and Visual Effects) --- */
+		document.addEventListener('DOMContentLoaded', function () {
+			const filterButtons = document.querySelectorAll('.filter-btn');
+			const cards = document.querySelectorAll('.leave-card'); // Ensure your cards have this class!
+			const noMsg = document.getElementById('no-requests-msg');
+
+			filterButtons.forEach(btn => {
+				btn.addEventListener('click', function () {
+					// 1. Visual toggle: Clear all active colors
+					filterButtons.forEach(b => {
+						b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'text-white');
+						b.classList.add('bg-gray-100', 'text-gray-700');
+					});
+
+					// 2. Get filter value from data attribute
+					const filterValue = this.getAttribute('data-filter');
 
 	    /* --- 2. FILTER BUTTONS (Visual Effects) --- */
 		document.addEventListener('DOMContentLoaded', function () {

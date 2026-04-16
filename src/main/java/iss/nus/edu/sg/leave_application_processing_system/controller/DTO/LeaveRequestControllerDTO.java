@@ -1,59 +1,37 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
-
-
-import java.time.LocalDateTime;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-
-
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 
 public class LeaveRequestControllerDTO implements ControllerDTO{
 
-    private String type;
+    private Long leaveRequestId;
+    private LeaveType leaveType;
+    private LeaveStatus leaveStatus;
     private String leavePeriod;
     private String leaveDuration;
     private String leaveAppliedOn;
     private String reason;
-    private String leaveRequestStatus;
     private String leaveApprover;
     private String leaveApprovalTransactionDate;
     private String leaveApprovalReason;
+   
+    public LeaveRequestControllerDTO(){}
 
-    
-
-    public LeaveRequestControllerDTO(String type, String leavePeriod, String leaveDuration, String leaveAppliedOn, String reason, String leaveRequestStatus, String leaveApprover, String leaveApprovalTransactionDate, String leaveApprovalReason){
-        this.type = type;
+    public LeaveRequestControllerDTO(LeaveType type, String leavePeriod, String leaveDuration, String leaveAppliedOn, String reason, LeaveStatus leaveStatus, String leaveApprover, String leaveApprovalTransactionDate, String leaveApprovalReason){
+        this.leaveType = type;
         this.leavePeriod = leavePeriod;
         this.leaveDuration = leaveDuration;
         this.leaveAppliedOn = leaveAppliedOn;
         this.reason = reason;
-        this.leaveRequestStatus = leaveRequestStatus;
+        this.leaveStatus = leaveStatus;
         this.leaveApprover = leaveApprover;
         this.leaveApprovalTransactionDate = leaveApprovalTransactionDate;
         this.leaveApprovalReason = leaveApprovalReason;
     }
 
     
-    
-
-
-    public String getType() {
-        return type;
-    }
-
-
-
-
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-
-
+        
 
 
     public String getLeavePeriod() {
@@ -120,17 +98,39 @@ public class LeaveRequestControllerDTO implements ControllerDTO{
 
 
 
-    public String getLeaveRequestStatus() {
-        return leaveRequestStatus;
+
+
+
+    public LeaveType getLeaveType() {
+        return leaveType;
     }
 
 
 
 
 
-    public void setLeaveRequestStatus(String leaveRequestStatus) {
-        this.leaveRequestStatus = leaveRequestStatus;
+    public void setLeaveType(LeaveType leaveType) {
+        this.leaveType = leaveType;
     }
+
+
+
+
+
+    public LeaveStatus getLeaveStatus() {
+        return leaveStatus;
+    }
+
+
+
+
+
+    public void setLeaveStatus(LeaveStatus leaveStatus) {
+        this.leaveStatus = leaveStatus;
+    }
+
+
+
 
 
     public String getLeaveApprover() {
@@ -177,6 +177,14 @@ public class LeaveRequestControllerDTO implements ControllerDTO{
     @Override
     public ControllerDTO getAllAttribute() {
         return this;
+    }
+
+    public Long getLeaveRequestId() {
+        return leaveRequestId;
+    }
+
+    public void setLeaveRequestId(Long leaveRequestId) {
+        this.leaveRequestId = leaveRequestId;
     }
     
     
