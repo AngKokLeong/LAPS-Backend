@@ -36,7 +36,7 @@ public class ManagerController {
 	}
 
 	@GetMapping("/team-leave-history")
-	public String teamLeaveHistory(HttpSession session) {
+	public String teamLeaveHistory(Model model, HttpSession session) {
 
 		String extractedRoleData = (String) session.getAttribute("userRole");
 
@@ -48,6 +48,12 @@ public class ManagerController {
 		if (!role.equals(Role.MANAGER)) {
 			return "redirect:/staff"; // Send them home if they aren't a manager
 		}
+
+		// use the current employeeId to find all subordinates' leave records
+		session.getAttribute("id");
+		
+
+		model.addAttribute("");
 
 		return "team-leave-history";
 	}
