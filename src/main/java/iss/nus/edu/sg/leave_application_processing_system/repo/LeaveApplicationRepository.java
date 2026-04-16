@@ -31,6 +31,14 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
             LeaveStatus leaveStatus
     );
     
+    @Query("SELECT l FROM LeaveApplication l " +
+    	       "WHERE l.employee.manager.id = :managerId " +
+    	       "ORDER BY CASE " +
+    	       "  WHEN l.leaveStatus = 'APPLIED' OR l.leaveStatus = 'UPDATED' THEN 0 " +
+    	       "  ELSE 1 END ASC, " +
+    	       "l.appliedDate DESC")
+    List<LeaveApplication> findSubordinateLeaves(@Param("managerId") Long managerId);
+    
     // For movement register workflow (movement-register.html)
     @Query("""
     SELECT new iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveMovementDTO(
