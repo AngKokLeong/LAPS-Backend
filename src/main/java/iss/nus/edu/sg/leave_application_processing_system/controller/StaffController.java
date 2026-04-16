@@ -104,7 +104,8 @@ public class StaffController {
 			
 			if (leaveApplication.getType() == null || 
 			        leaveApplication.getStartDate() == null || 
-			        leaveApplication.getEndDate() == null) {
+			        leaveApplication.getEndDate() == null ||
+			        leaveApplication.getReason().isBlank()) {
 			        
 			        ra.addFlashAttribute("errorMessage", "Please fill in all fields.");
 			        return "redirect:/staff/apply-leave";
