@@ -13,7 +13,7 @@ public class TeamLeaveHistoryServiceDTO implements ServiceDTO {
     private LeaveType leaveType;
     private LocalDate leaveStartDate;
     private LocalDate leaveEndDate;
-
+    private String leaveDuration;
     private int numberOfLeaveDay;
     private LeaveStatus leaveStatus;
     private String reviewBy;
@@ -28,6 +28,14 @@ public class TeamLeaveHistoryServiceDTO implements ServiceDTO {
 
     public void setEmployeeId(Long employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public String getLeaveDuration() {
+        return leaveDuration;
+    }
+
+    public void setLeaveDuration(String leaveDuration) {
+        this.leaveDuration = leaveDuration;
     }
 
     public String getStaffName() {
