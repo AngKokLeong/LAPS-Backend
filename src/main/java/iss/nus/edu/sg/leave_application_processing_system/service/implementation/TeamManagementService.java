@@ -220,7 +220,7 @@ public class TeamManagementService implements ManagerService {
 	    // Find entitlement by Employee, LeaveType, and Year
 	    int year = app.getStartDate().getYear();
 	    LeaveEntitlement entitlement = lEntitlementRepo
-	            .findByEmployeeIdAndLeaveTypeAndYearApplied(app.getEmployee().getId(), app.getLeaveType(), year)
+	            .findByEmployeeId_IdAndLeaveTypeAndYearApplied(app.getEmployee().getId(), app.getLeaveType(), year)
 	            .orElseThrow(() -> new IllegalStateException("No entitlement record found for this employee/year"));
 
 	    // Increment used days

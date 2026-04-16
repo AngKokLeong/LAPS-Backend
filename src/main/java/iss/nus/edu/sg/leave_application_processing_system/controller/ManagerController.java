@@ -149,7 +149,8 @@ public class ManagerController {
 			// The Service has already rolled back! Now we just inform the user.
 			ra.addFlashAttribute("errorMessage", e.getMessage());
 		} catch (Exception e) {
-			ra.addFlashAttribute("errorMessage", "A system error occurred. Please try again.");
+	        e.printStackTrace(); 
+	        ra.addFlashAttribute("errorMessage", "DEBUG ERROR: " + e.toString());
 		}
 
 		return "redirect:/manager/manage-leave-requests";
@@ -178,7 +179,8 @@ public class ManagerController {
 	    } catch (RuntimeException e) {
 	        ra.addFlashAttribute("errorMessage", "Could not reject request: " + e.getMessage());
 	    } catch (Exception e) {
-	        ra.addFlashAttribute("errorMessage", "An internal error occurred. Please contact IT support.");
+	    	e.printStackTrace(); 
+	        ra.addFlashAttribute("errorMessage", "DEBUG ERROR: " + e.toString());
 	    }
 
 		return "redirect:/manager/manage-leave-requests";
