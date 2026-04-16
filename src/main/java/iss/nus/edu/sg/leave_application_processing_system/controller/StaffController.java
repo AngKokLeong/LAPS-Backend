@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CancelLeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
@@ -24,12 +25,13 @@ import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.CancelLeaveRequestServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.AnnualLeaveApplicationService;
+import iss.nus.edu.sg.leave_application_processing_system.service.implementation.CancelLeaveRequestService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.MedicalLeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewLeaveRequestsService;
 import jakarta.servlet.http.HttpSession;
@@ -42,16 +44,19 @@ public class StaffController {
 	private final MedicalLeaveApplicationService medicalLeaveApplicationService;
 	private final ViewLeaveRequestsService viewLeaveRequestsService;
 	private final OverTimeClaimService otClaimService;
+	private final CancelLeaveRequestService cancelLeaveRequestService;
 
 
 	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, 
 							MedicalLeaveApplicationService medicalLeaveApplicationService,
 							ViewLeaveRequestsService viewLeaveRequestsService,
-							OverTimeClaimService otClaimService){
+							OverTimeClaimService otClaimService,
+							CancelLeaveRequestService cancelLeaveRequestService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
 		this.viewLeaveRequestsService = viewLeaveRequestsService;
 		this.otClaimService = otClaimService;
+		this.cancelLeaveRequestService = cancelLeaveRequestService;
 	}
 
 
@@ -290,7 +295,7 @@ public class StaffController {
 	
 	@PostMapping("/submit-ot-claim")
 	public String processOTSubmission(@ModelAttribute OverTimeClaim otClaim,
-			HttpSession session ,RedirectAttributes redirectAttrs) {
+									HttpSession session ,RedirectAttributes redirectAttrs) {
 
 		Long employeeId = (Long) session.getAttribute("id");
 
@@ -307,4 +312,42 @@ public class StaffController {
 		return "redirect:/staff/submit-ot-claim";
 	}
 
+	
+	@PostMapping("/cancel-leave-request")
+	public String cancelLeaveRequest(@ModelAttribute CancelLeaveRequestControllerDTO cancelLeaveRequestControllerDTO, HttpSession session, RedirectAttributes redirectAttrs) {
+		String role = (String) session.getAttribute("userRole");
+		
+		if (role == null || role.toString().isEmpty()) return "redirect:/";
+		
+		Long employeeId = (Long) session.getAttribute("id");
+		if (employeeId == null) {
+			return "redirect:/";
+		}
+
+
+		CancelLeaveRequestServiceDTO cancelLeaveRequestServiceDTO = new CancelLeaveRequestServiceDTO();
+		cancelLeaveRequestServiceDTO.setEmployeeId(employeeId);
+		cancelLeaveRequestServiceDTO.setStartDate(cancelLeaveRequestControllerDTO.getStartDate());
+		cancelLeaveRequestServiceDTO.setEndDate(cancelLeaveRequestControllerDTO.getEndDate());
+		cancelLeaveRequestServiceDTO.setLeaveRequestId(cancelLeaveRequestControllerDTO.getLeaveRequestId());
+		cancelLeaveRequestServiceDTO.setLeaveStatus(cancelLeaveRequestControllerDTO.getLeaveStatus());
+
+		ControllerDTO controllerDTO = cancelLeaveRequestService.cancelLeaveRequest(cancelLeaveRequestServiceDTO);
+		
+		CancelLeaveRequestControllerDTO result = (CancelLeaveRequestControllerDTO) controllerDTO.getAllAttribute();
+
+		if (result.getOperationResult()){
+			redirectAttrs.addFlashAttribute("message", "The leave request is cancelled.");
+			redirectAttrs.addFlashAttribute("cancelLeaveRequestData", result);
+		}else{
+			redirectAttrs.addFlashAttribute("message", "The leave request is not cancelled.");
+			redirectAttrs.addFlashAttribute("cancelLeaveRequestData", result);
+		}
+
+		
+
+
+		return "redirect:/staff/my-leave-requests";
+	}
+ 
 }
