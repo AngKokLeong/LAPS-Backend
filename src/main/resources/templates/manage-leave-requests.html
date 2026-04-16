@@ -214,64 +214,41 @@
 	<script>
 		/* --- 1. MODAL LOGIC (Functional) --- */
 		function openModal(id, action) {
-			const modal = document.getElementById('modal-' + id);
-			const form = document.getElementById('form-' + id);
-			const actionText = document.getElementById('action-text-' + id);
-			const remarksArea = document.getElementById('remarks-' + id);
+		    const modal = document.getElementById('modal-' + id);
+		    const form = document.getElementById('form-' + id);
+		    const actionText = document.getElementById('action-text-' + id);
+		    const remarksArea = document.getElementById('remarks-' + id);
 
-			if (modal && form) {
-				modal.classList.remove('hidden');
+		    if (modal && form) {
+		        modal.classList.remove('hidden');
+		        const normalizedAction = action.toLowerCase();
+		        actionText.innerText = normalizedAction;
+		        form.action = '/manager/leave/' + id + '/' + normalizedAction;
 
-				// Convert to lowercase once to make comparisons easier
-				const normalizedAction = action.toLowerCase(); // will be 'approve' or 'reject'
-
-				actionText.innerText = normalizedAction;
-
-				// Set the URL: /manager/leave/101/approve or /manager/leave/101/reject
-				form.action = '/manager/leave/' + id + '/' + normalizedAction;
-
-				// Handle the "Required" requirement for rejection
-				if (normalizedAction === 'reject') {
-					remarksArea.required = true;
-					remarksArea.placeholder = "Reason for rejection (Required)...";
-				} else {
-					remarksArea.required = false;
-					remarksArea.placeholder = "Optional remarks...";
-				}
-			}
+		        if (normalizedAction === 'reject') {
+		            remarksArea.required = true;
+		            remarksArea.placeholder = "Reason for rejection (Required)...";
+		        } else {
+		            remarksArea.required = false;
+		            remarksArea.placeholder = "Optional remarks...";
+		        }
+		    }
 		}
 
 		function closeModal(id) {
-			const modal = document.getElementById('modal-' + id);
-			if (modal) {
-				modal.classList.add('hidden');
-			}
+		    const modal = document.getElementById('modal-' + id);
+		    if (modal) {
+		        modal.classList.add('hidden');
+		    }
 		}
 
-		/* --- 2. FILTER BUTTONS (Visibility and Visual Effects) --- */
-		document.addEventListener('DOMContentLoaded', function () {
-			const filterButtons = document.querySelectorAll('.filter-btn');
-			const cards = document.querySelectorAll('.leave-card'); // Ensure your cards have this class!
-			const noMsg = document.getElementById('no-requests-msg');
-
-			filterButtons.forEach(btn => {
-				btn.addEventListener('click', function () {
-					// 1. Visual toggle: Clear all active colors
-					filterButtons.forEach(b => {
-						b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'text-white');
-						b.classList.add('bg-gray-100', 'text-gray-700');
-					});
-
-					// 2. Get filter value from data attribute
-					const filterValue = this.getAttribute('data-filter');
-
-	    /* --- 2. FILTER BUTTONS (Visual Effects) --- */
+		/* --- 2. FILTER BUTTONS LOGIC --- */
 		document.addEventListener('DOMContentLoaded', function () {
 		    const noMsg = document.getElementById('no-requests-msg');
 		    const filterButtons = document.querySelectorAll('.filter-btn');
 		    const cards = document.querySelectorAll('.leave-card');
 
-		    // Logical grouping for Leave Statuses
+		    // Maps the button data-filter to your Thymeleaf Uppercase statuses
 		    const statusGroups = {
 		        'pending':  ['APPLIED', 'UPDATED'],
 		        'approved': ['APPROVED'],
@@ -283,7 +260,7 @@
 		        btn.addEventListener('click', function () {
 		            const filterValue = this.getAttribute('data-filter');
 
-		            // 1. Visual Toggle for Buttons
+		            // Visual Toggle for Buttons
 		            filterButtons.forEach(b => {
 		                b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'bg-gray-600', 'text-white');
 		                b.classList.add('bg-gray-100', 'text-gray-700');
@@ -291,18 +268,19 @@
 
 		            this.classList.remove('bg-gray-100', 'text-gray-700');
 		            this.classList.add('text-white');
+		            
 		            if (filterValue === 'all') this.classList.add('bg-blue-600');
 		            else if (filterValue === 'pending') this.classList.add('bg-yellow-600');
 		            else if (filterValue === 'approved') this.classList.add('bg-green-600');
 		            else if (filterValue === 'rejected') this.classList.add('bg-red-600');
 		            else if (filterValue === 'inactive') this.classList.add('bg-gray-600');
 
-		            // 2. Advanced Filtering Logic (Grouping + Hiding)
+		            // Filtering Logic
 		            cards.forEach(card => {
 		                const cardStatus = card.getAttribute('data-status');
 
 		                if (filterValue === 'all') {
-		                    // Show everything except Inactive items for a clean 'All' view
+		                    // Show all except the "inactive" noise
 		                    if (cardStatus === 'CANCELLED' || cardStatus === 'ARCHIVED') {
 		                        card.classList.add('hidden');
 		                    } else {
@@ -318,19 +296,16 @@
 		                }
 		            });
 
-		            // 3. Update Empty State
 		            updateEmptyState(noMsg);
 		        });
 		    });
 
-		    // Run once on load
 		    updateEmptyState(noMsg);
 		});
 
-		// Helper function (Matches your OT logic)
+		// Helper function
 		function updateEmptyState(noMsg) {
 		    if (noMsg) {
-		        // Look specifically for leave-cards that don't have the .hidden class
 		        const visibleCards = document.querySelectorAll('.leave-card:not(.hidden)');
 		        if (visibleCards.length === 0) {
 		            noMsg.classList.remove('hidden');
