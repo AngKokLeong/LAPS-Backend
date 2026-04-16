@@ -28,7 +28,7 @@ import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.LeaveMovementService;
 import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.CancelLeaveRequestServiceDTO;
@@ -48,16 +48,22 @@ public class StaffController {
 	private final MedicalLeaveApplicationService medicalLeaveApplicationService;
 	private final ViewLeaveRequestsService viewLeaveRequestsService;
 	private final OverTimeClaimService otClaimService;
+	private final CancelLeaveRequestService cancelLeaveRequestService;
+	private final LeaveMovementService leaveMovementService;
 
 	// Constructor Injections
 	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, 
 							MedicalLeaveApplicationService medicalLeaveApplicationService,
 							ViewLeaveRequestsService viewLeaveRequestsService,
-							OverTimeClaimService otClaimService){
+							OverTimeClaimService otClaimService,
+							LeaveMovementService leaveMovementService,
+							CancelLeaveRequestService cancelLeaveRequestService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
 		this.viewLeaveRequestsService = viewLeaveRequestsService;
 		this.otClaimService = otClaimService;
+		this.leaveMovementService = leaveMovementService;
+		this.cancelLeaveRequestService = cancelLeaveRequestService;
 	}
 
 
