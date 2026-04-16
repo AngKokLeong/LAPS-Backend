@@ -126,6 +126,9 @@ public class StaffController {
 				} else {
 					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
 				}
+				
+				ra.addFlashAttribute("successMessage", "Leave application submitted successfully!");
+				
 			} else if (leaveApplication.getType().equals(LeaveType.MEDICAL)) {
 				MedicalLeaveServiceDTO medicalLeaveServiceDTO = new MedicalLeaveServiceDTO();
 
