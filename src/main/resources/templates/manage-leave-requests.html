@@ -71,7 +71,6 @@
 
             <!-- Leave Request Cards -->
             <div class="space-y-4">
-                <!-- Pending Request 1 - John Doe -->
                 <div th:each="request : ${teamRequests}"
 				class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm"
 				th:data-status="${#strings.toUpperCase(request.status)}">
@@ -85,25 +84,33 @@
                                     <h3 th:text="${request.employeeName}" class="text-lg font-semibold text-gray-900">Name</h3>
                                     <p th:text="${request.department}" class="text-sm text-gray-500">Department</p>
                                 </div>
-								<div class="flex items-center gap-2 px-3 py-1 rounded-lg border"
-								     th:classappend="${(request.status == 'APPLIED' || request.status == 'UPDATED') ? 'bg-yellow-50 border-yellow-200' : 
-								                     (request.status == 'APPROVED' ? 'bg-green-50 border-green-200' : 
-								                     (request.status == 'REJECTED' ? 'bg-red-50 border-red-200' : 'bg-gray-100 border-gray-300'))}">
+								
+								<div th:switch="${#strings.toString(request.status)}">
 								    
-								    <span class="text-sm font-bold" 
-								          th:classappend="${(request.status == 'APPLIED' || request.status == 'UPDATED') ? 'text-yellow-700' : 
-								                          (request.status == 'APPROVED' ? 'text-green-700' : 'text-red-700')}">
-								        <span th:if="${request.status == 'APPLIED' || request.status == 'UPDATED'}">PENDING</span>
-								        <span th:if="${request.status == 'APPROVED'}">APPROVED</span>
-								        <span th:if="${request.status == 'REJECTED'}">REJECTED</span>
-								        <span th:if="${request.status == 'CANCELLED' || request.status == 'ARCHIVED'}">INACTIVE</span>
-								    </span>
+								    <div th:case="'APPLIED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-yellow-50 border-yellow-200">
+								        <span class="text-sm font-bold text-yellow-700">PENDING</span>
+								        <span class="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded-full font-black">APPLIED</span>
+								    </div>
 
-								    <span th:if="${request.status == 'UPDATED'}" 
-								          class="bg-yellow-200 text-yellow-900 text-[10px] px-1.5 py-0.5 rounded-full font-black">
-								        UPDATED
-								    </span>
+								    <div th:case="'UPDATED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-yellow-50 border-yellow-200">
+								        <span class="text-sm font-bold text-yellow-700">PENDING</span>
+								        <span class="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-full font-black">UPDATED</span>
+								    </div>
+
+								    <div th:case="'APPROVED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-green-50 border-green-200">
+								        <span class="text-sm font-bold text-green-700">APPROVED</span>
+								    </div>
+
+								    <div th:case="'REJECTED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-red-50 border-red-200">
+								        <span class="text-sm font-bold text-red-700">REJECTED</span>
+								    </div>
+
+								    <div th:case="*" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-gray-50 border-gray-300">
+								        <span class="text-sm font-bold text-gray-500">INACTIVE</span>
+								        <span th:text="${request.status}" class="text-[10px] text-gray-400 uppercase">Status</span>
+								    </div>
 								</div>
+								
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
