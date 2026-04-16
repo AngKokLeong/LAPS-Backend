@@ -5,14 +5,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
@@ -21,6 +21,11 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.constan
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.constant.LeaveRequestTypeConstant;
 import iss.nus.edu.sg.leave_application_processing_system.controller.helper.LeaveRequestUtilities;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.AnnualLeaveApplicationService;
@@ -33,10 +38,14 @@ public class StaffController {
 	
 	private final AnnualLeaveApplicationService annualLeaveApplicationService;
 	private final MedicalLeaveApplicationService medicalLeaveApplicationService;
+	private final OverTimeClaimService otClaimService;
 
-	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, MedicalLeaveApplicationService medicalLeaveApplicationService){
+	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService,
+			MedicalLeaveApplicationService medicalLeaveApplicationService,
+			OverTimeClaimService otClaimService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
+		this.otClaimService = otClaimService;
 	}
 
 
@@ -210,12 +219,33 @@ public class StaffController {
 	}
 	
 	@GetMapping ("/submit-ot-claim") 
-	public String submitOvertimeClaim(HttpSession session) {
+	public String submitOvertimeClaim(HttpSession session, Model model) {
 		String role = (String) session.getAttribute("userRole");
 		
 		if (role == null || role.toString().isEmpty()) return "redirect:/";
 		
+		model.addAttribute("otClaim", new OverTimeClaim());
+		
 		return "submit-ot-claim";
+	}
+	
+	@PostMapping("/submit-ot-claim")
+	public String processOTSubmission(@ModelAttribute OverTimeClaim otClaim,
+			HttpSession session ,RedirectAttributes redirectAttrs) {
+
+		Long employeeId = (Long) session.getAttribute("id");
+
+		// Create a "dummy" employee with just the ID
+	    Employee employee = new Employee();
+	    employee.setId(employeeId); 
+	    
+	    otClaim.setEmployee(employee);
+
+	    otClaimService.submitOTClaim(otClaim);
+
+	    redirectAttrs.addFlashAttribute("successMessage", "Your OT claim was submitted successfully.");
+
+		return "redirect:/staff/submit-ot-claim";
 	}
 
 }
