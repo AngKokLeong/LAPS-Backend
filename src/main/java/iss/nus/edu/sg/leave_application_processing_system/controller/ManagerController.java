@@ -1,6 +1,7 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,12 +16,15 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.Control
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApprovalControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.OTClaimControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.TeamLeaveHistoryControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.TeamLeaveHistoryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.TeamManagementService;
+import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewTeamLeaveHistoryService;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -29,14 +33,16 @@ public class ManagerController {
 
 	private final TeamManagementService teamMngService;
 	private final OverTimeClaimService overTimeClaimService;
+	private final ViewTeamLeaveHistoryService viewTeamLeaveHistoryService;
 
-	public ManagerController(TeamManagementService teamMngService, OverTimeClaimService overTimeClaimService) {
+	public ManagerController(TeamManagementService teamMngService, OverTimeClaimService overTimeClaimService, ViewTeamLeaveHistoryService viewTeamLeaveHistoryService) {
 		this.teamMngService = teamMngService;
 		this.overTimeClaimService = overTimeClaimService;
+		this.viewTeamLeaveHistoryService = viewTeamLeaveHistoryService;
 	}
 
 	@GetMapping("/team-leave-history")
-	public String teamLeaveHistory(HttpSession session) {
+	public String teamLeaveHistory(Model model, HttpSession session) {
 
 		String extractedRoleData = (String) session.getAttribute("userRole");
 
@@ -48,6 +54,19 @@ public class ManagerController {
 		if (!role.equals(Role.MANAGER)) {
 			return "redirect:/staff"; // Send them home if they aren't a manager
 		}
+
+		// use the current employeeId to find all subordinates' leave records
+		Long managerId = (Long) session.getAttribute("id");
+		TeamLeaveHistoryServiceDTO teamLeaveHistoryService = new TeamLeaveHistoryServiceDTO();
+		teamLeaveHistoryService.setEmployeeId(managerId);
+
+		List<ControllerDTO> subordinateLeaveRecords = viewTeamLeaveHistoryService.retrieveCurrentSubordinateLeaveRecords(teamLeaveHistoryService);
+
+		List<TeamLeaveHistoryControllerDTO> subordinateLeaveHistory = subordinateLeaveRecords.stream()
+			.map(dto -> (TeamLeaveHistoryControllerDTO) dto.getAllAttribute())
+			.collect(Collectors.toList());
+
+		model.addAttribute("subordinateLeaveHistory", subordinateLeaveHistory);
 
 		return "team-leave-history";
 	}
