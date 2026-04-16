@@ -36,9 +36,10 @@ public class TeamManagementService implements ManagerService {
 	private final LeaveEntitlementRepository lEntitlementRepo;
 	
 	public TeamManagementService(OverTimeClaimRepository otClaimRepo,
-			LeaveApplicationRepository laRepo) {
+			LeaveApplicationRepository laRepo, LeaveEntitlementRepository lEntitlementRepo) {
 		this.otClaimRepo = otClaimRepo;
 		this.laRepo = laRepo;
+		this.lEntitlementRepo = lEntitlementRepo;
 	}
 	
 

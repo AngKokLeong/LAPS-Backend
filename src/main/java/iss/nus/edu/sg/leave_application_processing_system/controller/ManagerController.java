@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +30,7 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQue
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.TeamLeaveHistoryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.TeamManagementService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewTeamLeaveHistoryService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -130,82 +133,53 @@ public class ManagerController {
 	}
 
 	@PostMapping("/leave/{id}/approve")
+	@PreAuthorize("hasRole('MANAGER')")
 	public String approveLeave(@PathVariable Long id, @RequestParam(required = false) String remarks,
-			RedirectAttributes ra, HttpSession session) {
+			@AuthenticationPrincipal ApplicationUserDetails userDetails, RedirectAttributes ra) {
+		
+		try {
+			Long currentManagerId = userDetails.getEmployee().getId();
+			LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(id, "APPROVE", currentManagerId);
+			requestDto.setManagerRemarks(remarks);
 
-		// check session role
-		String extractedRoleData = (String) session.getAttribute("userRole");
+			LeaveApprovalControllerDTO result = (LeaveApprovalControllerDTO) teamMngService.processApproval(requestDto);
 
-		if (extractedRoleData == null || extractedRoleData.toString().isEmpty())
-			return "redirect:/";
-
-		Role role = Role.valueOf(extractedRoleData);
-
-		if (!role.equals(Role.MANAGER)) {
-			return "redirect:/staff"; // Send them home if they aren't a manager
-		}
-
-		// Create ServiceDTO
-		// Later, we need to get the current manager's ID from the session/security
-		// context
-		Long currentManagerId = 1L;
-		LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(id, "APPROVE", currentManagerId);
-
-		// Optional: Add the comment if your DTO supports it
-		requestDto.setManagerRemarks(remarks);
-
-		// Call the Service
-		// The service returns a LeaveApprovalControllerDTO
-		LeaveApprovalControllerDTO result = (LeaveApprovalControllerDTO) teamMngService.processApproval(requestDto);
-
-		// 3. Handle the result and prepare feedback for the UI
-		if (result.isSuccess()) {
 			ra.addFlashAttribute("successMessage", result.getMessage());
-		} else {
-			ra.addFlashAttribute("errorMessage", "Failed to process leave: " + result.getMessage());
+		} catch (IllegalArgumentException | EntityNotFoundException e) {
+			// The Service has already rolled back! Now we just inform the user.
+			ra.addFlashAttribute("errorMessage", e.getMessage());
+		} catch (Exception e) {
+			ra.addFlashAttribute("errorMessage", "A system error occurred. Please try again.");
 		}
 
-		// 4. Redirect back to the pending list page
 		return "redirect:/manager/manage-leave-requests";
 	}
 
 	@PostMapping("/leave/{id}/reject")
+	@PreAuthorize("hasRole('MANAGER')")
 	public String rejectLeave(@PathVariable Long id, @RequestParam(required = false) String remarks,
-			RedirectAttributes ra,
-			HttpSession session) {
+			@AuthenticationPrincipal ApplicationUserDetails userDetails, RedirectAttributes ra) {
 
-		// check session role
-		String extractedRoleData = (String) session.getAttribute("userRole");
+		try {
+	        // Mandatory Validation for Rejection
+	        if (remarks == null || remarks.isBlank()) {
+	            ra.addFlashAttribute("errorMessage", "A reason is required to reject a leave request.");
+	            return "redirect:/manager/manage-leave-requests";
+	        }
 
-		if (extractedRoleData == null || extractedRoleData.toString().isEmpty())
-			return "redirect:/";
+	        Long currentManagerId = userDetails.getEmployee().getId();
+	        LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(id, "REJECT", currentManagerId);
+	        requestDto.setManagerRemarks(remarks);
 
-		Role role = Role.valueOf(extractedRoleData);
+	        LeaveApprovalControllerDTO result = (LeaveApprovalControllerDTO) teamMngService.processApproval(requestDto);
 
-		if (!role.equals(Role.MANAGER)) {
-			return "redirect:/staff"; // Send them home if they aren't a manager
-		}
+	        ra.addFlashAttribute("successMessage", result.getMessage());
 
-		// Extra safety check in case JS validation is bypassed
-		if (remarks == null || remarks.isBlank()) {
-			ra.addFlashAttribute("errorMessage", "Remarks are required for rejection.");
-			return "redirect:/manager//manage-leave-requests";
-		}
-
-		// Create ServiceDTO
-		// Later, we need to get the current manager's ID from the session/security
-		// context
-		Long currentManagerId = 1L;
-		LeaveApprovalServiceDTO requestDto = new LeaveApprovalServiceDTO(id, "REJECT", currentManagerId);
-		requestDto.setManagerRemarks(remarks);
-
-		LeaveApprovalControllerDTO result = (LeaveApprovalControllerDTO) teamMngService.processApproval(requestDto);
-
-		if (result.isSuccess()) {
-			ra.addFlashAttribute("successMessage", result.getMessage());
-		} else {
-			ra.addFlashAttribute("errorMessage", "Failed to reject leave: " + result.getMessage());
-		}
+	    } catch (RuntimeException e) {
+	        ra.addFlashAttribute("errorMessage", "Could not reject request: " + e.getMessage());
+	    } catch (Exception e) {
+	        ra.addFlashAttribute("errorMessage", "An internal error occurred. Please contact IT support.");
+	    }
 
 		return "redirect:/manager/manage-leave-requests";
 	}
