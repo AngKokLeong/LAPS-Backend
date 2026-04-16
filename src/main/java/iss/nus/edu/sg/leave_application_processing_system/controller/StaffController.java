@@ -27,6 +27,7 @@ import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.service.LeaveBalanceService;
 import iss.nus.edu.sg.leave_application_processing_system.service.LeaveMovementService;
 import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
@@ -46,18 +47,21 @@ public class StaffController {
 	private final ViewLeaveRequestsService viewLeaveRequestsService;
 	private final OverTimeClaimService otClaimService;
 	private final LeaveMovementService leaveMovementService;
+	private final LeaveBalanceService balanceService;
 
 	// Constructor Injections
 	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, 
 							MedicalLeaveApplicationService medicalLeaveApplicationService,
 							ViewLeaveRequestsService viewLeaveRequestsService,
 							OverTimeClaimService otClaimService,
-							LeaveMovementService leaveMovementService){
+							LeaveMovementService leaveMovementService,
+							LeaveBalanceService balanceService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
 		this.viewLeaveRequestsService = viewLeaveRequestsService;
 		this.otClaimService = otClaimService;
 		this.leaveMovementService = leaveMovementService;
+		this.balanceService = balanceService;
 	}
 
 
@@ -77,6 +81,10 @@ public class StaffController {
 		Long userId = (Long) session.getAttribute("id");
 		
 		if (role == null || role.toString().isEmpty()) return "redirect:/";
+		
+		model.addAttribute("annualBalance", balanceService.getAnnualBalance(userId)); 
+	    model.addAttribute("medicalBalance", balanceService.getMedicalBalance(userId));
+	    model.addAttribute("compBalance", balanceService.getCompBalance(userId));
 		
 		model.addAttribute("leaveApplication", new LeaveApplicationControllerDTO());
 
