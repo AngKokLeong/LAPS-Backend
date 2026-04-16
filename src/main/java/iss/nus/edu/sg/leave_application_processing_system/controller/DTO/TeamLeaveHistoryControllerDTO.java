@@ -16,6 +16,7 @@ public class TeamLeaveHistoryControllerDTO implements ControllerDTO {
 
     private int numberOfLeaveDay;
     private LeaveStatus leaveStatus;
+    private String leaveDuration;
     private String reviewBy;
     private LocalDate leaveRequestUpdatedDate;
 
@@ -84,6 +85,14 @@ public class TeamLeaveHistoryControllerDTO implements ControllerDTO {
 
     public void setLeaveStatus(LeaveStatus leaveStatus) {
         this.leaveStatus = leaveStatus;
+    }
+
+    public String getLeaveDuration() {
+        return leaveDuration;
+    }
+
+    public void setLeaveDuration(String leaveDuration) {
+        this.leaveDuration = leaveDuration;
     }
 
     public String getReviewBy() {
