@@ -31,9 +31,11 @@ import iss.nus.edu.sg.leave_application_processing_system.service.LeaveBalanceSe
 import iss.nus.edu.sg.leave_application_processing_system.service.LeaveMovementService;
 import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.CompensationLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.AnnualLeaveApplicationService;
+import iss.nus.edu.sg.leave_application_processing_system.service.implementation.CompensationLeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.MedicalLeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewLeaveRequestsService;
 import jakarta.servlet.http.HttpSession;
@@ -48,6 +50,7 @@ public class StaffController {
 	private final OverTimeClaimService otClaimService;
 	private final LeaveMovementService leaveMovementService;
 	private final LeaveBalanceService balanceService;
+	private final CompensationLeaveApplicationService compService;
 
 	// Constructor Injections
 	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, 
@@ -55,13 +58,15 @@ public class StaffController {
 							ViewLeaveRequestsService viewLeaveRequestsService,
 							OverTimeClaimService otClaimService,
 							LeaveMovementService leaveMovementService,
-							LeaveBalanceService balanceService){
+							LeaveBalanceService balanceService,
+							CompensationLeaveApplicationService compService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
 		this.viewLeaveRequestsService = viewLeaveRequestsService;
 		this.otClaimService = otClaimService;
 		this.leaveMovementService = leaveMovementService;
 		this.balanceService = balanceService;
+		this.compService = compService;
 	}
 
 
@@ -152,7 +157,24 @@ public class StaffController {
 				}
 				
 				ra.addFlashAttribute("successMessage", "Leave application submitted successfully!");
-			}
+			} else if (leaveApplication.getType().equals(LeaveType.COMPENSATION)) {
+		        CompensationLeaveServiceDTO compDTO = new CompensationLeaveServiceDTO();
+		        compDTO.setStaffId(leaveApplication.getStaffId());
+		        compDTO.setHalfDay(leaveApplication.isHalfDay());
+		        compDTO.setLeavePeriodStart(leaveApplication.getStartDate());
+		        compDTO.setLeavePeriodEnd(leaveApplication.getEndDate());
+		        compDTO.setReason(leaveApplication.getReason());
+		        compDTO.setType(leaveApplication.getType());
+
+		        ControllerDTO result = compService.submitApplication(compDTO);
+		        LeaveApplicationControllerDTO response = (LeaveApplicationControllerDTO) result.getAllAttribute();
+
+		        if (response.getApplicationResult()) {
+		            ra.addFlashAttribute("successMessage", "Compensation leave submitted successfully!");
+		        } else {
+		            ra.addFlashAttribute("errorMessage", response.getLeaveApprovalReason());
+		        }
+		    }
 		} catch (Exception e) {
 			e.printStackTrace();
 			ra.addFlashAttribute("errorMessage", "DEBUG ERROR: " + e.toString());
