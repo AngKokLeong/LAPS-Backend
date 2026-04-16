@@ -26,6 +26,12 @@
 			    <span>You have successfully logged out.</span>
 			</div>
 
+			<div th:if="${param.error}"
+			     class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center"
+			     role="alert">
+			    <span>Invalid email or password.</span>
+			</div>
+
             <form class="space-y-4" th:action="@{/authenticate/login}" th:object="${authenticationUser}" method="POST">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
