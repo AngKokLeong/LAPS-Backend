@@ -1,6 +1,5 @@
 package iss.nus.edu.sg.leave_application_processing_system.service.implementation;
 
-import iss.nus.edu.sg.leave_application_processing_system.controller.StaffController;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +40,8 @@ public class ViewLeaveRequestsService {
 			
 			LeaveRequestControllerDTO leaveRequestControllerDTO = new LeaveRequestControllerDTO();
 			
+			leaveRequestControllerDTO.setLeaveRequestId(leaveApplication.getId());
+
 			leaveRequestControllerDTO.setLeaveType(leaveApplication.getLeaveType());
 			leaveRequestControllerDTO.setLeaveStatus(leaveApplication.getLeaveStatus());
 			

@@ -5,6 +5,7 @@ import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 
 public class LeaveRequestControllerDTO implements ControllerDTO{
 
+    private Long leaveRequestId;
     private LeaveType leaveType;
     private LeaveStatus leaveStatus;
     private String leavePeriod;
@@ -176,6 +177,14 @@ public class LeaveRequestControllerDTO implements ControllerDTO{
     @Override
     public ControllerDTO getAllAttribute() {
         return this;
+    }
+
+    public Long getLeaveRequestId() {
+        return leaveRequestId;
+    }
+
+    public void setLeaveRequestId(Long leaveRequestId) {
+        this.leaveRequestId = leaveRequestId;
     }
     
     
