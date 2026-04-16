@@ -203,6 +203,37 @@ public class StaffController {
 			)
 			
 		);
+
+		leaveRequestDTOList.add(
+			new LeaveRequestControllerDTO(
+				LeaveType.ANNUAL,
+				LeaveRequestUtilities.GenerateLeavePeriod(LocalDateTime.of(2026, 4, 15, 11, 30), LocalDateTime.of(2026, 4, 17, 11,30)),
+				LeaveRequestUtilities.RetrieveDateDifferenceText(LocalDateTime.of(2026, 4, 15, 11, 30), LocalDateTime.of(2026, 4, 17, 11,30)),
+				LeaveRequestUtilities.GenerateStandardDateFormat(LocalDateTime.of(2026, 4, 01, 11, 30)),
+				"Family Vacation Trip",
+				LeaveStatus.UPDATED,
+				"",
+				null,
+				""
+			)
+			
+		);
+
+		leaveRequestDTOList.add(
+			new LeaveRequestControllerDTO(
+				LeaveType.ANNUAL,
+				LeaveRequestUtilities.GenerateLeavePeriod(LocalDateTime.of(2026, 4, 15, 11, 30), LocalDateTime.of(2026, 4, 17, 11,30)),
+				LeaveRequestUtilities.RetrieveDateDifferenceText(LocalDateTime.of(2026, 4, 15, 11, 30), LocalDateTime.of(2026, 4, 17, 11,30)),
+				LeaveRequestUtilities.GenerateStandardDateFormat(LocalDateTime.of(2026, 4, 01, 11, 30)),
+				"Family Vacation Trip",
+				LeaveStatus.CANCELLED,
+				"",
+				null,
+				""
+			)
+			
+		);
+		
 		
 		/* 
 		leaveRequestControllerDTO.add(new LeaveRequestControllerDTO(
