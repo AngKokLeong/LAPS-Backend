@@ -92,57 +92,70 @@ public class StaffController {
 	}
 
 	@PostMapping("/apply-leave")
-	public String applyLeave(@ModelAttribute LeaveApplicationControllerDTO leaveApplication,Model model, HttpSession session){
+	public String applyLeave(@ModelAttribute LeaveApplicationControllerDTO leaveApplication, Model model,
+			HttpSession session, RedirectAttributes ra){
 
-		if (leaveApplication.getType().equals(LeaveType.ANNUAL)){
-			//call the service class
-			AnnualLeaveServiceDTO annualLeaveServiceDTO = new AnnualLeaveServiceDTO();
-			annualLeaveServiceDTO.setStaffId(leaveApplication.getStaffId());
-			annualLeaveServiceDTO.setHalfDay(leaveApplication.isHalfDay());
-			annualLeaveServiceDTO.setLeavePeriodEnd(leaveApplication.getEndDate());
-			annualLeaveServiceDTO.setLeavePeriodStart(leaveApplication.getStartDate());
+		try {
 			
-			annualLeaveServiceDTO.setReason(leaveApplication.getReason());
-			annualLeaveServiceDTO.setType(leaveApplication.getType());
-
-
-			ControllerDTO controllerDTO = annualLeaveApplicationService.submitApplication(annualLeaveServiceDTO);
-			LeaveApplicationControllerDTO leaveApplicationControllerDTO = (LeaveApplicationControllerDTO) controllerDTO.getAllAttribute();
-			//retrieve the result from the service class
-			if (leaveApplicationControllerDTO.getApplicationResult()){
-				//show success message
-				model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
-			}else{
-				model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
-			}
-		}else if(leaveApplication.getType().equals(LeaveType.MEDICAL)){
-			MedicalLeaveServiceDTO medicalLeaveServiceDTO = new MedicalLeaveServiceDTO();
-
-			medicalLeaveServiceDTO.setStaffId(leaveApplication.getStaffId());
-			medicalLeaveServiceDTO.setHalfDay(leaveApplication.isHalfDay());
-			medicalLeaveServiceDTO.setLeavePeriodEnd(leaveApplication.getEndDate());
-			medicalLeaveServiceDTO.setLeavePeriodStart(leaveApplication.getStartDate());
+			if (leaveApplication.getType() == null || 
+			        leaveApplication.getStartDate() == null || 
+			        leaveApplication.getEndDate() == null) {
+			        
+			        ra.addFlashAttribute("errorMessage", "Please fill in all fields.");
+			        return "redirect:/staff/apply-leave";
+			    }
 			
-			medicalLeaveServiceDTO.setReason(leaveApplication.getReason());
-			medicalLeaveServiceDTO.setType(leaveApplication.getType());
+			if (leaveApplication.getType().equals(LeaveType.ANNUAL)) {
+				// call the service class
+				AnnualLeaveServiceDTO annualLeaveServiceDTO = new AnnualLeaveServiceDTO();
+				annualLeaveServiceDTO.setStaffId(leaveApplication.getStaffId());
+				annualLeaveServiceDTO.setHalfDay(leaveApplication.isHalfDay());
+				annualLeaveServiceDTO.setLeavePeriodEnd(leaveApplication.getEndDate());
+				annualLeaveServiceDTO.setLeavePeriodStart(leaveApplication.getStartDate());
 
-			ControllerDTO controllerDTO = medicalLeaveApplicationService.submitApplication(medicalLeaveServiceDTO);
-			LeaveApplicationControllerDTO leaveApplicationControllerDTO = (LeaveApplicationControllerDTO) controllerDTO.getAllAttribute();
+				annualLeaveServiceDTO.setReason(leaveApplication.getReason());
+				annualLeaveServiceDTO.setType(leaveApplication.getType());
 
-			if (leaveApplicationControllerDTO.getApplicationResult()){
-				//show success message
-				model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
-			}else{
-				model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+				ControllerDTO controllerDTO = annualLeaveApplicationService.submitApplication(annualLeaveServiceDTO);
+				LeaveApplicationControllerDTO leaveApplicationControllerDTO = (LeaveApplicationControllerDTO) controllerDTO
+						.getAllAttribute();
+				// retrieve the result from the service class
+				if (leaveApplicationControllerDTO.getApplicationResult()) {
+					// show success message
+					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+				} else {
+					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+				}
+			} else if (leaveApplication.getType().equals(LeaveType.MEDICAL)) {
+				MedicalLeaveServiceDTO medicalLeaveServiceDTO = new MedicalLeaveServiceDTO();
+
+				medicalLeaveServiceDTO.setStaffId(leaveApplication.getStaffId());
+				medicalLeaveServiceDTO.setHalfDay(leaveApplication.isHalfDay());
+				medicalLeaveServiceDTO.setLeavePeriodEnd(leaveApplication.getEndDate());
+				medicalLeaveServiceDTO.setLeavePeriodStart(leaveApplication.getStartDate());
+
+				medicalLeaveServiceDTO.setReason(leaveApplication.getReason());
+				medicalLeaveServiceDTO.setType(leaveApplication.getType());
+
+				ControllerDTO controllerDTO = medicalLeaveApplicationService.submitApplication(medicalLeaveServiceDTO);
+				LeaveApplicationControllerDTO leaveApplicationControllerDTO = (LeaveApplicationControllerDTO) controllerDTO
+						.getAllAttribute();
+
+				if (leaveApplicationControllerDTO.getApplicationResult()) {
+					// show success message
+					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+				} else {
+					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+				}
+				
+				ra.addFlashAttribute("successMessage", "Leave application submitted successfully!");
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			ra.addFlashAttribute("errorMessage", "DEBUG ERROR: " + e.toString());
 		}
 
-
-
-
-
-
-		return "apply-leave";
+		return "redirect:/staff/apply-leave";
 
 
 	}
