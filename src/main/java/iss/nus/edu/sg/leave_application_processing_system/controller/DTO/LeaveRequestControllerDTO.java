@@ -1,16 +1,7 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
-
-
-import java.time.LocalDateTime;
-
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-
-
 
 public class LeaveRequestControllerDTO implements ControllerDTO{
 
@@ -23,8 +14,8 @@ public class LeaveRequestControllerDTO implements ControllerDTO{
     private String leaveApprover;
     private String leaveApprovalTransactionDate;
     private String leaveApprovalReason;
-
-    
+   
+    public LeaveRequestControllerDTO(){}
 
     public LeaveRequestControllerDTO(LeaveType type, String leavePeriod, String leaveDuration, String leaveAppliedOn, String reason, LeaveStatus leaveStatus, String leaveApprover, String leaveApprovalTransactionDate, String leaveApprovalReason){
         this.leaveType = type;
@@ -39,7 +30,7 @@ public class LeaveRequestControllerDTO implements ControllerDTO{
     }
 
     
-    
+        
 
 
     public String getLeavePeriod() {
