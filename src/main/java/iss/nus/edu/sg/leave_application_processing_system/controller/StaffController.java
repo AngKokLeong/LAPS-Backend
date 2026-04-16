@@ -4,6 +4,7 @@ package iss.nus.edu.sg.leave_application_processing_system.controller;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 import org.springframework.stereotype.Controller;
@@ -17,15 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.constant.LeaveRequestStatusConstant;
-import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.constant.LeaveRequestTypeConstant;
 import iss.nus.edu.sg.leave_application_processing_system.controller.helper.LeaveRequestUtilities;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.AnnualLeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.MedicalLeaveApplicationService;
+import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewLeaveRequestsService;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -34,10 +35,15 @@ public class StaffController {
 	
 	private final AnnualLeaveApplicationService annualLeaveApplicationService;
 	private final MedicalLeaveApplicationService medicalLeaveApplicationService;
+	private final ViewLeaveRequestsService viewLeaveRequestsService;
 
-	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, MedicalLeaveApplicationService medicalLeaveApplicationService){
+	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, 
+							MedicalLeaveApplicationService medicalLeaveApplicationService,
+							ViewLeaveRequestsService viewLeaveRequestsService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
+		this.viewLeaveRequestsService = viewLeaveRequestsService;
+
 	}
 
 
@@ -154,9 +160,15 @@ public class StaffController {
 
 			// Deleted
 
+		ViewLeaveRequestsServiceDTO viewLeaveRequestsServiceDTO = new ViewLeaveRequestsServiceDTO();
+		Long staffId = (Long) session.getAttribute("id");
 
-		List<LeaveRequestControllerDTO> leaveRequestControllerDTO = new ArrayList<LeaveRequestControllerDTO>();
-		
+		viewLeaveRequestsServiceDTO.setStaffId(staffId);
+
+		List<ControllerDTO> leaveRequestControllerDTO = viewLeaveRequestsService.retrieveAllLeaveRequestByEmployeeId(viewLeaveRequestsServiceDTO);
+		List<LeaveRequestControllerDTO> leaveRequestDTOList = leaveRequestControllerDTO.stream()
+			.map(dto -> (LeaveRequestControllerDTO) dto.getAllAttribute())
+			.collect(Collectors.toList());
 
 		/*
 		LeaveRequestTypeConstant.ANNUAL_LEAVE,
@@ -169,7 +181,7 @@ public class StaffController {
 		*/
 
 		
-		leaveRequestControllerDTO.add(
+		leaveRequestDTOList.add(
 			new LeaveRequestControllerDTO(
 				LeaveType.ANNUAL,
 				LeaveRequestUtilities.GenerateLeavePeriod(LocalDateTime.of(2026, 4, 15, 11, 30), LocalDateTime.of(2026, 4, 17, 11,30)),
@@ -183,21 +195,8 @@ public class StaffController {
 			)
 			
 		);
+		
 		/* 
-		leaveRequestControllerDTO.add(
-			new LeaveRequestControllerDTO(
-				LeaveRequestTypeConstant.MEDICAL_LEAVE, 
-				LeaveRequestUtilities.GenerateLeavePeriod(LocalDateTime.of(2026, 3, 20, 11, 30), LocalDateTime.of(2026, 3, 22, 11,30)),
-				LeaveRequestUtilities.RetrieveDateDifferenceText(LocalDateTime.of(2026, 3, 20, 11, 30), LocalDateTime.of(2026, 3, 22, 11,30)),
-				LeaveRequestUtilities.GenerateStandardDateFormat(LocalDateTime.of(2026, 3, 22, 11, 30)),
-				"Flu and Fever, doctor advised rest",
-				LeaveRequestStatusConstant.APPROVED,
-				"Sarah",
-				LeaveRequestUtilities.GenerateLeaveApprovalDate(LocalDateTime.of(2026, 3, 19, 11, 30)),
-				LeaveRequestUtilities.GenerateLeaveApprovalStatement("Sarah")
-			)
-		);
-
 		leaveRequestControllerDTO.add(new LeaveRequestControllerDTO(
 				LeaveRequestTypeConstant.COMPENSATION_LEAVE, 
 				LeaveRequestUtilities.GenerateLeavePeriod(LocalDateTime.of(2026, 2, 10, 11, 30), LocalDateTime.of(2026, 2, 11, 11,30)),
@@ -225,7 +224,7 @@ public class StaffController {
 		);
 		*/
 
-		model.addAttribute("leaveRequestList", leaveRequestControllerDTO);
+		model.addAttribute("leaveRequestList", leaveRequestDTOList);
 
 		return "my-leave-requests";
 	}
