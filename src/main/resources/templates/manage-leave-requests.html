@@ -23,16 +23,16 @@
                         <p th:text="${pendingCount}" class="text-3xl font-semibold text-gray-900 mt-1">count</p>
                     </div>
                     <div class="flex gap-2">
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white">
+                        <button class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white" data-filter="all">
                             All
                         </button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
+                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="pending">
                             Pending
                         </button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
+                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="approved">
                             Approved
                         </button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
+                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="rejected">
                             Rejected
                         </button>
                     </div>
@@ -69,7 +69,9 @@
             <!-- Leave Request Cards -->
             <div class="space-y-4">
                 <!-- Pending Request 1 - John Doe -->
-                <div th:each="request : ${teamRequests}" class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm">
+                <div th:each="request : ${teamRequests}"
+					th:data-status="${request.status.toLowerCase()}"
+					class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm">
                     <div class="flex items-start gap-4 mb-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white font-semibold text-lg">JD</span>
@@ -99,7 +101,7 @@
 								    <span th:text="${request.status}" 
 								          class="text-sm font-medium"
 								          th:classappend="${request.status == 'APPROVED' ? 'text-green-700' : 
-								                          (request.status == 'Rejected' ? 'text-red-700' : 'text-yellow-700')}">
+								                          (request.status == 'REJECTED' ? 'text-red-700' : 'text-yellow-700')}">
 								        Status
 								    </span>
 								</div>
@@ -193,71 +195,115 @@
 							
                         </div>
                     </div>
-                </div>
-
-
-            </div>
+				</div>
+				
+				<div id="no-requests-msg" class="hidden py-12 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+					<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 text-gray-400 mb-4">
+						<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+							</path>
+						</svg>
+					</div>
+					<h3 class="text-lg font-medium text-gray-900">No requests found</h3>
+					<p class="text-gray-500">There are no leave applications matching this filter.</p>
+				</div>
+				
+			</div>
         </main>
     </div>
 
 	<script>
-	    /* --- 1. MODAL LOGIC (Functional) --- */
+		/* --- 1. MODAL LOGIC (Functional) --- */
 		function openModal(id, action) {
-		    const modal = document.getElementById('modal-' + id);
-		    const form = document.getElementById('form-' + id);
-		    const actionText = document.getElementById('action-text-' + id);
-		    const remarksArea = document.getElementById('remarks-' + id);
+			const modal = document.getElementById('modal-' + id);
+			const form = document.getElementById('form-' + id);
+			const actionText = document.getElementById('action-text-' + id);
+			const remarksArea = document.getElementById('remarks-' + id);
 
-		    if (modal && form) {
-		        modal.classList.remove('hidden');
-		        
-		        // Convert to lowercase once to make comparisons easier
-		        const normalizedAction = action.toLowerCase(); // will be 'approve' or 'reject'
-		        
-		        actionText.innerText = normalizedAction;
-		        
-		        // Set the URL: /manager/leave/101/approve or /manager/leave/101/reject
-		        form.action = '/manager/leave/' + id + '/' + normalizedAction;
+			if (modal && form) {
+				modal.classList.remove('hidden');
 
-		        // Handle the "Required" requirement for rejection
-		        if (normalizedAction === 'reject') {
-		            remarksArea.required = true;
-		            remarksArea.placeholder = "Reason for rejection (Required)...";
-		        } else {
-		            remarksArea.required = false;
-		            remarksArea.placeholder = "Optional remarks...";
-		        }
-		    }
+				// Convert to lowercase once to make comparisons easier
+				const normalizedAction = action.toLowerCase(); // will be 'approve' or 'reject'
+
+				actionText.innerText = normalizedAction;
+
+				// Set the URL: /manager/leave/101/approve or /manager/leave/101/reject
+				form.action = '/manager/leave/' + id + '/' + normalizedAction;
+
+				// Handle the "Required" requirement for rejection
+				if (normalizedAction === 'reject') {
+					remarksArea.required = true;
+					remarksArea.placeholder = "Reason for rejection (Required)...";
+				} else {
+					remarksArea.required = false;
+					remarksArea.placeholder = "Optional remarks...";
+				}
+			}
 		}
 
-	    function closeModal(id) {
-	        const modal = document.getElementById('modal-' + id);
-	        if (modal) {
-	            modal.classList.add('hidden');
-	        }
-	    }
+		function closeModal(id) {
+			const modal = document.getElementById('modal-' + id);
+			if (modal) {
+				modal.classList.add('hidden');
+			}
+		}
 
-	    /* --- 2. FILTER BUTTONS (Visual Effects) --- */
-	    document.addEventListener('DOMContentLoaded', function() {
-	        document.querySelectorAll('.filter-btn').forEach(btn => {
-	            btn.addEventListener('click', function() {
-	                // Remove active state colors from all buttons
-	                document.querySelectorAll('.filter-btn').forEach(b => {
-	                    b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'text-white');
-	                    b.classList.add('bg-gray-100', 'text-gray-700');
-	                });
+		/* --- 2. FILTER BUTTONS (Visibility and Visual Effects) --- */
+		document.addEventListener('DOMContentLoaded', function () {
+			const filterButtons = document.querySelectorAll('.filter-btn');
+			const cards = document.querySelectorAll('.leave-card'); // Ensure your cards have this class!
+			const noMsg = document.getElementById('no-requests-msg');
 
-	                // Add active state color to the clicked button
-	                this.classList.remove('bg-gray-100', 'text-gray-700');
-	                const filterText = this.textContent.trim().toLowerCase();
-	                
-	                if (filterText === 'all') this.classList.add('bg-blue-600', 'text-white');
-	                else if (filterText === 'pending') this.classList.add('bg-yellow-600', 'text-white');
-	                else if (filterText === 'approved') this.classList.add('bg-green-600', 'text-white');
-	                else if (filterText === 'rejected') this.classList.add('bg-red-600', 'text-white');
-	            });
-	        });
-	    });
+			filterButtons.forEach(btn => {
+				btn.addEventListener('click', function () {
+					// 1. Visual toggle: Clear all active colors
+					filterButtons.forEach(b => {
+						b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'text-white');
+						b.classList.add('bg-gray-100', 'text-gray-700');
+					});
+
+					// 2. Get filter value from data attribute
+					const filterValue = this.getAttribute('data-filter');
+
+					// 3. Set active color for clicked button
+					this.classList.remove('bg-gray-100', 'text-gray-700');
+					if (filterValue === 'all') this.classList.add('bg-blue-600', 'text-white');
+					else if (filterValue === 'pending') this.classList.add('bg-yellow-600', 'text-white');
+					else if (filterValue === 'approved') this.classList.add('bg-green-600', 'text-white');
+					else if (filterValue === 'rejected') this.classList.add('bg-red-600', 'text-white');
+
+					// 4. Filtering Logic
+					cards.forEach(card => {
+						const cardStatus = card.getAttribute('data-status'); // Reading from th:data-status
+						if (filterValue === 'all' || cardStatus === filterValue) {
+							card.classList.remove('hidden');
+						} else {
+							card.classList.add('hidden');
+						}
+					});
+
+					// 5. Toggle Empty State Message (Inside click listener)
+					updateEmptyState(noMsg);
+				});
+			});
+
+			// 6. Run once on page load to check if the initial list is empty
+			updateEmptyState(noMsg);
+		});
+
+		// Helper function to avoid repeating code
+		function updateEmptyState(noMsg) {
+			if (noMsg) {
+				const visibleCards = document.querySelectorAll('.leave-card:not(.hidden)');
+				if (visibleCards.length === 0) {
+					noMsg.classList.remove('hidden');
+				} else {
+					noMsg.classList.add('hidden');
+				}
+			}
+		}
 	</script>
 </body>
 </html>
