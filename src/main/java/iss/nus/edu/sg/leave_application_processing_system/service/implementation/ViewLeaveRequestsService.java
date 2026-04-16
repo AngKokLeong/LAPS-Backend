@@ -48,6 +48,9 @@ public class ViewLeaveRequestsService {
 			String leavePeriod = leaveApplication.getStartDate().getMonth().name() + " " + leaveApplication.getStartDate().getDayOfMonth() + " - " + leaveApplication.getEndDate().getMonth().name() + " " + leaveApplication.getEndDate().getDayOfMonth() + " " + leaveApplication.getEndDate().getYear();
 			leaveRequestControllerDTO.setLeavePeriod(leavePeriod);
 			
+			leaveRequestControllerDTO.setStartDate(leaveApplication.getStartDate());
+			leaveRequestControllerDTO.setEndDate(leaveApplication.getEndDate());
+
 			long fullDays = java.time.temporal.ChronoUnit.DAYS.between(leaveApplication.getStartDate(), leaveApplication.getEndDate()) + 1;
 			double duration = leaveApplication.isHalfDay() ? fullDays - 0.5 : fullDays;
 			String leaveDuration = duration % 1 == 0 ? (int)duration + " days" : duration + " days";
@@ -58,6 +61,8 @@ public class ViewLeaveRequestsService {
 			leaveRequestControllerDTO.setLeaveAppliedOn(leaveAppliedOn);
 			
 			leaveRequestControllerDTO.setReason(leaveApplication.getReason());
+			
+			
 			
 			if (leaveApplication.getEmployee().getManager() != null) {
 				leaveRequestControllerDTO.setLeaveApprover(leaveApplication.getEmployee().getManager().getName());
