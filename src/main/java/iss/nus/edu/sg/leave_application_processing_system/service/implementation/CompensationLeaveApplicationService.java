@@ -68,9 +68,11 @@ public class CompensationLeaveApplicationService implements LeaveApplicationServ
                 newApp.setStartDate(dto.getLeavePeriodStart());
                 newApp.setEndDate(dto.getLeavePeriodEnd());
                 newApp.setLeaveType(LeaveType.COMPENSATION);
+                newApp.setLedger(ledger);
                 newApp.setLeaveStatus(LeaveStatus.APPLIED);
                 newApp.setReason(dto.getReason());
                 newApp.setHalfDay(dto.isHalfDay());
+                newApp.setAppliedDate(LocalDate.now());
                 
                 laRepo.save(newApp);
                 

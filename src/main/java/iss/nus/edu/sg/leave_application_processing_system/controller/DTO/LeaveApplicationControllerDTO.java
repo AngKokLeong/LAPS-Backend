@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedger;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
 
 
@@ -16,6 +17,7 @@ public class LeaveApplicationControllerDTO implements ControllerDTO{
     private LeaveType type;
     private Long staffId;
     private LeaveEntitlement leaveEntitlement;
+    private CompensationLedger compLedger;
     private LocalDate startDate;
     private LocalDate endDate;
 
@@ -140,6 +142,13 @@ public class LeaveApplicationControllerDTO implements ControllerDTO{
         this.leaveEntitlement = leaveEntitlement;
     }
 
+    public CompensationLedger getCompLedger() {
+    	return compLedger;
+    }
+    
+    public void setCompLedger(CompensationLedger compLedger) {
+    	this.compLedger = compLedger;
+    }
 
 
 
