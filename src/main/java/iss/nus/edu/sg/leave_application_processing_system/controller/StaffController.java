@@ -2,29 +2,32 @@ package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveMovementDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.helper.LeaveRequestUtilities;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.LeaveMovementService;
 import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
@@ -42,16 +45,19 @@ public class StaffController {
 	private final MedicalLeaveApplicationService medicalLeaveApplicationService;
 	private final ViewLeaveRequestsService viewLeaveRequestsService;
 	private final OverTimeClaimService otClaimService;
+	private final LeaveMovementService leaveMovementService;
 
-
+	// Constructor Injections
 	public StaffController(AnnualLeaveApplicationService annualLeaveApplicationService, 
 							MedicalLeaveApplicationService medicalLeaveApplicationService,
 							ViewLeaveRequestsService viewLeaveRequestsService,
-							OverTimeClaimService otClaimService){
+							OverTimeClaimService otClaimService,
+							LeaveMovementService leaveMovementService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
 		this.viewLeaveRequestsService = viewLeaveRequestsService;
 		this.otClaimService = otClaimService;
+		this.leaveMovementService = leaveMovementService;
 	}
 
 
@@ -268,14 +274,36 @@ public class StaffController {
 		return "my-leave-requests";
 	}
 	
-	@GetMapping ("/movement-register") 
-	public String movementRegister(HttpSession session) {
-		String role = (String) session.getAttribute("userRole");
-		
-		if (role == null || role.toString().isEmpty()) return "redirect:/";
-		
-		return "movement-register";
-	}
+
+@GetMapping("/movement-register")
+public String movementRegister(
+        @RequestParam(required = false) String month,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "3") int size, // Records of 3 per page, can be changed
+        Model model,
+        HttpSession session) {
+
+    String role = (String) session.getAttribute("userRole");
+    if (role == null || role.isEmpty()) {
+        return "redirect:/";
+    }
+
+    YearMonth selectedMonth = (month == null || month.isEmpty())
+            ? YearMonth.now()
+            : YearMonth.parse(month);
+
+    Pageable pageable = PageRequest.of(page, size);
+
+    Page<LeaveMovementDTO> leavePage =
+            leaveMovementService.getApprovedLeaveForMonth(selectedMonth, pageable);
+
+    model.addAttribute("leavePage", leavePage);
+    model.addAttribute("selectedMonth", selectedMonth);
+    model.addAttribute("pageSize", size);
+
+    return "movement-register";
+}
+
 	
 	@GetMapping ("/submit-ot-claim") 
 	public String submitOvertimeClaim(HttpSession session, Model model) {
