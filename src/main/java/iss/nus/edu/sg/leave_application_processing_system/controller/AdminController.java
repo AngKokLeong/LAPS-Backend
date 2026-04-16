@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
@@ -103,7 +103,7 @@ public class AdminController {
 	
 	
 	@PostMapping("/employee-management/add-employee")
-	public String saveNewEmployee (@ModelAttribute Employee employee, HttpSession session) {
+	public String saveNewEmployee (@ModelAttribute Employee employee, HttpSession session, RedirectAttributes redirectAttrs) {
 
 		String extractedRoleData = (String) session.getAttribute("userRole");
 		
@@ -116,7 +116,7 @@ public class AdminController {
 	    }
 
 		employeeService.save(employee);
-		
+		redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
 		return "employee-management";
 	}
 
