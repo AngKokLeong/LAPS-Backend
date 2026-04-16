@@ -22,20 +22,23 @@
                         <p class="text-sm text-gray-600">Pending Approvals</p>
                         <p th:text="${pendingCount}" class="text-3xl font-semibold text-gray-900 mt-1">count</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white">
-                            All
-                        </button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
-                            Pending
-                        </button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
-                            Approved
-                        </button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
-                            Rejected
-                        </button>
-                    </div>
+					<div class="flex gap-2 flex-wrap">
+					    <button class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white" data-filter="all">
+					        All
+					    </button>
+					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="pending">
+					        Pending
+					    </button>
+					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="approved">
+					        Approved
+					    </button>
+					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="rejected">
+					        Rejected
+					    </button>
+					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="inactive">
+					        Inactive
+					    </button>
+					</div>
                 </div>
             </div>
 			
@@ -81,26 +84,22 @@
                                     <p th:text="${request.department}" class="text-sm text-gray-500">Department</p>
                                 </div>
 								<div class="flex items-center gap-2 px-3 py-1 rounded-lg border"
-								     th:classappend="${request.status == 'APPROVED' ? 'bg-green-50 border-green-200' : 
-								                     (request.status == 'REJECTED' ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200')}">
+								     th:classappend="${(request.status == 'APPLIED' || request.status == 'UPDATED') ? 'bg-yellow-50 border-yellow-200' : 
+								                     (request.status == 'APPROVED' ? 'bg-green-50 border-green-200' : 
+								                     (request.status == 'REJECTED' ? 'bg-red-50 border-red-200' : 'bg-gray-100 border-gray-300'))}">
 								    
-								    <svg class="w-4 h-4" 
-								         th:classappend="${request.status == 'APPROVED' ? 'text-green-600' : 
-								                         (request.status == 'REJECTED' ? 'text-red-600' : 'text-yellow-600')}"
-								         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								        
-								        <path th:if="${request.status == 'APPROVED'}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-								        
-								        <path th:if="${request.status == 'REJECTED'}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-								        
-								        <path th:if="${request.status == 'PENDING'}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-								    </svg>
+								    <span class="text-sm font-bold" 
+								          th:classappend="${(request.status == 'APPLIED' || request.status == 'UPDATED') ? 'text-yellow-700' : 
+								                          (request.status == 'APPROVED' ? 'text-green-700' : 'text-red-700')}">
+								        <span th:if="${request.status == 'APPLIED' || request.status == 'UPDATED'}">PENDING</span>
+								        <span th:if="${request.status == 'APPROVED'}">APPROVED</span>
+								        <span th:if="${request.status == 'REJECTED'}">REJECTED</span>
+								        <span th:if="${request.status == 'CANCELLED' || request.status == 'ARCHIVED'}">INACTIVE</span>
+								    </span>
 
-								    <span th:text="${request.status}" 
-								          class="text-sm font-medium"
-								          th:classappend="${request.status == 'APPROVED' ? 'text-green-700' : 
-								                          (request.status == 'Rejected' ? 'text-red-700' : 'text-yellow-700')}">
-								        Status
+								    <span th:if="${request.status == 'UPDATED'}" 
+								          class="bg-yellow-200 text-yellow-900 text-[10px] px-1.5 py-0.5 rounded-full font-black">
+								        UPDATED
 								    </span>
 								</div>
                             </div>
@@ -238,26 +237,68 @@
 	    }
 
 	    /* --- 2. FILTER BUTTONS (Visual Effects) --- */
-	    document.addEventListener('DOMContentLoaded', function() {
-	        document.querySelectorAll('.filter-btn').forEach(btn => {
-	            btn.addEventListener('click', function() {
-	                // Remove active state colors from all buttons
-	                document.querySelectorAll('.filter-btn').forEach(b => {
-	                    b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'text-white');
-	                    b.classList.add('bg-gray-100', 'text-gray-700');
-	                });
+		document.addEventListener('DOMContentLoaded', function() {
+		    // 1. Select all filter buttons and leave cards
+		    const filterButtons = document.querySelectorAll('.filter-btn');
+		    const cards = document.querySelectorAll('.leave-card');
 
-	                // Add active state color to the clicked button
-	                this.classList.remove('bg-gray-100', 'text-gray-700');
-	                const filterText = this.textContent.trim().toLowerCase();
-	                
-	                if (filterText === 'all') this.classList.add('bg-blue-600', 'text-white');
-	                else if (filterText === 'pending') this.classList.add('bg-yellow-600', 'text-white');
-	                else if (filterText === 'approved') this.classList.add('bg-green-600', 'text-white');
-	                else if (filterText === 'rejected') this.classList.add('bg-red-600', 'text-white');
-	            });
-	        });
-	    });
+		    // 2. Define our logical groups (Maps UI buttons to Database Enums)
+		    const statusGroups = {
+		        'pending':  ['APPLIED', 'UPDATED'],
+		        'approved': ['APPROVED'],
+		        'rejected': ['REJECTED'],
+		        'inactive': ['CANCELLED', 'ARCHIVED']
+		    };
+
+		    filterButtons.forEach(btn => {
+		        btn.addEventListener('click', function() {
+		            // Get the specific filter type from the clicked button
+		            const filterType = this.getAttribute('data-filter');
+
+		            // --- STEP A: Update Button Visual Styles ---
+		            filterButtons.forEach(b => {
+		                // Reset all buttons to the "inactive" gray state
+		                b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'bg-gray-600', 'text-white');
+		                b.classList.add('bg-gray-100', 'text-gray-700');
+		            });
+
+		            // Set the clicked button to its "active" color
+		            this.classList.remove('bg-gray-100', 'text-gray-700');
+		            this.classList.add('text-white');
+		            
+		            if (filterType === 'all')      this.classList.add('bg-blue-600');
+		            else if (filterType === 'pending')  this.classList.add('bg-yellow-600');
+		            else if (filterType === 'approved') this.classList.add('bg-green-600');
+		            else if (filterType === 'rejected') this.classList.add('bg-red-600');
+		            else if (filterType === 'inactive') this.classList.add('bg-gray-600');
+
+		            // --- STEP B: Filter the Leave Cards ---
+		            cards.forEach(card => {
+		                const cardStatus = card.getAttribute('data-status');
+
+		                if (filterType === 'all') {
+		                    /** * Logic: When "All" is clicked, show actionable items and history, 
+		                     * but keep Cancelled/Archived hidden so the list isn't messy.
+		                     */
+		                    if (cardStatus === 'CANCELLED' || cardStatus === 'ARCHIVED') {
+		                        card.style.display = 'none';
+		                    } else {
+		                        card.style.display = 'block';
+		                    }
+		                } else {
+		                    /** * Logic: Check if the card's status exists in the selected group array.
+		                     */
+		                    const allowedStatuses = statusGroups[filterType];
+		                    if (allowedStatuses && allowedStatuses.includes(cardStatus)) {
+		                        card.style.display = 'block';
+		                    } else {
+		                        card.style.display = 'none';
+		                    }
+		                }
+		            });
+		        });
+		    });
+		});
 	</script>
 </body>
 </html>
