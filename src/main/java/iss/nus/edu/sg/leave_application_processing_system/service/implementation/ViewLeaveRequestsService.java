@@ -1,38 +1,76 @@
 package iss.nus.edu.sg.leave_application_processing_system.service.implementation;
 
+import iss.nus.edu.sg.leave_application_processing_system.controller.StaffController;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
+
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 
 @Service
 public class ViewLeaveRequestsService {
     
-    private final LeaveApplicationRepository leaveApplicationRepository;
-    private final LeaveEntitlementRepository leaveEntitlementRepository;
 
-    public ViewLeaveRequestsService(LeaveApplicationRepository leaveApplicationRepository, LeaveEntitlementRepository leaveEntitlementRepository){
+    private final LeaveApplicationRepository leaveApplicationRepository;
+
+
+    public ViewLeaveRequestsService(LeaveApplicationRepository leaveApplicationRepository){
         this.leaveApplicationRepository = leaveApplicationRepository;
-        this.leaveEntitlementRepository = leaveEntitlementRepository;
     }
 
-    public List<ControllerDTO> retrieveAllLeaveRequest(ServiceDTO serviceDTO){
+    public List<ControllerDTO> retrieveAllLeaveRequestByEmployeeId(ServiceDTO serviceDTO){
         
         ViewLeaveRequestsServiceDTO viewLeaveRequestsServiceDTO = (ViewLeaveRequestsServiceDTO) serviceDTO.getAllAttribute();
 
         //Retrieve the data from the database
 		//need to pass the staffId into the method
         List<LeaveApplication> leaveApplicationList = leaveApplicationRepository.findByEmployeeId(viewLeaveRequestsServiceDTO.getStaffId());
-        List<LeaveEntitlement> leaveEntitlementList = leaveEntitlementRepository.findByEmployeeId(viewLeaveRequestsServiceDTO.getStaffId());
 
-        
+		List<ControllerDTO> leaveRequestControllerDTOList = new ArrayList<>();
+
+	
+		for (LeaveApplication leaveApplication : leaveApplicationList){
+			
+			LeaveRequestControllerDTO leaveRequestControllerDTO = new LeaveRequestControllerDTO();
+			
+			leaveRequestControllerDTO.setLeaveType(leaveApplication.getLeaveType());
+			leaveRequestControllerDTO.setLeaveStatus(leaveApplication.getLeaveStatus());
+			
+			String leavePeriod = leaveApplication.getStartDate().getMonth().name() + " " + leaveApplication.getStartDate().getDayOfMonth() + " - " + leaveApplication.getEndDate().getMonth().name() + " " + leaveApplication.getEndDate().getDayOfMonth() + " " + leaveApplication.getEndDate().getYear();
+			leaveRequestControllerDTO.setLeavePeriod(leavePeriod);
+			
+			long fullDays = java.time.temporal.ChronoUnit.DAYS.between(leaveApplication.getStartDate(), leaveApplication.getEndDate()) + 1;
+			double duration = leaveApplication.isHalfDay() ? fullDays - 0.5 : fullDays;
+			String leaveDuration = duration % 1 == 0 ? (int)duration + " days" : duration + " days";
+			leaveRequestControllerDTO.setLeaveDuration(leaveDuration);
+			
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+			String leaveAppliedOn = leaveApplication.getAppliedDate().format(formatter);
+			leaveRequestControllerDTO.setLeaveAppliedOn(leaveAppliedOn);
+			
+			leaveRequestControllerDTO.setReason(leaveApplication.getReason());
+			
+			if (leaveApplication.getEmployee().getManager() != null) {
+				leaveRequestControllerDTO.setLeaveApprover(leaveApplication.getEmployee().getManager().getName());
+			}
+			
+			String leaveApprovalTransactionDate = leaveApplication.getUpdatedDate() != null ? leaveApplication.getUpdatedDate().format(formatter) : "";
+			leaveRequestControllerDTO.setLeaveApprovalTransactionDate(leaveApprovalTransactionDate);
+			
+			leaveRequestControllerDTO.setLeaveApprovalReason(leaveApplication.getMgrRemarks());
+			
+			leaveRequestControllerDTOList.add(leaveRequestControllerDTO);
+			
+		}
+
 
 		// Leave Request Card Structure
 			// Leave Application Id
@@ -59,7 +97,7 @@ public class ViewLeaveRequestsService {
 			// Deleted
 
 
-        return null;
+        return leaveRequestControllerDTOList;
     }
 
 
