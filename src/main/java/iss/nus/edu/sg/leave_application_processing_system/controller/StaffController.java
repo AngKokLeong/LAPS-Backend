@@ -74,6 +74,7 @@ public class StaffController {
 	@GetMapping ("/apply-leave") 
 	public String applyLeave(Model model, HttpSession session) {
 		String role = (String) session.getAttribute("userRole");
+		Long userId = (Long) session.getAttribute("id");
 		
 		if (role == null || role.toString().isEmpty()) return "redirect:/";
 		
