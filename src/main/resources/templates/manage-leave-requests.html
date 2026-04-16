@@ -72,7 +72,9 @@
             <!-- Leave Request Cards -->
             <div class="space-y-4">
                 <!-- Pending Request 1 - John Doe -->
-                <div th:each="request : ${teamRequests}" class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm">
+                <div th:each="request : ${teamRequests}"
+				class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm"
+				th:data-status="${#strings.toUpperCase(request.status)}">
                     <div class="flex items-start gap-4 mb-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white font-semibold text-lg">JD</span>
@@ -144,7 +146,7 @@
                                 Submitted on March 30, 2026
                             </div>
 
-							<div class="flex gap-3" th:if="${request.status == 'PENDING'}">
+							<div class="flex gap-3" th:if="${request.status == 'APPLIED' || request.status == 'UPDATED'}">
 							    <button type="button" 
 							            th:onclick="'openModal(' + ${request.applicationId} + ', \'APPROVE\')'"
 							            class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm">
@@ -193,7 +195,10 @@
                         </div>
                     </div>
                 </div>
-
+				
+				<div id="no-requests-msg" class="hidden text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+				    <p class="text-gray-500">No leave requests found for this category.</p>
+				</div>
 
             </div>
         </main>
@@ -237,12 +242,12 @@
 	    }
 
 	    /* --- 2. FILTER BUTTONS (Visual Effects) --- */
-		document.addEventListener('DOMContentLoaded', function() {
-		    // 1. Select all filter buttons and leave cards
+		document.addEventListener('DOMContentLoaded', function () {
+		    const noMsg = document.getElementById('no-requests-msg');
 		    const filterButtons = document.querySelectorAll('.filter-btn');
 		    const cards = document.querySelectorAll('.leave-card');
 
-		    // 2. Define our logical groups (Maps UI buttons to Database Enums)
+		    // Logical grouping for Leave Statuses
 		    const statusGroups = {
 		        'pending':  ['APPLIED', 'UPDATED'],
 		        'approved': ['APPROVED'],
@@ -251,54 +256,66 @@
 		    };
 
 		    filterButtons.forEach(btn => {
-		        btn.addEventListener('click', function() {
-		            // Get the specific filter type from the clicked button
-		            const filterType = this.getAttribute('data-filter');
+		        btn.addEventListener('click', function () {
+		            const filterValue = this.getAttribute('data-filter');
 
-		            // --- STEP A: Update Button Visual Styles ---
+		            // 1. Visual Toggle for Buttons
 		            filterButtons.forEach(b => {
-		                // Reset all buttons to the "inactive" gray state
 		                b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'bg-gray-600', 'text-white');
 		                b.classList.add('bg-gray-100', 'text-gray-700');
 		            });
 
-		            // Set the clicked button to its "active" color
 		            this.classList.remove('bg-gray-100', 'text-gray-700');
 		            this.classList.add('text-white');
-		            
-		            if (filterType === 'all')      this.classList.add('bg-blue-600');
-		            else if (filterType === 'pending')  this.classList.add('bg-yellow-600');
-		            else if (filterType === 'approved') this.classList.add('bg-green-600');
-		            else if (filterType === 'rejected') this.classList.add('bg-red-600');
-		            else if (filterType === 'inactive') this.classList.add('bg-gray-600');
+		            if (filterValue === 'all') this.classList.add('bg-blue-600');
+		            else if (filterValue === 'pending') this.classList.add('bg-yellow-600');
+		            else if (filterValue === 'approved') this.classList.add('bg-green-600');
+		            else if (filterValue === 'rejected') this.classList.add('bg-red-600');
+		            else if (filterValue === 'inactive') this.classList.add('bg-gray-600');
 
-		            // --- STEP B: Filter the Leave Cards ---
+		            // 2. Advanced Filtering Logic (Grouping + Hiding)
 		            cards.forEach(card => {
 		                const cardStatus = card.getAttribute('data-status');
 
-		                if (filterType === 'all') {
-		                    /** * Logic: When "All" is clicked, show actionable items and history, 
-		                     * but keep Cancelled/Archived hidden so the list isn't messy.
-		                     */
+		                if (filterValue === 'all') {
+		                    // Show everything except Inactive items for a clean 'All' view
 		                    if (cardStatus === 'CANCELLED' || cardStatus === 'ARCHIVED') {
-		                        card.style.display = 'none';
+		                        card.classList.add('hidden');
 		                    } else {
-		                        card.style.display = 'block';
+		                        card.classList.remove('hidden');
 		                    }
 		                } else {
-		                    /** * Logic: Check if the card's status exists in the selected group array.
-		                     */
-		                    const allowedStatuses = statusGroups[filterType];
+		                    const allowedStatuses = statusGroups[filterValue];
 		                    if (allowedStatuses && allowedStatuses.includes(cardStatus)) {
-		                        card.style.display = 'block';
+		                        card.classList.remove('hidden');
 		                    } else {
-		                        card.style.display = 'none';
+		                        card.classList.add('hidden');
 		                    }
 		                }
 		            });
+
+		            // 3. Update Empty State
+		            updateEmptyState(noMsg);
 		        });
 		    });
+
+		    // Run once on load
+		    updateEmptyState(noMsg);
 		});
+
+		// Helper function (Matches your OT logic)
+		function updateEmptyState(noMsg) {
+		    if (noMsg) {
+		        // Look specifically for leave-cards that don't have the .hidden class
+		        const visibleCards = document.querySelectorAll('.leave-card:not(.hidden)');
+		        if (visibleCards.length === 0) {
+		            noMsg.classList.remove('hidden');
+		        } else {
+		            noMsg.classList.add('hidden');
+		        }
+		    }
+		}
+		
 	</script>
 </body>
 </html>
