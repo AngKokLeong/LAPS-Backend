@@ -110,7 +110,14 @@
                                 <button
                                     class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors font-medium"
                                     onclick="openEditModal(this)"
-                                    th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-request-id=${leaveRequest.leaveRequestId}">
+                                    th:data-leave-type="${leaveRequest.leaveType}"
+                                    th:data-leave-period="${leaveRequest.leavePeriod}"
+                                    th:data-reason="${leaveRequest.reason}"
+                                    th:data-leave-duration="${leaveRequest.leaveDuration}"
+                                    th:data-leave-status="${leaveRequest.leaveStatus}"
+                                    th:data-leave-request-id="${leaveRequest.leaveRequestId}"
+                                    th:data-leave-start-date="${leaveRequest.startDate}"
+                                    th:data-leave-end-date="${leaveRequest.endDate}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -138,7 +145,14 @@
                                 <button
                                     class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors font-medium"
                                     onclick="openEditModal(this)"
-                                    th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-request-id=${leaveRequest.leaveRequestId}">
+                                    th:data-leave-type="${leaveRequest.leaveType}"
+                                    th:data-leave-period="${leaveRequest.leavePeriod}"
+                                    th:data-leave-duration="${leaveRequest.leaveDuration}"
+                                    th:data-leave-status="${leaveRequest.leaveStatus}"
+                                    th:data-leave-request-id="${leaveRequest.leaveRequestId}"
+                                    th:data-leave-start-date="${leaveRequest.startDate}"
+                                    th:data-leave-end-date="${leaveRequest.endDate}"
+                                    th:data-reason="${leaveRequest.reason}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -269,8 +283,10 @@
                     </div>
                 </div>
 
-                <form class="space-y-5" th:action="@{/staff/update-leave-request}" th:method="post">
-                    <input type="hidden" name="leaveRequestId" id="editLeaveRequestId" />
+                <form class="space-y-5" th:action="@{/staff/update-leave-request}" th:object="${updateLeaveRequestDTO}" th:method="post">
+                    <input type="hidden" name="leaveRequestId" id="updateLeaveRequestId" />
+                    <input type="hidden" name="leaveStatus" id="updateLeaveRequestStatus" />
+
                     <!-- Leave Type -->
                     <div>
                         <label for="editLeaveType" class="block text-sm font-medium text-gray-700 mb-2">
@@ -280,8 +296,7 @@
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
                             <option value="ANNUAL" selected>Annual Leave</option>
                             <option value="MEDICAL">Medical Leave</option>
-                            <option value="sick">Sick Leave</option>
-                            <option value="unpaid">Unpaid Leave</option>
+                            <option value="COMPENSATION">Compensation Leave</option>
                         </select>
                     </div>
 
@@ -322,18 +337,19 @@
                         </div>
                     </div>
 
-
-                    <!-- Reason -->
+                    <!-- Update Summary -->
                     <div>
                         <label for="editReason" class="block text-sm font-medium text-gray-700 mb-2">
                             Reason for Leave <span class="text-red-500">*</span>
                         </label>
                         <textarea id="editReason" name="reason" rows="4" required
                             placeholder="Please provide a detailed reason for your leave request..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none">Personal matters</textarea>
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"></textarea>
                         <p class="text-xs text-gray-500 mt-1">Please provide sufficient detail to help your manager
                             review the request</p>
                     </div>
+
+
 
                     <!-- Update Summary -->
                     <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
@@ -354,21 +370,21 @@
                             </div>
                         </div>
                     </div>
+            
+                    <!-- Modal Footer -->
+                    <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl sticky bottom-0">
+                        <div class="flex gap-3">
+                            <button onclick="closeEditModal()"
+                                class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
+                                Cancel
+                            </button>
+                            <button type="submit" onclick="return submitEditRequest()"
+                                class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">
+                                Update Request
+                            </button>
+                        </div>
+                    </div>
                 </form>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl sticky bottom-0">
-                <div class="flex gap-3">
-                    <button onclick="closeEditModal()"
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
-                        Cancel
-                    </button>
-                    <button type="submit" onclick="return submitEditRequest()"
-                        class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">
-                        Update Request
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -439,6 +455,19 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Reason -->
+                        <div>
+                            <label for="cancelReason" class="block text-sm font-medium text-gray-700 mb-2">
+                                Cancellation Reason <span class="text-red-500">*</span>
+                            </label>
+                            <textarea id="cancelReason" name="reason" rows="4" required
+                                placeholder="Please provide a detailed reason for your leave request..."
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none">Personal matters</textarea>
+                            <p class="text-xs text-gray-500 mt-1">Please provide sufficient detail to help your manager
+                                review the request</p>
+                        </div>
+
 
                     </div>
                 </div>
@@ -576,6 +605,7 @@
             document.getElementById('cancelLeaveEndDate').value = leaveEndDate;
             document.getElementById('cancelLeaveRequestStatus').value = leaveStatus;
             document.getElementById('cancelLeaveRequestType').value = leaveType;
+            document.getElementById('cancelReason').value = reason || '';
 
             document.getElementById('cancelModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -660,24 +690,20 @@
         // Edit Modal Functions
         function openEditModal(button) {
             const leaveType = button.getAttribute('data-leave-type');
-            const leavePeriod = button.getAttribute('data-leave-period');
-            const reason = button.getAttribute('data-reason');
+            const leaveStatus = button.getAttribute('data-leave-status');
             const leaveRequestId = button.getAttribute('data-leave-request-id');
+            const leaveStartDate = button.getAttribute('data-leave-start-date');
+            const leaveEndDate = button.getAttribute('data-leave-end-date');
+            const reason = button.getAttribute('data-reason');
 
             document.getElementById('editLeaveType').value = leaveType;
+            document.getElementById('editStartDate').value = leaveStartDate;
+            document.getElementById('editEndDate').value = leaveEndDate;
+            document.getElementById('editReason').value = reason || '';
 
-            // Parse leave period (format: "start - end")
-            const dates = leavePeriod.split(' - ');
-            if (dates.length === 2) {
-                document.getElementById('editStartDate').value = dates[0];
-                document.getElementById('editEndDate').value = dates[1];
-            }
-
-            // Set reason
-            document.getElementById('editReason').value = reason;
-
-            // Set hidden id
-            document.getElementById('editLeaveRequestId').value = leaveRequestId;
+            // Set hidden id and status
+            document.getElementById('updateLeaveRequestId').value = leaveRequestId;
+            document.getElementById('updateLeaveRequestStatus').value = leaveStatus;
 
             // Calculate days
             calculateDays();
@@ -700,7 +726,6 @@
             const leaveType = document.getElementById('editLeaveType').value;
             const startDate = document.getElementById('editStartDate').value;
             const endDate = document.getElementById('editEndDate').value;
-            const reason = document.getElementById('editReason').value.trim();
 
             if (!startDate || !endDate) {
                 alert('Please select both start and end dates');

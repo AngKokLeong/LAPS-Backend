@@ -63,6 +63,7 @@ public class CancelLeaveRequestService {
 		var leave = leaveApplication.get();
 		leave.setLeaveStatus(LeaveStatus.CANCELLED);
 		leave.setUpdatedDate(LocalDate.now());
+		leave.setReason(cancelLeaveRequestServiceDTO.getReason());
 
 		if (leaveApplicationRepository.save(leave) == null) {
 			cancelLeaveRequestControllerDTO.setOperationResult(false);

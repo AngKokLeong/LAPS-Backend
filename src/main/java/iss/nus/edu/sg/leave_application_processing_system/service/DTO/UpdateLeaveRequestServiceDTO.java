@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 
-public class CancelLeaveRequestServiceDTO implements ServiceDTO {
+public class UpdateLeaveRequestServiceDTO implements ServiceDTO {
 
     private Long leaveRequestId;
     private Long employeeId;
@@ -15,17 +15,10 @@ public class CancelLeaveRequestServiceDTO implements ServiceDTO {
 
     private LocalDate startDate;
     private LocalDate endDate;
+
     private String reason;
 
-    public CancelLeaveRequestServiceDTO() {
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
+    public UpdateLeaveRequestServiceDTO() {
     }
 
     public Long getLeaveRequestId() {
@@ -74,6 +67,14 @@ public class CancelLeaveRequestServiceDTO implements ServiceDTO {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     @Override

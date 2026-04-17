@@ -15,11 +15,20 @@ public class CancelLeaveRequestControllerDTO implements ControllerDTO {
 
     private LocalDate startDate;
     private LocalDate endDate;
+    private String reason;
 
     private boolean operationResult;
     private String operationComments;
 
     public CancelLeaveRequestControllerDTO() {
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public Long getLeaveRequestId() {

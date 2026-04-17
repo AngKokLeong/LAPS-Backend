@@ -1,11 +1,11 @@
-package iss.nus.edu.sg.leave_application_processing_system.service.DTO;
+package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
 import java.time.LocalDate;
 
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 
-public class CancelLeaveRequestServiceDTO implements ServiceDTO {
+public class UpdateLeaveRequestControllerDTO implements ControllerDTO {
 
     private Long leaveRequestId;
     private Long employeeId;
@@ -15,17 +15,13 @@ public class CancelLeaveRequestServiceDTO implements ServiceDTO {
 
     private LocalDate startDate;
     private LocalDate endDate;
+
     private String reason;
 
-    public CancelLeaveRequestServiceDTO() {
-    }
+    private boolean operationResult;
+    private String operationComments;
 
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
+    public UpdateLeaveRequestControllerDTO() {
     }
 
     public Long getLeaveRequestId() {
@@ -76,8 +72,32 @@ public class CancelLeaveRequestServiceDTO implements ServiceDTO {
         this.endDate = endDate;
     }
 
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public boolean getOperationResult() {
+        return operationResult;
+    }
+
+    public void setOperationResult(boolean operationResult) {
+        this.operationResult = operationResult;
+    }
+
+    public String getOperationComments() {
+        return operationComments;
+    }
+
+    public void setOperationComments(String operationComments) {
+        this.operationComments = operationComments;
+    }
+
     @Override
-    public ServiceDTO getAllAttribute() {
+    public ControllerDTO getAllAttribute() {
         return this;
     }
 
