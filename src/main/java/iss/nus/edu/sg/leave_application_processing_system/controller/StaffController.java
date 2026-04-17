@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CancelLeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.DeleteLeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveMovementDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
@@ -38,8 +39,10 @@ import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveR
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.AnnualLeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.CompensationLeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.CancelLeaveRequestServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.DeleteLeaveRequestServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.UpdateLeaveRequestServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.CancelLeaveRequestService;
+import iss.nus.edu.sg.leave_application_processing_system.service.implementation.DeleteLeaveRequestService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.MedicalLeaveApplicationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.UpdateLeaveRequestService;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewLeaveRequestsService;
@@ -55,6 +58,7 @@ public class StaffController {
 	private final OverTimeClaimService otClaimService;
 	private final CancelLeaveRequestService cancelLeaveRequestService;
 	private final UpdateLeaveRequestService updateLeaveRequestService;
+	private final DeleteLeaveRequestService deleteLeaveRequestService;
 	private final LeaveMovementService leaveMovementService;
 	private final LeaveBalanceService balanceService;
 	private final CompensationLeaveApplicationService compService;
@@ -68,7 +72,8 @@ public class StaffController {
 			LeaveBalanceService balanceService,
 			CompensationLeaveApplicationService compService,
 			CancelLeaveRequestService cancelLeaveRequestService,
-			UpdateLeaveRequestService updateLeaveRequestService) {
+			UpdateLeaveRequestService updateLeaveRequestService,
+			DeleteLeaveRequestService deleteLeaveRequestService) {
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
 		this.viewLeaveRequestsService = viewLeaveRequestsService;
@@ -78,6 +83,7 @@ public class StaffController {
 		this.compService = compService;
 		this.cancelLeaveRequestService = cancelLeaveRequestService;
 		this.updateLeaveRequestService = updateLeaveRequestService;
+		this.deleteLeaveRequestService = deleteLeaveRequestService;
 	}
 
 	@GetMapping({ "", "/" })
@@ -242,6 +248,7 @@ public class StaffController {
 				.collect(Collectors.toList());
 
 		model.addAttribute("leaveRequestList", leaveRequestDTOList);
+		model.addAttribute("deleteLeaveRequestDTO", new DeleteLeaveRequestControllerDTO());
 
 		return "my-leave-requests";
 	}
@@ -372,6 +379,40 @@ public class StaffController {
 		} else {
 			redirectAttrs.addFlashAttribute("message", "The leave request could not be updated.");
 			redirectAttrs.addFlashAttribute("updateLeaveRequestData", result);
+		}
+
+		return "redirect:/staff/my-leave-requests";
+	}
+
+	@PostMapping("/delete-leave-request")
+	public String deleteLeaveRequest(@ModelAttribute DeleteLeaveRequestControllerDTO deleteLeaveRequestControllerDTO,
+			HttpSession session, RedirectAttributes redirectAttrs) {
+		String role = (String) session.getAttribute("userRole");
+
+		if (role == null || role.toString().isEmpty())
+			return "redirect:/";
+
+		Long employeeId = (Long) session.getAttribute("id");
+		if (employeeId == null) {
+			return "redirect:/";
+		}
+
+		DeleteLeaveRequestServiceDTO deleteLeaveRequestServiceDTO = new DeleteLeaveRequestServiceDTO();
+		deleteLeaveRequestServiceDTO.setEmployeeId(employeeId);
+		deleteLeaveRequestServiceDTO.setLeaveRequestId(deleteLeaveRequestControllerDTO.getLeaveRequestId());
+		deleteLeaveRequestServiceDTO.setLeaveType(deleteLeaveRequestControllerDTO.getLeaveType());
+		deleteLeaveRequestServiceDTO.setLeaveStatus(deleteLeaveRequestControllerDTO.getLeaveStatus());
+		deleteLeaveRequestServiceDTO.setStartDate(deleteLeaveRequestControllerDTO.getStartDate());
+		deleteLeaveRequestServiceDTO.setEndDate(deleteLeaveRequestControllerDTO.getEndDate());
+		deleteLeaveRequestServiceDTO.setReason(deleteLeaveRequestControllerDTO.getReason());
+
+		ControllerDTO controllerDTO = deleteLeaveRequestService.deleteLeaveRequest(deleteLeaveRequestServiceDTO);
+		DeleteLeaveRequestControllerDTO result = (DeleteLeaveRequestControllerDTO) controllerDTO.getAllAttribute();
+
+		if (result.isOperationResult()) {
+			redirectAttrs.addFlashAttribute("message", "The leave request has been deleted.");
+		} else {
+			redirectAttrs.addFlashAttribute("message", result.getOperationComments());
 		}
 
 		return "redirect:/staff/my-leave-requests";
