@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class SubordinateLeaveBalanceControllerDTO implements ControllerDTO {
 
 	private String employeeName;
@@ -14,15 +13,30 @@ public class SubordinateLeaveBalanceControllerDTO implements ControllerDTO {
 	private String department;
 	private int annualBalance;
 	private int medicalBalance;
-	private int compensationBalance;
-	private int totalBalance;
+	private double compensationBalance;
+	private double totalBalance;
 	
 	@Override
 	public ControllerDTO getAllAttribute() {
 		// TODO Auto-generated method stub
 		return this;
 	}
+		
 	
+	public SubordinateLeaveBalanceControllerDTO() {}
+
+	public SubordinateLeaveBalanceControllerDTO(String employeeName, String email, String department, int annualBalance,
+			int medicalBalance, double compensationBalance, double totalBalance) {
+		this.employeeName = employeeName;
+		this.email = email;
+		this.department = department;
+		this.annualBalance = annualBalance;
+		this.medicalBalance = medicalBalance;
+		this.compensationBalance = compensationBalance;
+		this.totalBalance = totalBalance;
+	}
+
+
 	//getters & setters
 	public String getEmployeeName() {
 		return employeeName;
@@ -64,19 +78,19 @@ public class SubordinateLeaveBalanceControllerDTO implements ControllerDTO {
 		this.medicalBalance = medicalBalance;
 	}
 
-	public int getCompensationBalance() {
+	public double getCompensationBalance() {
 		return compensationBalance;
 	}
 
-	public void setCompensationBalance(int compensationBalance) {
+	public void setCompensationBalance(double compensationBalance) {
 		this.compensationBalance = compensationBalance;
 	}
 
-	public int getTotalBalance() {
+	public double getTotalBalance() {
 		return totalBalance;
 	}
 
-	public void setTotalBalance(int totalBalance) {
+	public void setTotalBalance(double totalBalance) {
 		this.totalBalance = totalBalance;
 	}
 	

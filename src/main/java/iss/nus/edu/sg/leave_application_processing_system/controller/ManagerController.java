@@ -78,31 +78,15 @@ public class ManagerController {
 	}
 
 	@GetMapping("/view-team-members-leave")
-	public String teamMembersLeave(HttpSession session, Model model) {
+	@PreAuthorize("hasRole('MANAGER')")
+	public String teamMembersLeave(@AuthenticationPrincipal ApplicationUserDetails userDetails, Model model) {
 
-		// check session role
-		String extractedRoleData = (String) session.getAttribute("userRole");
+	    Long currentManagerId = userDetails.getEmployee().getId();
+	    ManagerQueryServiceDTO sDTO = new ManagerQueryServiceDTO(currentManagerId);
 
-		if (extractedRoleData == null || extractedRoleData.toString().isEmpty())
-			return "redirect:/";
+	    List<ControllerDTO> teamBalances = teamMngService.viewTeamLeaveBalances(sDTO);
 
-		Role role = Role.valueOf(extractedRoleData);
-
-		if (!role.equals(Role.MANAGER)) {
-			return "redirect:/staff"; // Send them home if they aren't a manager
-		}
-
-		// Create the ServiceDTO
-		// Later, we need to get the managerID from the Login Session
-		Long currentManagerId = 1L;
-		ManagerQueryServiceDTO sDTO = new ManagerQueryServiceDTO(currentManagerId);
-
-		// passing the ServiceDTO to service
-		// The service returns a List of ControllerDTOs
-		List<ControllerDTO> teamBalances = teamMngService.viewTeamLeaveBalances(sDTO);
-
-		// Add to the Model for Thymeleaf
-		model.addAttribute("teamBalances", teamBalances);
+	    model.addAttribute("teamBalances", teamBalances);
 
 		return "view-team-members-leave";
 	}
