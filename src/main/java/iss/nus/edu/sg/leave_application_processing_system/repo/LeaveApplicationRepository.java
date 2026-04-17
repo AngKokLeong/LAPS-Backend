@@ -82,4 +82,8 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
         @Param("leaveType") LeaveType leaveType
     );
 
+    // For dashboard: recent leaves for employee
+    @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :employeeId ORDER BY l.appliedDate DESC")
+    org.springframework.data.domain.Page<LeaveApplication> findTop5RecentByEmployeeId(@Param("employeeId") Long employeeId, org.springframework.data.domain.Pageable pageable);
+
 }

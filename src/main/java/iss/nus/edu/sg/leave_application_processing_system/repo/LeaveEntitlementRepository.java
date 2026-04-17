@@ -17,7 +17,7 @@ public interface LeaveEntitlementRepository extends JpaRepository<LeaveEntitleme
             int yearApplied
     );
 
-    List<LeaveEntitlement> findByEmployeeId(Long employeeId);
+    List<LeaveEntitlement> findByEmployeeId_Id(Long employeeId);
     
     @Query("SELECT le FROM LeaveEntitlement le " + 
             "WHERE le.employeeId.manager.id = :managerId " + 

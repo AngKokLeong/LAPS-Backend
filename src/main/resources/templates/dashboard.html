@@ -12,7 +12,7 @@
         <main class="flex-1 p-8">
             <div class="mb-8">
                 <h1 class="text-3xl font-semibold text-gray-900">Dashboard</h1>
-                <p class="text-gray-500 mt-1">Welcome back, John!</p>
+                <p class="text-gray-500 mt-1" th:text="'Welcome back, ' + ${#authentication.principal.employee.name} + '!'">Welcome back!</p>
             </div>
 
             <!-- Stats Cards -->
@@ -25,7 +25,7 @@
                             </svg>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-semibold text-gray-900">15</h3>
+                    <h3 id="totalLeaveDays" class="text-2xl font-semibold text-gray-900">15</h3>
                     <p class="text-sm text-gray-500 mt-1">Total Leave Days</p>
                 </div>
 
@@ -37,7 +37,7 @@
                             </svg>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-semibold text-gray-900">5</h3>
+                    <h3 id="daysUsed" class="text-2xl font-semibold text-gray-900">5</h3>
                     <p class="text-sm text-gray-500 mt-1">Days Used</p>
                 </div>
 
@@ -49,7 +49,7 @@
                             </svg>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-semibold text-gray-900">2</h3>
+                    <h3 id="pendingRequests" class="text-2xl font-semibold text-gray-900">2</h3>
                     <p class="text-sm text-gray-500 mt-1">Pending Requests</p>
                 </div>
 
@@ -61,7 +61,7 @@
                             </svg>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-semibold text-gray-900">10</h3>
+                    <h3 id="daysRemaining" class="text-2xl font-semibold text-gray-900">10</h3>
                     <p class="text-sm text-gray-500 mt-1">Days Remaining</p>
                 </div>
             </div>
@@ -82,45 +82,102 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-sm text-gray-900">Annual Leave</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">2026-04-15</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">2026-04-17</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">3</td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-200">
-                                        Pending
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-sm text-gray-900">Sick Leave</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">2026-03-20</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">2026-03-22</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">3</td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-                                        Approved
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-sm text-gray-900">Personal Leave</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">2026-02-10</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">2026-02-11</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">2</td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-                                        Approved
-                                    </span>
-                                </td>
-                            </tr>
+                        <tbody id="recentLeavesTable" class="divide-y divide-gray-200">
                         </tbody>
                     </table>
                 </div>
             </div>
         </main>
     </div>
+
+    <script>
+        function getStatusBadge(status) {
+            let classes = "inline-flex px-2 py-1 rounded-full text-xs font-medium border ";
+            let text = status;
+
+            if (status === "APPLIED" || status === "UPDATED") {
+                classes += "bg-yellow-100 text-yellow-700 border-yellow-200";
+                text = "Pending";
+            } else if (status === "APPROVED") {
+                classes += "bg-green-100 text-green-700 border-green-200";
+                text = "Approved";
+            } else if (status === "REJECTED") {
+                classes += "bg-red-100 text-red-700 border-red-200";
+                text = "Rejected";
+            } else {
+                classes += "bg-gray-100 text-gray-700 border-gray-200";
+            }
+
+            return `<span class="${classes}">${text}</span>`;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+            });
+        }
+
+        function loadDashboard() {
+            fetch("/api/staff/dashboard")
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Failed to load dashboard data");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // Update stats
+                    document.getElementById("totalLeaveDays").textContent = data.totalLeaveDays;
+                    document.getElementById("daysUsed").textContent = data.daysUsed;
+                    document.getElementById("pendingRequests").textContent = data.pendingRequests;
+                    document.getElementById("daysRemaining").textContent = data.daysRemaining;
+
+                    // Update table
+                    const tbody = document.getElementById("recentLeavesTable");
+                    tbody.innerHTML = "";
+
+                    if (data.recentLeaves.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                    No recent leave requests found.
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    data.recentLeaves.forEach((leave) => {
+                        const row = `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm text-gray-900">${leave.type}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">${formatDate(leave.startDate)}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">${formatDate(leave.endDate)}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">${leave.days}</td>
+                                <td class="px-6 py-4">${getStatusBadge(leave.status)}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+                    // Optionally show error in UI
+                    const tbody = document.getElementById("recentLeavesTable");
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-red-600">
+                                Failed to load recent leaves. Please refresh the page.
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", loadDashboard);
+    </script>
 </body>
 </html>
