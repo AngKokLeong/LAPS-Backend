@@ -10,22 +10,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.AddEmployeeControllerDTO;
+
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.service.EmployeeService;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AddEmployeeServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.implementation.AddEmployeeService;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
-	private final EmployeeService employeeService;
+	private final AddEmployeeService addEmployeeService;
 
-	AdminController(EmployeeService employeeService) {
-		this.employeeService = employeeService;
+	AdminController(AddEmployeeService addEmployeeService) {
+		this.addEmployeeService = addEmployeeService;
 	}
 
 	@GetMapping("/employee-management")
-	public String employeeManagement(HttpSession session) {  
+	public String employeeManagement(Model model, HttpSession session) {  
 	  	
 		String extractedRoleData = (String) session.getAttribute("userRole");
 		
@@ -37,7 +39,10 @@ public class AdminController {
 	    if (!role.equals(Role.ADMIN)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
 	    }
-	    
+		
+		model.addAttribute("employee", new AddEmployeeControllerDTO());
+		
+
 		return "employee-management";       
 	}
 	
@@ -103,21 +108,31 @@ public class AdminController {
 	
 	
 	@PostMapping("/employee-management/add-employee")
-	public String saveNewEmployee (@ModelAttribute Employee employee, HttpSession session, RedirectAttributes redirectAttrs) {
+    public String saveNewEmployee(@ModelAttribute("employee") AddEmployeeControllerDTO employeeDto, HttpSession session, RedirectAttributes redirectAttrs) {
+        String extractedRoleData = (String) session.getAttribute("userRole");
+        if (extractedRoleData == null || extractedRoleData.isEmpty()) return "redirect:/";
+        Role role = Role.valueOf(extractedRoleData);
+        if (!role.equals(Role.ADMIN)) {
+            return "redirect:/staff"; // Send them home if they aren't a admin
+        }
 
-		String extractedRoleData = (String) session.getAttribute("userRole");
-		
-	  	if (extractedRoleData == null || extractedRoleData.toString().isEmpty()) return "redirect:/";
+		AddEmployeeServiceDTO serviceDTO = new AddEmployeeServiceDTO();
+        serviceDTO.setName(employeeDto.getName());
+        serviceDTO.setEmail(employeeDto.getEmail());
+        serviceDTO.setPassword(employeeDto.getPassword());
+        serviceDTO.setDesignation(employeeDto.getDesignation());
+        serviceDTO.setDepartment(employeeDto.getDepartment());
+        serviceDTO.setRole(employeeDto.getRole());
+        serviceDTO.setJoinDate(employeeDto.getJoinDate());
+        serviceDTO.setStatus(employeeDto.getStatus());
+        serviceDTO.setManagerId(employeeDto.getManagerId());
 
-		Role role = Role.valueOf(extractedRoleData);	
-		
-	    if (!role.equals(Role.ADMIN)) {
-	        return "redirect:/staff"; // Send them home if they aren't a admin
-	    }
+        AddEmployeeControllerDTO result = (AddEmployeeControllerDTO) addEmployeeService.save(serviceDTO);
 
-		employeeService.save(employee);
-		redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
-		return "employee-management";
-	}
+        redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
+		redirectAttrs.addFlashAttribute("data", result);
+        return "redirect:/admin/employee-management";
+    }
+
 
 }
