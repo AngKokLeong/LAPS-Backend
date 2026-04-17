@@ -6,18 +6,16 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CalendarEventControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.security.ApplicationUserDetails;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewLeaveRequestsService;
 
-@RequestMapping("/staff")
+@RestController
 public class LeaveCalendarController {
 	
 	private final ViewLeaveRequestsService viewLeaveRequestsService;
@@ -26,7 +24,7 @@ public class LeaveCalendarController {
         this.viewLeaveRequestsService = viewLeaveRequestsService;
     }
     
-    @GetMapping("/calendar")
+    @GetMapping("/api/calendar")
     public List<CalendarEventControllerDTO> getMyLeaves(@AuthenticationPrincipal ApplicationUserDetails userDetails) {
         
     	Long staffId = userDetails.getEmployee().getId();

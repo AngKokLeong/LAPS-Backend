@@ -434,4 +434,9 @@ public class StaffController {
 		return "redirect:/staff/my-leave-requests";
 	}
 
+	@GetMapping("/calendar")
+    public String showCalendar() {
+		
+        return "calendar"; 
+    }
 }
