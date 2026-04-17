@@ -69,15 +69,85 @@
             </div>
 
 			<!-- Calendar -->
-			<div class="max-w-4xl mx-auto w-full mb-8">
-				<div class="bg-white rounded-xl border border-gray-200">
-					<div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-						<h2 class="text-lg font-semibold text-gray-900">My Leave Calendar</h2>
-					</div>
-					<div class="p-6">
-						<div id="calendar"></div>
-					</div>
-				</div>
+			<div class="max-w-5xl mx-auto">
+			    
+			    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4 shadow-sm">
+			        <div class="flex items-center justify-between mb-6">
+			            <h2 class="text-2xl font-bold text-gray-900" id="customCalendarTitle">April 2026</h2>
+			            
+			            <div class="flex items-center gap-3">
+			                <button id="prevBtn" class="p-2 hover:bg-blue-50 text-gray-600 hover:text-blue-600 rounded-lg transition-all border border-transparent hover:border-blue-100">
+			                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			                    </svg>
+			                </button>
+			                <button id="todayBtn" class="px-6 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all border border-blue-100">
+			                    Today
+			                </button>
+			                <button id="nextBtn" class="p-2 hover:bg-blue-50 text-gray-600 hover:text-blue-600 rounded-lg transition-all border border-transparent hover:border-blue-100">
+			                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			                    </svg>
+			                </button>
+			            </div>
+			        </div>
+
+			        <div id="calendar"></div>
+			    </div>
+
+			    <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+			        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+			            
+			            <div>
+			                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Leave Types (Color Bar)</h3>
+			                <div class="grid grid-cols-2 gap-4">
+			                    <div class="flex items-center gap-3">
+			                        <div class="w-1.5 h-6 rounded-full bg-blue-500"></div>
+			                        <span class="text-sm font-medium text-gray-700">Annual</span>
+			                    </div>
+			                    <div class="flex items-center gap-3">
+			                        <div class="w-1.5 h-6 rounded-full bg-rose-500"></div>
+			                        <span class="text-sm font-medium text-gray-700">Medical</span>
+			                    </div>
+			                    <div class="flex items-center gap-3">
+			                        <div class="w-1.5 h-6 rounded-full bg-indigo-500"></div>
+			                        <span class="text-sm font-medium text-gray-700">Compensation</span>
+			                    </div>
+			                    <div class="flex items-center gap-3">
+			                        <div class="w-1.5 h-6 rounded-full bg-gray-400"></div>
+			                        <span class="text-sm font-medium text-gray-700">Other/Unpaid</span>
+			                    </div>
+			                </div>
+			                <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3">
+			                    <div class="w-5 h-5 rounded border-2 border-dashed border-blue-400 bg-blue-50"></div>
+			                    <span class="text-sm text-gray-600">Dashed Border = <span class="font-semibold">Pending Approval</span></span>
+			                </div>
+			            </div>
+
+			            <div>
+			                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Status Symbols</h3>
+			                <div class="grid grid-cols-2 gap-y-3">
+			                    <div class="flex items-center gap-2">
+			                        <span class="text-blue-600 font-bold">✅</span>
+			                        <span class="text-sm text-gray-700">Approved</span>
+			                    </div>
+			                    <div class="flex items-center gap-2">
+			                        <span class="text-amber-500 font-bold">⏳</span>
+			                        <span class="text-sm text-gray-700">Applied/Updated</span>
+			                    </div>
+			                    <div class="flex items-center gap-2">
+			                        <span class="text-red-500 font-bold">❌</span>
+			                        <span class="text-sm text-gray-700">Rejected</span>
+			                    </div>
+			                    <div class="flex items-center gap-2">
+			                        <span class="text-gray-400 font-bold">🚫</span>
+			                        <span class="text-sm text-gray-700">Cancelled</span>
+			                    </div>
+			                </div>
+			            </div>
+
+			        </div>
+			    </div>
 			</div>
 			
             <!-- Recent Leaves -->
@@ -107,88 +177,101 @@
 	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 	
 	<style>
-	    /* --- 1. CALENDAR HEADER & TOOLBAR --- */
-	    .fc-toolbar-title {
-	        font-size: 1.5rem !important;
-	        font-weight: 800 !important;
-	        color: #1e3a8a !important; /* Blue-900 */
+	    /* --- 1. CALENDAR LAYOUT & HEADER --- */
+	    #calendar {
+	        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
 	    }
 
-	    .fc .fc-button-primary {
-	        background-color: #eff6ff !important; /* Blue-50 */
-	        border: 1px solid #dbeafe !important; /* Blue-200 */
-	        color: #2563eb !important;             /* Blue-600 */
-	        font-weight: 600 !important;
+	    /* Remove the default FullCalendar header since we built a custom one */
+	    .fc-header-toolbar {
+	        display: none !important;
 	    }
 
-	    .fc .fc-button-primary:hover {
-	        background-color: #dbeafe !important;
-	    }
-
-	    .fc .fc-button-primary:not(:disabled).fc-button-active {
-	        background-color: #2563eb !important; /* Solid Blue */
-	        color: #ffffff !important;             /* White text */
-	    }
-
-	    /* --- 2. THE DAY HEADERS (Sun, Mon...) --- */
+	    /* Modernize Day Headers (Mon, Tue, etc.) */
 	    .fc-col-header-cell {
-	        background-color: #f0f9ff !important; /* Sky-50 */
-	        border-bottom: 2px solid #bae6fd !important;
+	        background-color: #f9fafb !important;
+	        border-bottom: 1px solid #e5e7eb !important;
+	        padding: 12px 0 !important;
 	    }
 
 	    .fc-col-header-cell-cushion {
-	        padding: 12px 0 !important;
-	        color: #0369a1 !important;
-	        font-weight: 700 !important;
+	        color: #6b7280 !important;
 	        font-size: 0.75rem !important;
-	        text-transform: uppercase !important;
+	        font-weight: 700 !important;
+	        text-transform: uppercase;
+	        letter-spacing: 0.05em;
 	        text-decoration: none !important;
 	    }
 
-	    /* --- 3. THE LEAVE BLOCKS (The "SaaS" Look) --- */
-	    /* Force every event to start as a white card with NO default blue background */
+	    /* --- 2. LEAVE BLOCK (EVENT) STYLING --- */
 	    .custom-event {
 	        background-color: #ffffff !important;
 	        border: 1px solid #e5e7eb !important;
-	        border-radius: 4px !important;
-	        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+	        border-radius: 6px !important;
+	        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+	        margin: 1px 2px !important;
+	        overflow: hidden;
 	    }
 
 	    .custom-event .fc-event-main {
-	        background-color: transparent !important; /* Kills the blue leak */
-	        border-left: 5px solid #9ca3af !important; /* Default Gray bar */
-	        padding: 2px 6px !important;
-	        color: #111827 !important; /* Dark text */
+	        border-left: 5px solid #9ca3af !important; /* Default bar color */
+	        padding: 4px 8px !important;
+	        color: #111827 !important;
 	        font-weight: 600 !important;
-	        font-size: 0.75rem !important;
+	        font-size: 0.8rem !important;
+	        display: flex;
+	        align-items: center;
 	    }
 
-	    /* --- 4. TYPE SPECIFIC STRIPES (The Fix) --- */
-	    .type-annual .fc-event-main {
-	        border-left-color: #3b82f6 !important; /* Annual Blue Bar */
-	    }
-	    .type-medical .fc-event-main {
-	        border-left-color: #f43f5e !important; /* Medical Rose Bar */
-	    }
-	    .type-compensation .fc-event-main {
-	        border-left-color: #6366f1 !important; /* Compensation Indigo Bar */
-	    }
+	    /* --- 3. COLOR STRIPES BY TYPE --- */
+	    .type-annual .fc-event-main { border-left-color: #3b82f6 !important; }      /* Blue */
+	    .type-medical .fc-event-main { border-left-color: #f43f5e !important; }      /* Rose/Red */
+	    .type-compensation .fc-event-main { border-left-color: #6366f1 !important; } /* Indigo/Purple */
 
-	    /* --- 5. PENDING & CANCELLED STATES --- */
+	    /* --- 4. STATUS & PENDING EFFECTS --- */
+	    /* Dashed border for applied/updated status */
 	    .is-pending .fc-event-main {
 	        border-left-style: dashed !important;
-	        background-color: #f9fafb !important; /* Very light gray for pending */
+	        background-color: #f9fafb !important;
 	    }
 
+	    /* Muted look for Cancelled/Rejected */
 	    .is-cancelled {
-	        opacity: 0.5;
-	        text-decoration: line-through;
+	        opacity: 0.6;
+	        filter: grayscale(0.5);
 	    }
 
-	    /* --- 6. CLEANUP --- */
-	    .fc-daygrid-event-dot { display: none !important; }
-	    .fc-day-today { background-color: #fefce8 !important; } /* Soft yellow for today */
-	    .fc { border: none !important; }
+	    .is-cancelled .fc-event-main {
+	        text-decoration: line-through;
+	        border-left-color: #d1d5db !important;
+	    }
+
+	    /* --- 5. GRID & INTERFACE POLISH --- */
+	    /* Highlight Today */
+	    .fc-day-today {
+	        background-color: #eff6ff !important; /* Very light blue tint */
+	    }
+
+	    /* Style the date numbers */
+	    .fc-daygrid-day-number {
+	        font-size: 0.875rem !important;
+	        font-weight: 500;
+	        color: #374151;
+	        padding: 8px !important;
+	        text-decoration: none !important;
+	    }
+
+	    /* Remove the default FullCalendar event dot */
+	    .fc-daygrid-event-dot {
+	        display: none !important;
+	    }
+
+	    /* Smooth transition for hover effects */
+	    .custom-event:hover {
+	        transform: translateY(-1px);
+	        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+	        z-index: 50;
+	    }
 	</style>
 		
     <script>
@@ -287,28 +370,28 @@
 
 		    // Initialize FullCalendar
 		    const calendarEl = document.getElementById('calendar');
-		    const calendar = new FullCalendar.Calendar(calendarEl, {
-		        initialView: 'dayGridMonth',
-		        headerToolbar: {
-		            left: 'prev,next today',
-		            center: 'title',
-		            right: 'dayGridMonth,listMonth' // Added list view as a bonus
-		        },
-		        height: 'auto',
-		        // This is the magic part: it calls your new REST Controller
-		        events: '/api/calendar', 
-		        
-		        eventDidMount: function(info) {
-		            // Optional: adds a tooltip using the description from our DTO
-		            if (info.event.extendedProps.description) {
-		                info.el.setAttribute('title', info.event.extendedProps.description);
-		            }
-		        },
-		        // Ensures the calendar looks clean in your dashboard
-		        themeSystem: 'standard'
-		    });
+			const calendar = new FullCalendar.Calendar(calendarEl, {
+			    initialView: 'dayGridMonth',
+			    headerToolbar: false, // This hides the default blue buttons
+			    events: '/api/calendar', // Your existing API
+			    
+			    // This updates the "April 2026" text whenever you click next/prev
+			    datesSet: function(info) {
+			        document.getElementById('customCalendarTitle').innerText = info.view.title;
+			    },
 
-		    calendar.render();
+			    // Ensure your events use the class names from our previous chat
+			    eventClassNames: function(arg) {
+			        return [arg.event.extendedProps.customClass];
+			    }
+			});
+
+			calendar.render();
+
+			// LINK THE CUSTOM BUTTONS TO THE CALENDAR
+			document.getElementById('prevBtn').addEventListener('click', () => calendar.prev());
+			document.getElementById('nextBtn').addEventListener('click', () => calendar.next());
+			document.getElementById('todayBtn').addEventListener('click', () => calendar.today());
 		});
 		
     </script>
