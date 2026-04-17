@@ -15,8 +15,17 @@ public class CancelLeaveRequestServiceDTO implements ServiceDTO {
 
     private LocalDate startDate;
     private LocalDate endDate;
+    private String reason;
 
     public CancelLeaveRequestServiceDTO() {
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public Long getLeaveRequestId() {
