@@ -66,7 +66,7 @@ public class StaffController {
 							OverTimeClaimService otClaimService,
 							LeaveMovementService leaveMovementService,
 							LeaveBalanceService balanceService,
-							CompensationLeaveApplicationService compService){
+							CompensationLeaveApplicationService compService,
 							CancelLeaveRequestService cancelLeaveRequestService){
 		this.annualLeaveApplicationService = annualLeaveApplicationService;
 		this.medicalLeaveApplicationService = medicalLeaveApplicationService;
