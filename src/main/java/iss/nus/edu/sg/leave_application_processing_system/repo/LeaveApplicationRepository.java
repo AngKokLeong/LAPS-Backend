@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveMovementDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 
 
@@ -61,6 +62,24 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
       @Param("startOfMonth") LocalDate startOfMonth,
       @Param("endOfMonth") LocalDate endOfMonth,
       Pageable pageable
+    );
+    
+    // For reporting: get leaves by manager, date range, and optional leave type
+    @Query("""
+    SELECT l FROM LeaveApplication l
+    JOIN l.employee e
+    WHERE e.manager.id = :managerId
+      AND l.leaveStatus = :status
+      AND (:leaveType IS NULL OR l.leaveType = :leaveType)
+      AND l.startDate <= :endDate
+      AND l.endDate >= :startDate
+    """)
+    List<LeaveApplication> findManagerLeavesByDateRange(
+        @Param("managerId") Long managerId,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        @Param("status") LeaveStatus status,
+        @Param("leaveType") LeaveType leaveType
     );
 
 }

@@ -1,320 +1,513 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head th:replace="~{fragments/common_header :: head('Manage Leave Requests - Leave Management System')}">
-</head>
+  <head
+    th:replace="~{fragments/common_header :: head('Manage Leave Requests - Leave Management System')}"
+  >
+  </head>
 
-<body class="bg-gray-50">
-	<div class="flex min-h-screen">
-		<!-- Manager Navigation Sidebar -->
-		<div th:replace="~{fragments/manager_left_navigation_bar :: manager_navigation_bar('Manager')}"></div>
+  <body class="bg-gray-50">
+    <div class="flex min-h-screen">
+      <!-- Manager Navigation Sidebar -->
+      <div
+        th:replace="~{fragments/manager_left_navigation_bar :: manager_navigation_bar('Manager')}"
+      ></div>
 
-        <!-- Main Content -->
-        <main class="flex-1 p-8">
-            <div class="mb-8">
-                <h1 class="text-3xl font-semibold text-gray-900">Manage Leave Requests</h1>
-                <p class="text-gray-500 mt-1">Review and approve team leave requests</p>
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div class="mb-8">
+          <h1 class="text-3xl font-semibold text-gray-900">
+            Manage Leave Requests
+          </h1>
+          <p class="text-gray-500 mt-1">
+            Review and approve team leave requests
+          </p>
+        </div>
+
+        <!-- Stats & Filters Card -->
+        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">Pending Approvals</p>
+              <p
+                th:text="${pendingCount}"
+                class="text-3xl font-semibold text-gray-900 mt-1"
+              >
+                count
+              </p>
             </div>
+            <div class="flex gap-2 flex-wrap">
+              <button
+                class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white"
+                data-filter="all"
+              >
+                All
+              </button>
+              <button
+                class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+                data-filter="pending"
+              >
+                Pending
+              </button>
+              <button
+                class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+                data-filter="approved"
+              >
+                Approved
+              </button>
+              <button
+                class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+                data-filter="rejected"
+              >
+                Rejected
+              </button>
+              <button
+                class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+                data-filter="inactive"
+              >
+                Inactive
+              </button>
+            </div>
+          </div>
+        </div>
 
-            <!-- Stats & Filters Card -->
-            <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Pending Approvals</p>
-                        <p th:text="${pendingCount}" class="text-3xl font-semibold text-gray-900 mt-1">count</p>
+        <!-- Success/Error Message -->
+        <div
+          th:if="${successMessage}"
+          class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded shadow-sm flex items-center justify-between"
+        >
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span th:text="${successMessage}">Success! Action completed.</span>
+          </div>
+          <button
+            type="button"
+            onclick="this.parentElement.style.display = 'none'"
+            class="text-green-500 hover:text-green-700"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div
+          th:if="${errorMessage}"
+          class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow-sm flex items-center justify-between"
+        >
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span th:text="${errorMessage}">An error occurred.</span>
+          </div>
+          <button
+            type="button"
+            onclick="this.parentElement.style.display = 'none'"
+            class="text-red-500 hover:text-red-700"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Leave Request Cards -->
+        <div class="space-y-4">
+          <div
+            th:each="request : ${teamRequests}"
+            class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm"
+            th:data-status="${#strings.toUpperCase(request.status)}"
+          >
+            <div class="flex items-start gap-4 mb-4">
+              <div
+                class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0"
+              >
+                <span class="text-white font-semibold text-lg">JD</span>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-start justify-between mb-2">
+                  <div>
+                    <h3
+                      th:text="${request.employeeName}"
+                      class="text-lg font-semibold text-gray-900"
+                    >
+                      Name
+                    </h3>
+                    <p
+                      th:text="${request.department}"
+                      class="text-sm text-gray-500"
+                    >
+                      Department
+                    </p>
+                  </div>
+
+                  <div th:switch="${#strings.toString(request.status)}">
+                    <div
+                      th:case="'APPLIED'"
+                      class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-yellow-50 border-yellow-200"
+                    >
+                      <span class="text-sm font-bold text-yellow-700"
+                        >PENDING</span
+                      >
+                      <span
+                        class="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded-full font-black"
+                        >APPLIED</span
+                      >
                     </div>
-					<div class="flex gap-2 flex-wrap">
-					    <button class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white" data-filter="all">
-					        All
-					    </button>
-					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="pending">
-					        Pending
-					    </button>
-					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="approved">
-					        Approved
-					    </button>
-					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="rejected">
-					        Rejected
-					    </button>
-					    <button class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200" data-filter="inactive">
-					        Inactive
-					    </button>
-					</div>
-                </div>
-            </div>
-			
-			<!-- Success/Error Message -->
-			<div th:if="${successMessage}" 
-			     class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded shadow-sm flex items-center justify-between">
-			    <div class="flex items-center">
-			        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-			            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-			        </svg>
-			        <span th:text="${successMessage}">Success! Action completed.</span>
-			    </div>
-			    <button type="button" onclick="this.parentElement.style.display='none'" class="text-green-500 hover:text-green-700">
-			        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
-			    </button>
-			</div>
 
-			<div th:if="${errorMessage}" 
-			     class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow-sm flex items-center justify-between">
-			    <div class="flex items-center">
-			        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-			            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-			        </svg>
-			        <span th:text="${errorMessage}">An error occurred.</span>
-			    </div>
-			    <button type="button" onclick="this.parentElement.style.display='none'" class="text-red-500 hover:text-red-700">
-			        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
-			    </button>
-			</div>
-
-            <!-- Leave Request Cards -->
-            <div class="space-y-4">
-                <div th:each="request : ${teamRequests}"
-				class="leave-card bg-white rounded-xl border-2 border-yellow-200 p-6 shadow-sm"
-				th:data-status="${#strings.toUpperCase(request.status)}">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-white font-semibold text-lg">JD</span>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <h3 th:text="${request.employeeName}" class="text-lg font-semibold text-gray-900">Name</h3>
-                                    <p th:text="${request.department}" class="text-sm text-gray-500">Department</p>
-                                </div>
-								
-								<div th:switch="${#strings.toString(request.status)}">
-								    
-								    <div th:case="'APPLIED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-yellow-50 border-yellow-200">
-								        <span class="text-sm font-bold text-yellow-700">PENDING</span>
-								        <span class="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded-full font-black">APPLIED</span>
-								    </div>
-
-								    <div th:case="'UPDATED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-yellow-50 border-yellow-200">
-								        <span class="text-sm font-bold text-yellow-700">PENDING</span>
-								        <span class="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-full font-black">UPDATED</span>
-								    </div>
-
-								    <div th:case="'APPROVED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-green-50 border-green-200">
-								        <span class="text-sm font-bold text-green-700">APPROVED</span>
-								    </div>
-
-								    <div th:case="'REJECTED'" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-red-50 border-red-200">
-								        <span class="text-sm font-bold text-red-700">REJECTED</span>
-								    </div>
-
-								    <div th:case="*" class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-gray-50 border-gray-300">
-								        <span class="text-sm font-bold text-gray-500">INACTIVE</span>
-								        <span th:text="${request.status}" class="text-[10px] text-gray-400 uppercase">Status</span>
-								    </div>
-								</div>
-								
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-500 mb-1">Leave Type</p>
-                                    <p th:text="${request.leaveType}" class="text-sm font-medium text-gray-900 capitalize">Type</p>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                                            <p th:text="${#temporals.format(request.startDate, 'dd MMM')} + ' - ' + ${#temporals.format(request.endDate, 'dd MMM yyyy')}"
-												class="text-sm font-medium text-gray-900">May 5 - May 6</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs text-gray-500 mb-1">Total Days</p>
-                                            <p th:text="${#numbers.formatDecimal(request.totalDays, 1, 1)} + ' days'" 
-												class="text-sm font-medium text-gray-900">2 days</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                                <p class="text-xs font-medium text-blue-900 mb-1">Reason:</p>
-                                <p th:text="${request.reason} " class="text-sm text-blue-800">reason</p>
-                            </div>
-
-                            <div th:text="'Submitted on ' + ${request.submittedDate}" class="text-xs text-gray-500 mb-4">
-                                Submitted on March 30, 2026
-                            </div>
-
-							<div class="flex gap-3" th:if="${request.status == 'APPLIED' || request.status == 'UPDATED'}">
-							    <button type="button" 
-							            th:onclick="'openModal(' + ${request.applicationId} + ', \'APPROVE\')'"
-							            class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm">
-							        Approve Request
-							    </button>
-							    
-							    <button type="button" 
-							            th:onclick="'openModal(' + ${request.applicationId} + ', \'REJECT\')'"
-							            class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
-							        Reject Request
-							    </button>
-							</div>
-
-							<div th:id="'modal-' + ${request.applicationId}" 
-							     class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-							    
-							    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100">
-							        <h3 class="text-xl font-bold text-gray-900 mb-2">Finalize Decision</h3>
-							        <p class="text-sm text-gray-500 mb-6">
-							            You are about to <span class="font-bold underline" th:id="'action-text-' + ${request.applicationId}"></span> this request.
-							        </p>
-							        
-							        <form th:id="'form-' + ${request.applicationId}" method="post">
-							            
-							            <div class="mb-6">
-							                <label class="block text-sm font-semibold text-gray-700 mb-2">Manager Remarks:</label>
-											<textarea name="remarks" th:id="'remarks-' + ${request.applicationId}" rows="4" 
-											                  class="w-full border rounded-xl p-3" placeholder="..."></textarea>
-							            </div>
-							            
-							            <div class="flex gap-3">
-							                <button type="button" 
-							                        th:onclick="'closeModal(' + ${request.applicationId} + ')'" 
-							                        class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-							                    Cancel
-							                </button>
-							                <button type="submit" 
-							                        class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-							                    Confirm Decision
-							                </button>
-							            </div>
-							        </form>
-							    </div>
-							</div>
-							
-                        </div>
+                    <div
+                      th:case="'UPDATED'"
+                      class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-yellow-50 border-yellow-200"
+                    >
+                      <span class="text-sm font-bold text-yellow-700"
+                        >PENDING</span
+                      >
+                      <span
+                        class="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-full font-black"
+                        >UPDATED</span
+                      >
                     </div>
-                </div>
-				
-				<div id="no-requests-msg" class="hidden text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-				    <p class="text-gray-500">No leave requests found for this category.</p>
-				</div>
 
+                    <div
+                      th:case="'APPROVED'"
+                      class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-green-50 border-green-200"
+                    >
+                      <span class="text-sm font-bold text-green-700"
+                        >APPROVED</span
+                      >
+                    </div>
+
+                    <div
+                      th:case="'REJECTED'"
+                      class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-red-50 border-red-200"
+                    >
+                      <span class="text-sm font-bold text-red-700"
+                        >REJECTED</span
+                      >
+                    </div>
+
+                    <div
+                      th:case="*"
+                      class="flex items-center gap-2 px-3 py-1 rounded-lg border bg-gray-50 border-gray-300"
+                    >
+                      <span class="text-sm font-bold text-gray-500"
+                        >INACTIVE</span
+                      >
+                      <span
+                        th:text="${request.status}"
+                        class="text-[10px] text-gray-400 uppercase"
+                        >Status</span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
+                  <div class="bg-gray-50 rounded-lg p-3">
+                    <p class="text-xs text-gray-500 mb-1">Leave Type</p>
+                    <p
+                      th:text="${request.leaveType}"
+                      class="text-sm font-medium text-gray-900 capitalize"
+                    >
+                      Type
+                    </p>
+                  </div>
+                  <div class="bg-gray-50 rounded-lg p-3">
+                    <div class="flex items-center gap-2">
+                      <svg
+                        class="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      <div>
+                        <p class="text-xs text-gray-500 mb-1">Duration</p>
+                        <p
+                          th:text="${#temporals.format(request.startDate, 'dd MMM')} + ' - ' + ${#temporals.format(request.endDate, 'dd MMM yyyy')}"
+                          class="text-sm font-medium text-gray-900"
+                        >
+                          May 5 - May 6
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bg-gray-50 rounded-lg p-3">
+                    <div class="flex items-center gap-2">
+                      <svg
+                        class="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      <div>
+                        <p class="text-xs text-gray-500 mb-1">Total Days</p>
+                        <p
+                          th:text="${#numbers.formatDecimal(request.totalDays, 1, 1)} + ' days'"
+                          class="text-sm font-medium text-gray-900"
+                        >
+                          2 days
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                  <p class="text-xs font-medium text-blue-900 mb-1">Reason:</p>
+                  <p th:text="${request.reason} " class="text-sm text-blue-800">
+                    reason
+                  </p>
+                </div>
+
+                <div
+                  th:text="'Submitted on ' + ${request.submittedDate}"
+                  class="text-xs text-gray-500 mb-4"
+                >
+                  Submitted on March 30, 2026
+                </div>
+
+                <div
+                  class="flex gap-3"
+                  th:if="${request.status == 'APPLIED' || request.status == 'UPDATED'}"
+                >
+                  <button
+                    type="button"
+                    th:onclick="'openModal(' + ${request.applicationId} + ', \'APPROVE\')'"
+                    class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
+                  >
+                    Approve Request
+                  </button>
+
+                  <button
+                    type="button"
+                    th:onclick="'openModal(' + ${request.applicationId} + ', \'REJECT\')'"
+                    class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm"
+                  >
+                    Reject Request
+                  </button>
+                </div>
+
+                <div
+                  th:id="'modal-' + ${request.applicationId}"
+                  class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
+                >
+                  <div
+                    class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100"
+                  >
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                      Finalize Decision
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-6">
+                      You are about to
+                      <span
+                        class="font-bold underline"
+                        th:id="'action-text-' + ${request.applicationId}"
+                      ></span>
+                      this request.
+                    </p>
+
+                    <form
+                      th:id="'form-' + ${request.applicationId}"
+                      method="post"
+                    >
+                      <div class="mb-6">
+                        <label
+                          class="block text-sm font-semibold text-gray-700 mb-2"
+                          >Manager Remarks:</label
+                        >
+                        <textarea
+                          name="remarks"
+                          th:id="'remarks-' + ${request.applicationId}"
+                          rows="4"
+                          class="w-full border rounded-xl p-3"
+                          placeholder="..."
+                        ></textarea>
+                      </div>
+
+                      <div class="flex gap-3">
+                        <button
+                          type="button"
+                          th:onclick="'closeModal(' + ${request.applicationId} + ')'"
+                          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                        >
+                          Confirm Decision
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
             </div>
-        </main>
+          </div>
+
+          <div
+            id="no-requests-msg"
+            class="hidden text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200"
+          >
+            <p class="text-gray-500">
+              No leave requests found for this category.
+            </p>
+          </div>
+        </div>
+      </main>
     </div>
 
-	<script>
-		/* --- 1. MODAL LOGIC (Functional) --- */
-		function openModal(id, action) {
-		    const modal = document.getElementById('modal-' + id);
-		    const form = document.getElementById('form-' + id);
-		    const actionText = document.getElementById('action-text-' + id);
-		    const remarksArea = document.getElementById('remarks-' + id);
+    <script>
+      /* --- 1. MODAL LOGIC (Functional) --- */
+      function openModal(id, action) {
+        const modal = document.getElementById("modal-" + id);
+        const form = document.getElementById("form-" + id);
+        const actionText = document.getElementById("action-text-" + id);
+        const remarksArea = document.getElementById("remarks-" + id);
 
-		    if (modal && form) {
-		        modal.classList.remove('hidden');
-		        const normalizedAction = action.toLowerCase();
-		        actionText.innerText = normalizedAction;
-		        form.action = '/manager/leave/' + id + '/' + normalizedAction;
+        if (modal && form) {
+          modal.classList.remove("hidden");
+          const normalizedAction = action.toLowerCase();
+          actionText.innerText = normalizedAction;
+          form.action = "/manager/leave/" + id + "/" + normalizedAction;
 
-		        if (normalizedAction === 'reject') {
-		            remarksArea.required = true;
-		            remarksArea.placeholder = "Reason for rejection (Required)...";
-		        } else {
-		            remarksArea.required = false;
-		            remarksArea.placeholder = "Optional remarks...";
-		        }
-		    }
-		}
+          if (normalizedAction === "reject") {
+            remarksArea.required = true;
+            remarksArea.placeholder = "Reason for rejection (Required)...";
+          } else {
+            remarksArea.required = false;
+            remarksArea.placeholder = "Optional remarks...";
+          }
+        }
+      }
 
-		function closeModal(id) {
-		    const modal = document.getElementById('modal-' + id);
-		    if (modal) {
-		        modal.classList.add('hidden');
-		    }
-		}
+      function closeModal(id) {
+        const modal = document.getElementById("modal-" + id);
+        if (modal) {
+          modal.classList.add("hidden");
+        }
+      }
 
-		/* --- 2. FILTER BUTTONS LOGIC --- */
-		document.addEventListener('DOMContentLoaded', function () {
-		    const noMsg = document.getElementById('no-requests-msg');
-		    const filterButtons = document.querySelectorAll('.filter-btn');
-		    const cards = document.querySelectorAll('.leave-card');
+      /* --- 2. FILTER BUTTONS LOGIC --- */
+      document.addEventListener("DOMContentLoaded", function () {
+        const noMsg = document.getElementById("no-requests-msg");
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        const cards = document.querySelectorAll(".leave-card");
 
-		    // Maps the button data-filter to your Thymeleaf Uppercase statuses
-		    const statusGroups = {
-		        'pending':  ['APPLIED', 'UPDATED'],
-		        'approved': ['APPROVED'],
-		        'rejected': ['REJECTED'],
-		        'inactive': ['CANCELLED', 'ARCHIVED']
-		    };
+        // Maps the button data-filter to your Thymeleaf Uppercase statuses
+        const statusGroups = {
+          pending: ["APPLIED", "UPDATED"],
+          approved: ["APPROVED"],
+          rejected: ["REJECTED"],
+          inactive: ["CANCELLED", "ARCHIVED"],
+        };
 
-		    filterButtons.forEach(btn => {
-		        btn.addEventListener('click', function () {
-		            const filterValue = this.getAttribute('data-filter');
+        filterButtons.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const filterValue = this.getAttribute("data-filter");
 
-		            // Visual Toggle for Buttons
-		            filterButtons.forEach(b => {
-		                b.classList.remove('bg-blue-600', 'bg-yellow-600', 'bg-green-600', 'bg-red-600', 'bg-gray-600', 'text-white');
-		                b.classList.add('bg-gray-100', 'text-gray-700');
-		            });
+            // Visual Toggle for Buttons
+            filterButtons.forEach((b) => {
+              b.classList.remove(
+                "bg-blue-600",
+                "bg-yellow-600",
+                "bg-green-600",
+                "bg-red-600",
+                "bg-gray-600",
+                "text-white",
+              );
+              b.classList.add("bg-gray-100", "text-gray-700");
+            });
 
-		            this.classList.remove('bg-gray-100', 'text-gray-700');
-		            this.classList.add('text-white');
-		            
-		            if (filterValue === 'all') this.classList.add('bg-blue-600');
-		            else if (filterValue === 'pending') this.classList.add('bg-yellow-600');
-		            else if (filterValue === 'approved') this.classList.add('bg-green-600');
-		            else if (filterValue === 'rejected') this.classList.add('bg-red-600');
-		            else if (filterValue === 'inactive') this.classList.add('bg-gray-600');
+            this.classList.remove("bg-gray-100", "text-gray-700");
+            this.classList.add("text-white");
 
-		            // Filtering Logic
-		            cards.forEach(card => {
-		                const cardStatus = card.getAttribute('data-status');
+            if (filterValue === "all") this.classList.add("bg-blue-600");
+            else if (filterValue === "pending")
+              this.classList.add("bg-yellow-600");
+            else if (filterValue === "approved")
+              this.classList.add("bg-green-600");
+            else if (filterValue === "rejected")
+              this.classList.add("bg-red-600");
+            else if (filterValue === "inactive")
+              this.classList.add("bg-gray-600");
 
-		                if (filterValue === 'all') {
-		                    // Show all except the "inactive" noise
-		                    if (cardStatus === 'CANCELLED' || cardStatus === 'ARCHIVED') {
-		                        card.classList.add('hidden');
-		                    } else {
-		                        card.classList.remove('hidden');
-		                    }
-		                } else {
-		                    const allowedStatuses = statusGroups[filterValue];
-		                    if (allowedStatuses && allowedStatuses.includes(cardStatus)) {
-		                        card.classList.remove('hidden');
-		                    } else {
-		                        card.classList.add('hidden');
-		                    }
-		                }
-		            });
+            // Filtering Logic
+            cards.forEach((card) => {
+              const cardStatus = card.getAttribute("data-status");
 
-		            updateEmptyState(noMsg);
-		        });
-		    });
+              if (filterValue === "all") {
+                // Show all except the "inactive" noise
+                if (cardStatus === "CANCELLED" || cardStatus === "ARCHIVED") {
+                  card.classList.add("hidden");
+                } else {
+                  card.classList.remove("hidden");
+                }
+              } else {
+                const allowedStatuses = statusGroups[filterValue];
+                if (allowedStatuses && allowedStatuses.includes(cardStatus)) {
+                  card.classList.remove("hidden");
+                } else {
+                  card.classList.add("hidden");
+                }
+              }
+            });
 
-		    updateEmptyState(noMsg);
-		});
+            updateEmptyState(noMsg);
+          });
+        });
 
-		// Helper function
-		function updateEmptyState(noMsg) {
-		    if (noMsg) {
-		        const visibleCards = document.querySelectorAll('.leave-card:not(.hidden)');
-		        if (visibleCards.length === 0) {
-		            noMsg.classList.remove('hidden');
-		        } else {
-		            noMsg.classList.add('hidden');
-		        }
-		    }
-		}
-		
-	</script>
-</body>
+        updateEmptyState(noMsg);
+      });
+
+      // Helper function
+      function updateEmptyState(noMsg) {
+        if (noMsg) {
+          const visibleCards = document.querySelectorAll(
+            ".leave-card:not(.hidden)",
+          );
+          if (visibleCards.length === 0) {
+            noMsg.classList.remove("hidden");
+          } else {
+            noMsg.classList.add("hidden");
+          }
+        }
+      }
+    </script>
+  </body>
 </html>
