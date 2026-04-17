@@ -3,25 +3,7 @@
 	<head>
 	
 		<head th:replace="~{fragments/common_header :: head('Dashboard - Leave Management System')}">
-			<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-			<style>
-				/* Match the calendar's style to your gray-900 text */
-				.fc-toolbar-title {
-					font-size: 1.25rem !important;
-					font-weight: 600;
-					color: #111827;
-				}
-	
-				.fc-button-primary {
-					background-color: #3b82f6 !important;
-					border-color: #3b82f6 !important;
-				}
-	
-				.fc-daygrid-day-number {
-					color: #374151;
-					text-decoration: none !important;
-				}
-			</style>
+			
 		</head>
 <body class="bg-gray-50">
     <div class="flex min-h-screen">
@@ -121,37 +103,28 @@
         </main>
     </div>
 
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+		<style>
+			/* Match the calendar's style to your gray-900 text */
+			.fc-toolbar-title {
+				font-size: 1.25rem !important;
+				font-weight: 600;
+				color: #111827;
+			}
+		
+			.fc-button-primary {
+				background-color: #3b82f6 !important;
+				border-color: #3b82f6 !important;
+			}
+		
+			.fc-daygrid-day-number {
+				color: #374151;
+				text-decoration: none !important;
+			}
+		</style>
+		
     <script>
-		document.addEventListener("DOMContentLoaded", function() {
-		    // Keep your loadDashboard() call
-		    loadDashboard();
 
-		    // Initialize FullCalendar
-		    const calendarEl = document.getElementById('calendar');
-		    const calendar = new FullCalendar.Calendar(calendarEl, {
-		        initialView: 'dayGridMonth',
-		        headerToolbar: {
-		            left: 'prev,next today',
-		            center: 'title',
-		            right: 'dayGridMonth,listMonth' // Added list view as a bonus
-		        },
-		        height: 'auto',
-		        // This is the magic part: it calls your new REST Controller
-		        events: 'api/calendar', 
-		        
-		        eventDidMount: function(info) {
-		            // Optional: adds a tooltip using the description from our DTO
-		            if (info.event.extendedProps.description) {
-		                info.el.setAttribute('title', info.event.extendedProps.description);
-		            }
-		        },
-		        // Ensures the calendar looks clean in your dashboard
-		        themeSystem: 'standard'
-		    });
-
-		    calendar.render();
-		});    
-	
 		function getStatusBadge(status) {
             let classes = "inline-flex px-2 py-1 rounded-full text-xs font-medium border ";
             let text = status;
@@ -239,6 +212,38 @@
         }
 
         document.addEventListener("DOMContentLoaded", loadDashboard);
+		
+		document.addEventListener("DOMContentLoaded", function() {
+		    // Keep your loadDashboard() call
+		    loadDashboard();
+
+		    // Initialize FullCalendar
+		    const calendarEl = document.getElementById('calendar');
+		    const calendar = new FullCalendar.Calendar(calendarEl, {
+		        initialView: 'dayGridMonth',
+		        headerToolbar: {
+		            left: 'prev,next today',
+		            center: 'title',
+		            right: 'dayGridMonth,listMonth' // Added list view as a bonus
+		        },
+		        height: 'auto',
+		        // This is the magic part: it calls your new REST Controller
+		        events: '/api/calendar', 
+		        
+		        eventDidMount: function(info) {
+		            // Optional: adds a tooltip using the description from our DTO
+		            if (info.event.extendedProps.description) {
+		                info.el.setAttribute('title', info.event.extendedProps.description);
+		            }
+		        },
+		        // Ensures the calendar looks clean in your dashboard
+		        themeSystem: 'standard'
+		    });
+
+		    calendar.render();
+		});
+		
     </script>
+	
 </body>
 </html>
