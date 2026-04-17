@@ -64,6 +64,7 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
       Pageable pageable
     );
     
+
     @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :staffId " +
             "AND l.leaveStatus IN :statusList " +
             "AND (:start <= l.endDate AND :end >= l.startDate)")
@@ -85,5 +86,24 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
          @Param("leaveStatus") LeaveStatus leaveStatus, 
          @Param("year") int year
      );
+
+    // For reporting: get leaves by manager, date range, and optional leave type
+    @Query("""
+    SELECT l FROM LeaveApplication l
+    JOIN l.employee e
+    WHERE e.manager.id = :managerId
+      AND l.leaveStatus = :status
+      AND (:leaveType IS NULL OR l.leaveType = :leaveType)
+      AND l.startDate <= :endDate
+      AND l.endDate >= :startDate
+    """)
+    List<LeaveApplication> findManagerLeavesByDateRange(
+        @Param("managerId") Long managerId,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        @Param("status") LeaveStatus status,
+        @Param("leaveType") LeaveType leaveType
+    );
+
 
 }
