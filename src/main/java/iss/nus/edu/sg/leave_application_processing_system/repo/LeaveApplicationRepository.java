@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveMovementDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 
 
@@ -62,5 +63,27 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
       @Param("endOfMonth") LocalDate endOfMonth,
       Pageable pageable
     );
+    
+    @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :staffId " +
+            "AND l.leaveStatus IN :statusList " +
+            "AND (:start <= l.endDate AND :end >= l.startDate)")
+     List<LeaveApplication> findOverlappingLeaves(
+         @Param("staffId") Long staffId, 
+         @Param("start") LocalDate start, 
+         @Param("end") LocalDate end, 
+         @Param("statusList") List<LeaveStatus> statusList
+     );
+
+     // Fixed field names to leaveType and leaveStatus
+     @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :staffId " +
+            "AND l.leaveType = :leaveType " +
+            "AND l.leaveStatus = :leaveStatus " +
+            "AND FUNCTION('YEAR', l.startDate) = :year")
+     List<LeaveApplication> findByEmployeeIdAndLeaveTypeAndLeaveStatusAndYear(
+         @Param("staffId") Long staffId, 
+         @Param("leaveType") LeaveType leaveType, 
+         @Param("leaveStatus") LeaveStatus leaveStatus, 
+         @Param("year") int year
+     );
 
 }
