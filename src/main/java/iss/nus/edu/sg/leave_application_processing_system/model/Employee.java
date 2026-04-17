@@ -23,10 +23,10 @@ public class Employee {
   private String name;
 
   @Enumerated(EnumType.STRING)
-  private Role role; // STAFF, MANAGER, ADMIN (enum)
+  private String role; // STAFF, MANAGER, ADMIN (enum)
   
   @Enumerated(EnumType.STRING)
-  private Designation designation;
+  private String designation;
 
   private String department;
 
@@ -81,19 +81,19 @@ public class Employee {
     this.name = name;
   }
 
-  public Role getRole() {
+  public String getRole() {
     return role;
   }
 
-  public void setRole(Role role) {
+  public void setRole(String role) {
     this.role = role;
   }
   
-  public Designation getDesignation() {
+  public String getDesignation() {
 	  return designation;
   }
   
-  public void setDesignation(Designation designation) {
+  public void setDesignation(String designation) {
 	  this.designation = designation;
   }
 

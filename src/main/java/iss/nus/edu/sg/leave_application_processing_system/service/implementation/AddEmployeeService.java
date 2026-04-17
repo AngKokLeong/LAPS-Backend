@@ -31,9 +31,12 @@ public class AddEmployeeService {
 			Employee employee = new Employee();
 			employee.setName(addEmployeeServiceDTO.getName());
 			employee.setEmail(addEmployeeServiceDTO.getEmail());
-			employee.setDepartment(null);
-			employee.setDesignation(null);
-			employee.setJoindate(null);
+			employee.setRole(addEmployeeServiceDTO.getRole());
+			employee.setDesignation(addEmployeeServiceDTO.getDesignation());
+			employee.setDepartment(addEmployeeServiceDTO.getDepartment());
+		
+			employee.setJoindate(addEmployeeServiceDTO.getJoinDate());
+			employee.setStatus(addEmployeeServiceDTO.getStatus());
 			
 
 			// Password encoding 
@@ -52,8 +55,8 @@ public class AddEmployeeService {
 			controllerDTO.setDepartment(saved.getDepartment());
 			controllerDTO.setJoinDate(saved.getJoindate());
 			controllerDTO.setStatus(saved.getStatus());
-			controllerDTO.setRole(saved.getRole() != null ? saved.getRole().name() : null);
-			controllerDTO.setDesignation(saved.getDesignation() != null ? saved.getDesignation().name() : null);
+			controllerDTO.setRole(saved.getRole());
+			controllerDTO.setDesignation(saved.getDesignation());
 			controllerDTO.setManagerId(saved.getManager() != null ? saved.getManager().getId() : null);
 			controllerDTO.setOperationResult(true);
 			controllerDTO.setOperationComments("Employee added successfully");
