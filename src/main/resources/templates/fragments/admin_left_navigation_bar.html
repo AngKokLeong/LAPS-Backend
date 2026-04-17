@@ -40,9 +40,10 @@
           >
             <span class="text-white font-semibold text-lg">AD</span>
           </div>
-          <div class="flex-1">
-            <p class="font-semibold text-gray-900">Administrator</p>
-            <p class="text-xs text-gray-600">admin@company.com</p>
+          <div class="flex-1" sec:authorize="isAuthenticated()">
+            <p class="font-semibold text-gray-900"
+				th:text="${#authentication.principal.employee.name}">Name</p>
+            <p class="text-xs text-gray-600">Email</p>
             <span
               class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 mt-1"
             >
