@@ -40,7 +40,6 @@ public class AnnualLeaveApplicationService implements LeaveApplicationService{
 
     @Override
     public List<ControllerDTO> viewApplicationStatus(ServiceDTO serviceDTO) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'viewApplicationStatus'");
     }
 

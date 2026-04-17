@@ -247,7 +247,23 @@ public class StaffController {
 				.map(dto -> (LeaveRequestControllerDTO) dto.getAllAttribute())
 				.collect(Collectors.toList());
 
+		// Calculate counts
+		long allCount = leaveRequestDTOList.size();
+		long pendingCount = leaveRequestDTOList.stream()
+				.filter(dto -> "APPLIED".equals(dto.getLeaveStatus()) || "UPDATED".equals(dto.getLeaveStatus()))
+				.count();
+		long approvedCount = leaveRequestDTOList.stream()
+				.filter(dto -> "APPROVED".equals(dto.getLeaveStatus()))
+				.count();
+		long rejectedCount = leaveRequestDTOList.stream()
+				.filter(dto -> "REJECTED".equals(dto.getLeaveStatus()))
+				.count();
+
 		model.addAttribute("leaveRequestList", leaveRequestDTOList);
+		model.addAttribute("allCount", allCount);
+		model.addAttribute("pendingCount", pendingCount);
+		model.addAttribute("approvedCount", approvedCount);
+		model.addAttribute("rejectedCount", rejectedCount);
 		model.addAttribute("deleteLeaveRequestDTO", new DeleteLeaveRequestControllerDTO());
 
 		return "my-leave-requests";

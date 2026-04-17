@@ -34,7 +34,6 @@ public class CompensationLeaveApplicationService implements LeaveApplicationServ
 
 	@Override
 	public List<ControllerDTO> viewApplicationStatus(ServiceDTO serviceDTO) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'viewApplicationStatus'");
 	}
 

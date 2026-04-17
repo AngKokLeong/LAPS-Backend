@@ -16,7 +16,6 @@ public class OrSpecification<T> extends CompositeSpecification<T> {
 
     @Override
     public BiPredicate<T, T> toPredicate() {
-        // TODO Auto-generated method stub
         return firstSpecification.toPredicate().or(secondSpecification.toPredicate());
     }
     
