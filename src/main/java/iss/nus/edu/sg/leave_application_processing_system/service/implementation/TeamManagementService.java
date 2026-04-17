@@ -4,7 +4,9 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -16,9 +18,13 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.OTClaim
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveBalanceControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedger;
+import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
 import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
@@ -34,59 +40,84 @@ public class TeamManagementService implements ManagerService {
 	private final OverTimeClaimRepository otClaimRepo;
 	private final LeaveApplicationRepository laRepo;
 	private final LeaveEntitlementRepository lEntitlementRepo;
+	private final CompensationLedgerRepository clRepo;
 	
 	public TeamManagementService(OverTimeClaimRepository otClaimRepo,
-			LeaveApplicationRepository laRepo, LeaveEntitlementRepository lEntitlementRepo) {
+			LeaveApplicationRepository laRepo, LeaveEntitlementRepository lEntitlementRepo,
+			CompensationLedgerRepository clRepo) {
 		this.otClaimRepo = otClaimRepo;
 		this.laRepo = laRepo;
 		this.lEntitlementRepo = lEntitlementRepo;
+		this.clRepo = clRepo;
 	}
 	
 
 	@Override
 	public List<ControllerDTO> viewTeamLeaveBalances(ServiceDTO serviceDTO) {
-		
-		// Cast the serviceDTO input to get the Manager ID to find all subordinates under them
-        // ManagerQueryServiceDTO input = (ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
-		
-		List<ControllerDTO> teamLeaveBalances = new ArrayList<>();
 
-        // USE MOCK DATA HERE
-        // Will need to call the Repository later
-        SubordinateLeaveBalanceControllerDTO mock1 = new SubordinateLeaveBalanceControllerDTO();
-        mock1.setEmployeeName("AhBeng Tan");
-        mock1.setEmail("ahbeng_tan@company.com");
-        mock1.setDepartment("Engineering");
-        mock1.setAnnualBalance(12 - 2); //simulate totalDays - usedDays
-        mock1.setMedicalBalance(20 - 3);
-        mock1.setCompensationBalance(2);
-        int sum = mock1.getAnnualBalance() + mock1.getCompensationBalance() + mock1.getMedicalBalance();
-        mock1.setTotalBalance(sum);
-        teamLeaveBalances.add(mock1);
+        ManagerQueryServiceDTO input = (ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
+        Long managerId = input.getManagerId();
+		
+        int currentYear = LocalDate.now().getYear();
         
-        SubordinateLeaveBalanceControllerDTO mock2 = new SubordinateLeaveBalanceControllerDTO();
-        mock2.setEmployeeName("AhHuat Lim");
-        mock2.setEmail("ahhuat_lim@company.com");
-        mock2.setDepartment("Engineering");
-        mock2.setAnnualBalance(14 - 2); //simulate totalDays - usedDays
-        mock2.setMedicalBalance(40 - 5);
-        mock2.setCompensationBalance(5);
-        sum = mock2.getAnnualBalance() + mock2.getCompensationBalance() + mock2.getMedicalBalance();
-        mock2.setTotalBalance(sum);
-        teamLeaveBalances.add(mock2);
+        // Fetch Entitlements (Annual/Medical)
+        List<LeaveEntitlement> entitlements = lEntitlementRepo.findAllByManagerId(managerId, currentYear);
         
-        SubordinateLeaveBalanceControllerDTO mock3 = new SubordinateLeaveBalanceControllerDTO();
-        mock3.setEmployeeName("David Ong");
-        mock3.setEmail("david_ong@company.com");
-        mock3.setDepartment("IT");
-        mock3.setAnnualBalance(18 - 5); //simulate totalDays - usedDays
-        mock3.setMedicalBalance(40 - 3);
-        mock3.setCompensationBalance(1);
-        sum = mock3.getAnnualBalance() + mock3.getCompensationBalance() + mock3.getMedicalBalance();
-        mock3.setTotalBalance(sum);
-        teamLeaveBalances.add(mock3);
+        // Fetch Compensation (OT)
+        List<CompensationLedger> compLedgers = clRepo.findAllByManagerId(managerId);
 
-        return teamLeaveBalances;
+
+        // Map to group by Employee ID
+        Map<Long, SubordinateLeaveBalanceControllerDTO> balanceMap = new HashMap<>();
+
+        // Process Entitlements (Annual/Medical)
+        for (LeaveEntitlement ent : entitlements) {
+            Employee emp = ent.getEmployeeId();
+            Long empId = emp.getId();
+
+            // Create DTO if not exists, and populate profile info
+            SubordinateLeaveBalanceControllerDTO dto = balanceMap.computeIfAbsent(empId, id -> {
+                SubordinateLeaveBalanceControllerDTO newDto = new SubordinateLeaveBalanceControllerDTO();
+                newDto.setEmployeeName(emp.getName());
+                newDto.setEmail(emp.getEmail());
+                newDto.setDepartment(emp.getDepartment());
+                return newDto;
+            });
+
+            // Calculate and set balances
+            int remaining = ent.getTotalDays() - ent.getUsedDays();
+            if (ent.getLeaveType() == LeaveType.ANNUAL) {
+                dto.setAnnualBalance(remaining);
+            } else if (ent.getLeaveType() == LeaveType.MEDICAL) {
+                dto.setMedicalBalance(remaining);
+            }
+        }
+
+        // Process Compensation Ledger (OT)
+        for (CompensationLedger comp : compLedgers) {
+            Long empId = comp.getEmployee().getId();
+            SubordinateLeaveBalanceControllerDTO dto = balanceMap.get(empId);
+            
+            // If the employee didn't have entitlements, we create the DTO here too
+            if (dto == null) {
+                Employee emp = comp.getEmployee();
+                dto = new SubordinateLeaveBalanceControllerDTO();
+                dto.setEmployeeName(emp.getName());
+                dto.setEmail(emp.getEmail());
+                dto.setDepartment(emp.getDepartment());
+                balanceMap.put(empId, dto);
+            }
+
+            double balance = comp.getEarnedDays() - comp.getUsedDays();
+            dto.setCompensationBalance(balance);
+        }
+
+        // Final Calculation for Total Balance
+        for (SubordinateLeaveBalanceControllerDTO dto : balanceMap.values()) {
+            dto.setTotalBalance(dto.getAnnualBalance() + dto.getMedicalBalance() + dto.getCompensationBalance());
+        }
+
+        return new ArrayList<>(balanceMap.values());
 	}
 	
 	@Override
