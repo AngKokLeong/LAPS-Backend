@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+  <head
+    th:replace="~{fragments/common_header :: head('Reports - Leave Management System')}"
+  >
+  </head>
+  <body class="bg-gray-50">
+    <div class="flex min-h-screen">
+      <!-- Navigation Sidebar -->
+      <div
+        th:replace="~{fragments/manager_left_navigation_bar :: manager_navigation_bar('Manager')}"
+      ></div>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div class="mb-8">
+          <h1 class="text-3xl font-semibold text-gray-900">Reports</h1>
+          <p class="text-gray-500 mt-1">
+            Generate and export leave and overtime reports
+          </p>
+        </div>
+
+        <!-- ==================== LEAVE REPORT SECTION ==================== -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-semibold text-gray-900 mb-6">Leave</h2>
+
+          <!-- Date Range & Leave Type Filter -->
+          <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >Date Range</label
+                >
+                <div class="flex gap-2">
+                  <input
+                    type="date"
+                    id="leaveStartDate"
+                    value="2026-04-01"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span class="flex items-center text-gray-500">to</span>
+                  <input
+                    type="date"
+                    id="leaveEndDate"
+                    value="2026-04-30"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <p id="leaveDateError" class="mt-2 text-sm text-red-600 hidden">
+                  End date must be the same as or after the start date.
+                </p>
+              </div>
+
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >Leave Type</label
+                >
+                <select
+                  id="leaveTypeFilter"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All</option>
+                  <option value="ANNUAL">Annual</option>
+                  <option value="COMPENSATION">Compensation</option>
+                  <option value="MEDICAL">Medical</option>
+                </select>
+              </div>
+
+              <div class="flex items-end gap-2">
+                <button
+                  id="applyLeaveFilter"
+                  class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Apply Filter
+                </button>
+                <button
+                  id="exportLeaveCSV"
+                  class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                  Export CSV
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leave Report Table -->
+          <div
+            class="bg-white rounded-xl border border-gray-200 overflow-hidden"
+          >
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">
+                Approved Leave Applications
+              </h3>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Employee Name
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Department
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Leave Type
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Start Date
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      End Date
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Days
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Reason
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="leaveTableBody" class="divide-y divide-gray-200">
+                  <tr>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                      Click "Apply Filter"
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== OVERTIME CLAIM REPORT SECTION ==================== -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+            Overtime Claims
+          </h2>
+
+          <!-- Date Range Filter for OT -->
+          <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >Date Range</label
+                >
+                <div class="flex gap-2">
+                  <input
+                    type="date"
+                    id="otStartDate"
+                    value="2026-04-01"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span class="flex items-center text-gray-500">to</span>
+                  <input
+                    type="date"
+                    id="otEndDate"
+                    value="2026-04-30"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <p id="otDateError" class="mt-2 text-sm text-red-600 hidden">
+                  End date must be the same as or after the start date.
+                </p>
+              </div>
+
+              <div class="flex items-end gap-2">
+                <button
+                  id="applyOTFilter"
+                  class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Apply Filter
+                </button>
+                <button
+                  id="exportOTCSV"
+                  class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                  Export CSV
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- OverTime Claim Report Table -->
+          <div
+            class="bg-white rounded-xl border border-gray-200 overflow-hidden"
+          >
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">
+                Overtime Claims
+              </h3>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Employee Name
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Department
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Status
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Start
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      End
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Hours
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Description
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="otTableBody" class="divide-y divide-gray-200">
+                  <tr>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                      Click "Apply Filter"
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Format date for display
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      // Format datetime for display
+      function formatDateTime(dateTimeString) {
+        const date = new Date(dateTimeString);
+        return (
+          date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          }) +
+          " " +
+          date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        );
+      }
+
+      // Get badge color and text for leave type
+      function getLeaveTypeBadge(leaveType) {
+        const badges = {
+          ANNUAL: { bg: "bg-blue-100", text: "text-blue-700", label: "Annual" },
+          MEDICAL: { bg: "bg-red-100", text: "text-red-700", label: "Medical" },
+          COMPENSATION: {
+            bg: "bg-green-100",
+            text: "text-green-700",
+            label: "Compensation",
+          },
+        };
+        return (
+          badges[leaveType] || {
+            bg: "bg-gray-100",
+            text: "text-gray-700",
+            label: leaveType,
+          }
+        );
+      }
+
+      // Get badge color and text for OT status
+      function getOTStatusBadge(status) {
+        const badges = {
+          APPROVED: {
+            bg: "bg-green-100",
+            text: "text-green-700",
+            label: "Approved",
+          },
+          PENDING: {
+            bg: "bg-yellow-100",
+            text: "text-yellow-700",
+            label: "Pending",
+          },
+          REJECTED: {
+            bg: "bg-red-100",
+            text: "text-red-700",
+            label: "Rejected",
+          },
+        };
+        return (
+          badges[status] || {
+            bg: "bg-gray-100",
+            text: "text-gray-700",
+            label: status,
+          }
+        );
+      }
+
+      function isDateRangeValid(startDate, endDate) {
+        return !startDate || !endDate || startDate <= endDate;
+      }
+
+      function updateApplyButtons() {
+        const leaveStart = document.getElementById("leaveStartDate").value;
+        const leaveEnd = document.getElementById("leaveEndDate").value;
+        const otStart = document.getElementById("otStartDate").value;
+        const otEnd = document.getElementById("otEndDate").value;
+
+        const leaveInvalid =
+          leaveStart && leaveEnd && !isDateRangeValid(leaveStart, leaveEnd);
+        const otInvalid = otStart && otEnd && !isDateRangeValid(otStart, otEnd);
+
+        const leaveButton = document.getElementById("applyLeaveFilter");
+        const otButton = document.getElementById("applyOTFilter");
+        const leaveError = document.getElementById("leaveDateError");
+        const otError = document.getElementById("otDateError");
+
+        if (leaveInvalid) {
+          leaveButton.disabled = true;
+          leaveButton.classList.add("opacity-50", "cursor-not-allowed");
+          leaveError.classList.remove("hidden");
+        } else {
+          leaveButton.disabled = false;
+          leaveButton.classList.remove("opacity-50", "cursor-not-allowed");
+          leaveError.classList.add("hidden");
+        }
+
+        if (otInvalid) {
+          otButton.disabled = true;
+          otButton.classList.add("opacity-50", "cursor-not-allowed");
+          otError.classList.remove("hidden");
+        } else {
+          otButton.disabled = false;
+          otButton.classList.remove("opacity-50", "cursor-not-allowed");
+          otError.classList.add("hidden");
+        }
+      }
+
+      // Load leave report data
+      async function loadLeaveReport() {
+        const startDate = document.getElementById("leaveStartDate").value;
+        const endDate = document.getElementById("leaveEndDate").value;
+        const leaveType = document.getElementById("leaveTypeFilter").value;
+
+        if (!startDate || !endDate) {
+          alert("Please select both start and end dates");
+          return;
+        }
+
+        if (!isDateRangeValid(startDate, endDate)) {
+          alert("End date must be the same as or after the start date.");
+          return;
+        }
+
+        try {
+          const params = new URLSearchParams({
+            startDate: startDate,
+            endDate: endDate,
+            leaveType: leaveType,
+          });
+
+          const response = await fetch(`/manager/reports/leaves?${params}`);
+          const json = await response.json();
+          if (!response.ok) {
+            throw new Error(
+              json.message || `HTTP error! status: ${response.status}`,
+            );
+          }
+
+          populateLeaveTable(json);
+        } catch (error) {
+          console.error("Error loading leave report:", error);
+          alert(
+            error.message || "Error loading leave report. Please try again.",
+          );
+        }
+      }
+
+      // Populate leave report table
+      function populateLeaveTable(reports) {
+        const tbody = document.getElementById("leaveTableBody");
+
+        if (reports.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No leave records found for the selected period.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = reports
+          .map((report) => {
+            const badge = getLeaveTypeBadge(report.leaveType);
+            return `
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900">${report.employeeName}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${report.department}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}">
+                  ${badge.label}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600">${formatDate(report.startDate)}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${formatDate(report.endDate)}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${report.daysTaken}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${report.reason || "-"}</td>
+            </tr>
+          `;
+          })
+          .join("");
+      }
+
+      // Load compensation report data
+      async function loadCompensationReport() {
+        const startDate = document.getElementById("otStartDate").value;
+        const endDate = document.getElementById("otEndDate").value;
+
+        if (!startDate || !endDate) {
+          alert("Please select both start and end dates");
+          return;
+        }
+
+        if (!isDateRangeValid(startDate, endDate)) {
+          alert("End date must be the same as or after the start date.");
+          return;
+        }
+
+        try {
+          const params = new URLSearchParams({
+            startDate: startDate,
+            endDate: endDate,
+          });
+
+          const response = await fetch(
+            `/manager/reports/compensation?${params}`,
+          );
+          const json = await response.json();
+          if (!response.ok) {
+            throw new Error(
+              json.message || `HTTP error! status: ${response.status}`,
+            );
+          }
+
+          populateOTTable(json);
+        } catch (error) {
+          console.error("Error loading compensation report:", error);
+          alert(
+            error.message ||
+              "Error loading compensation report. Please try again.",
+          );
+        }
+      }
+
+      // Populate OT report table
+      function populateOTTable(reports) {
+        const tbody = document.getElementById("otTableBody");
+
+        if (reports.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No overtime claims found for the selected period.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = reports
+          .map((report) => {
+            const badge = getOTStatusBadge(report.status);
+            return `
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900">${report.employeeName}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${report.department}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text} border border-current border-opacity-30">
+                  ${badge.label}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600">${formatDateTime(report.startDateTime)}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${formatDateTime(report.endDateTime)}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${report.hoursWorked.toFixed(2)}h</td>
+              <td class="px-6 py-4 text-sm text-gray-600">${report.description || "-"}</td>
+            </tr>
+          `;
+          })
+          .join("");
+      }
+
+      // Export leave report as CSV
+      async function exportLeaveCSV() {
+        const startDate = document.getElementById("leaveStartDate").value;
+        const endDate = document.getElementById("leaveEndDate").value;
+        const leaveType = document.getElementById("leaveTypeFilter").value;
+
+        if (!startDate || !endDate) {
+          alert("Please select both start and end dates");
+          return;
+        }
+
+        try {
+          const params = new URLSearchParams({
+            startDate: startDate,
+            endDate: endDate,
+            leaveType: leaveType,
+          });
+
+          const response = await fetch(
+            `/manager/reports/export-leaves-csv?${params}`,
+            {
+              method: "POST",
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `leave_report_${new Date().toISOString().split("T")[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (error) {
+          console.error("Error exporting leave CSV:", error);
+          alert("Error exporting CSV. Please try again.");
+        }
+      }
+
+      // Export compensation report as CSV
+      async function exportCompensationCSV() {
+        const startDate = document.getElementById("otStartDate").value;
+        const endDate = document.getElementById("otEndDate").value;
+
+        if (!startDate || !endDate) {
+          alert("Please select both start and end dates");
+          return;
+        }
+
+        try {
+          const params = new URLSearchParams({
+            startDate: startDate,
+            endDate: endDate,
+          });
+
+          const response = await fetch(
+            `/manager/reports/export-compensation-csv?${params}`,
+            {
+              method: "POST",
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `compensation_report_${new Date().toISOString().split("T")[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (error) {
+          console.error("Error exporting compensation CSV:", error);
+          alert("Error exporting CSV. Please try again.");
+        }
+      }
+
+      // Event listeners
+      document
+        .getElementById("applyLeaveFilter")
+        .addEventListener("click", loadLeaveReport);
+      document
+        .getElementById("exportLeaveCSV")
+        .addEventListener("click", exportLeaveCSV);
+      document
+        .getElementById("applyOTFilter")
+        .addEventListener("click", loadCompensationReport);
+      document
+        .getElementById("exportOTCSV")
+        .addEventListener("click", exportCompensationCSV);
+
+      document
+        .getElementById("leaveStartDate")
+        .addEventListener("change", updateApplyButtons);
+      document
+        .getElementById("leaveEndDate")
+        .addEventListener("change", updateApplyButtons);
+      document
+        .getElementById("otStartDate")
+        .addEventListener("change", updateApplyButtons);
+      document
+        .getElementById("otEndDate")
+        .addEventListener("change", updateApplyButtons);
+
+      updateApplyButtons();
+    </script>
+  </body>
+</html>

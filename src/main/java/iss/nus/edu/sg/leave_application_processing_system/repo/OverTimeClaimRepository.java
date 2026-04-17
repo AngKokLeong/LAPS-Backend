@@ -31,6 +31,21 @@ public interface OverTimeClaimRepository extends JpaRepository<OverTimeClaim, Lo
             "ORDER BY CASE WHEN o.status = 'PENDING' THEN 0 ELSE 1 END ASC, " +
             "o.startDateTime DESC")
     List<OverTimeClaim> findSubordinateClaimsCustomSort(@Param("managerId") Long managerId);
-
+    
+    // For reporting: get OT claims by manager and date range, optional filter by status
+    @Query("""
+    SELECT o FROM OverTimeClaim o
+    WHERE o.employee.manager.id = :managerId
+      AND o.startDateTime >= :startDate
+      AND o.startDateTime <= :endDate
+      AND (:status IS NULL OR o.status = :status)
+    ORDER BY o.startDateTime DESC
+    """)
+    List<OverTimeClaim> findManagerOTClaimsByDateRange(
+        @Param("managerId") Long managerId,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate,
+        @Param("status") OTClaimStatus status
+    );
 
 }
