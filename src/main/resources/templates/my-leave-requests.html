@@ -59,7 +59,7 @@
                                 <p class="text-sm text-gray-500 mt-1" th:text="${leaveRequest.leavePeriod}"></p>
                             </div>
                         </div>
-                        leaveRequestId
+
                         <div th:switch="${#strings.toString(leaveRequest.leaveStatus)}">
                             <span th:case="'APPLIED'"
                                 class="px-4 py-2 rounded-lg text-sm font-medium border bg-blue-50 text-blue-700 border-blue-200">
@@ -127,7 +127,8 @@
                                 </button>
                                 <button
                                     class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-                                    onclick="openDeleteModal()">
+                                    onclick="openDeleteModal(this)"
+                                    th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -162,7 +163,8 @@
                                 </button>
                                 <button
                                     class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-                                    onclick="openDeleteModal()">
+                                    onclick="openDeleteModal(this)"
+                                    th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -507,78 +509,86 @@
             </div>
 
             <!-- Modal Body -->
-            <div class="p-6">
-                <div class="mb-6">
-                    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                            </path>
-                        </svg>
-                        <p class="text-sm text-red-800">
-                            <strong>Warning:</strong> This action cannot be undone. The request will be permanently
-                            deleted.
-                        </p>
-                    </div>
-                </div>
+            <form th:action="@{/staff/delete-leave-request}" th:object="${deleteLeaveRequestDTO}" method="post">
+                <div class="p-6">
+                    <input type="hidden" name="leaveRequestId" id="deleteLeaveRequestId" />
+                    <input type="hidden" name="leaveType" id="deleteLeaveType" />
+                    <input type="hidden" name="leaveStatus" id="deleteLeaveStatus" />
+                    <input type="hidden" name="startDate" id="deleteStartDate" />
+                    <input type="hidden" name="endDate" id="deleteEndDate" />
 
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-900 mb-3">Request to Delete:</h3>
-                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Leave Type:</span>
-                                <span class="font-medium text-gray-900">Personal Leave</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Duration:</span>
-                                <span class="font-medium text-gray-900">5/5/2026 - 5/6/2026</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Total Days:</span>
-                                <span class="font-medium text-gray-900">2 days</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Status:</span>
-                                <span
-                                    class="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">Applied</span>
-                            </div>
+                    <div class="mb-6">
+                        <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                            </svg>
+                            <p class="text-sm text-red-800">
+                                <strong>Warning:</strong> This action cannot be undone. The request will be permanently
+                                deleted.
+                            </p>
                         </div>
                     </div>
 
-                    <div>
-                        <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">
-                            Deletion Reason (Optional)
-                        </label>
-                        <textarea id="deleteReason" rows="3"
-                            placeholder="You may provide a reason for deleting this request..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none"></textarea>
-                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Request to Delete:</h3>
+                            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Leave Type:</span>
+                                    <span class="font-medium text-gray-900" id="deleteLeaveTypeDisplay">-</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Duration:</span>
+                                    <span class="font-medium text-gray-900" id="deleteLeavePeriod">-</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Total Days:</span>
+                                    <span class="font-medium text-gray-900" id="deleteLeaveDuration">-</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span id="deleteLeaveStatusDisplay"
+                                        class="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">-</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <input type="checkbox" id="confirmDelete"
-                            class="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" />
-                        <label for="confirmDelete" class="text-sm text-gray-700">
-                            I understand that this action is permanent and cannot be reversed
-                        </label>
+                        <div>
+                            <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">
+                                Deletion Reason (Optional)
+                            </label>
+                            <textarea id="deleteReason" name="reason" rows="3"
+                                placeholder="You may provide a reason for deleting this request..."
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none"></textarea>
+                        </div>
+
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                            <input type="checkbox" id="confirmDelete"
+                                class="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" />
+                            <label for="confirmDelete" class="text-sm text-gray-700">
+                                I understand that this action is permanent and cannot be reversed
+                            </label>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Modal Footer -->
-            <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl">
-                <div class="flex gap-3">
-                    <button onclick="closeDeleteModal()"
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
-                        Cancel
-                    </button>
-                    <button id="confirmDeleteBtn" onclick="submitDeleteRequest()" disabled
-                        class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                        Delete Request
-                    </button>
+                <!-- Modal Footer -->
+                <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl">
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeDeleteModal()"
+                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
+                            Cancel
+                        </button>
+                        <button type="submit" id="confirmDeleteBtn" disabled
+                            class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                            Delete Request
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -627,7 +637,38 @@
         }
 
         // Delete Modal Functions
-        function openDeleteModal() {
+        function openDeleteModal(button) {
+            const leaveType = button.getAttribute('data-leave-type');
+            const leavePeriod = button.getAttribute('data-leave-period');
+            const reason = button.getAttribute('data-reason');
+            const leaveDurationData = button.getAttribute('data-leave-duration');
+            const leaveStatus = button.getAttribute('data-leave-status');
+            const leaveRequestId = button.getAttribute('data-leave-request-id');
+            const leaveStartDate = button.getAttribute('data-leave-start-date');
+            const leaveEndDate = button.getAttribute('data-leave-end-date');
+
+            // Set hidden fields
+            document.getElementById('deleteLeaveRequestId').value = leaveRequestId;
+            document.getElementById('deleteLeaveType').value = leaveType;
+            document.getElementById('deleteLeaveStatus').value = leaveStatus;
+            document.getElementById('deleteStartDate').value = leaveStartDate;
+            document.getElementById('deleteEndDate').value = leaveEndDate;
+
+            // Set display fields
+            document.getElementById('deleteLeaveTypeDisplay').textContent = leaveType || '-';
+            document.getElementById('deleteLeavePeriod').textContent = leavePeriod || '-';
+            document.getElementById('deleteLeaveDuration').textContent = leaveDurationData || '-';
+            
+            // Set status badge
+            const statusDisplay = document.getElementById('deleteLeaveStatusDisplay');
+            statusDisplay.textContent = leaveStatus || '-';
+            statusDisplay.className = 'px-2 py-1 rounded text-xs font-medium ' + getStatusBadgeClass(leaveStatus);
+
+            // Reset form
+            document.getElementById('deleteReason').value = reason || '';
+            document.getElementById('confirmDelete').checked = false;
+            document.getElementById('confirmDeleteBtn').disabled = true;
+
             document.getElementById('deleteModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -638,19 +679,6 @@
             document.getElementById('deleteReason').value = '';
             document.getElementById('confirmDelete').checked = false;
             document.getElementById('confirmDeleteBtn').disabled = true;
-        }
-
-        function submitDeleteRequest() {
-            const reason = document.getElementById('deleteReason').value.trim();
-
-            // Here you would typically send the delete request to your backend
-            console.log('Deleting request with reason:', reason);
-
-            alert('Leave request has been deleted successfully!');
-            closeDeleteModal();
-
-            // In a real application, you would refresh the data or update the UI
-            // window.location.reload();
         }
 
         // Enable/disable delete button based on checkbox
@@ -664,6 +692,19 @@
                 });
             }
         });
+
+        // Helper function for status badge styling
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'APPLIED': return 'bg-blue-100 text-blue-700';
+                case 'UPDATED': return 'bg-purple-100 text-purple-700';
+                case 'APPROVED': return 'bg-green-100 text-green-700';
+                case 'REJECTED': return 'bg-red-100 text-red-700';
+                case 'CANCELLED': return 'bg-orange-100 text-orange-700';
+                case 'DELETED': return 'bg-gray-100 text-gray-700';
+                default: return 'bg-gray-100 text-gray-700';
+            }
+        }
 
         // Close modals when clicking outside
         document.getElementById('cancelModal')?.addEventListener('click', function (e) {
