@@ -136,15 +136,19 @@ public class TeamManagementService implements ManagerService {
         String actionTaken = request.getAction();
 
         if ("APPROVE".equalsIgnoreCase(actionTaken)) {
-            // Handle Entitlement Update
-            updateEntitlement(application);
+            
+        	if (application.getLeaveType() == LeaveType.COMPENSATION) {
+                updateCompensationLedger(application);
+            } else {
+                updateEntitlement(application);
+            }
 
             // Update Application Status
             application.setLeaveStatus(LeaveStatus.APPROVED);
             application.setMgrRemarks(request.getManagerRemarks());
             
             response.setNewStatus("APPROVED");
-            response.setMessage("Application approved and entitlement updated.");
+            response.setMessage("Application approved and balance updated.");
             response.setSuccess(true);
         } 
         else if ("REJECT".equalsIgnoreCase(actionTaken)) {
@@ -246,6 +250,29 @@ public class TeamManagementService implements ManagerService {
 	    return (double) days;
 	}
 	
+	private double calculateDuration(LocalDate start, LocalDate end, boolean isHalfDay) {
+		
+		double workingDaysCount = 0;
+	    LocalDate current = start;
+
+	    while (!current.isAfter(end)) {
+	        DayOfWeek dow = current.getDayOfWeek();
+	        
+	        // Only count the day if it's NOT a weekend
+	        if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
+	            workingDaysCount++;
+	        }
+	        current = current.plusDays(1);
+	    }
+
+	    // Apply the 0.5 multiplier if the half-day box is checked
+	    if (isHalfDay) {
+	        return workingDaysCount * 0.5;
+	    }
+
+	    return workingDaysCount;
+	}
+	
 	// helper method to update leave entitlement
 	private void updateEntitlement(LeaveApplication app) {
 	    // Find entitlement by Employee, LeaveType, and Year
@@ -265,5 +292,38 @@ public class TeamManagementService implements ManagerService {
 	    entitlement.setUsedDays(newUsedDays);
 	    lEntitlementRepo.save(entitlement);
 	}
+	
+	// helper method to update compensation ledger
+	private void updateCompensationLedger(LeaveApplication application) {
+	    int year = application.getStartDate().getYear();
+	    Long employeeId = application.getEmployee().getId();
+
+	    // Fetch the ledger record
+	    CompensationLedger ledger = clRepo.findByEmployeeIdAndYearApplied(employeeId, year)
+	            .orElseThrow(() -> new EntityNotFoundException("Compensation Ledger not found for this employee"));
+
+	    // Calculate the actual working days (excluding weekends)
+	    double daysToDeduct = calculateDuration(
+	        application.getStartDate(), 
+	        application.getEndDate(), 
+	        application.isHalfDay()
+	    );
+	    
+	    // Increment used days
+	    double newUsedDays = ledger.getUsedDays() + calculateDuration(application.getStartDate(), application.getEndDate());
+	    
+	    // Safety check: Don't exceed total allowed
+	    if (newUsedDays > ledger.getEarnedDays()) {
+	        throw new IllegalArgumentException("Approval failed: Employee has insufficient compensation leave balance.");
+	    }
+
+	    // Update the used days
+	    ledger.setUsedDays(ledger.getUsedDays() + daysToDeduct);
+
+	    // 4. Save to repository
+	    clRepo.save(ledger);
+	}
+	
+	
 	
 }
