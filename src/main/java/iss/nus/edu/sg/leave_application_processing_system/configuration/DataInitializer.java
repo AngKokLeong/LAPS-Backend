@@ -231,6 +231,8 @@ public class DataInitializer implements CommandLineRunner {
 		createLeaveApplication(jason, jasonAnnual, 5, 3, LeaveStatus.APPLIED, "Family vacation", "");
 
 		createLeaveApplication(john, johnMedical, 1, 2, LeaveStatus.APPROVED, "Doctor's appointment", "");
+		createLeaveApplication(john, johnMedical, 10, 1, LeaveStatus.APPROVED, "Doctor's appointment", "");
+
 
 		createLeaveApplication(maria, mariaAnnual, 10, 5, LeaveStatus.REJECTED, "Staycation", "Short handed at work");
 		
@@ -238,6 +240,7 @@ public class DataInitializer implements CommandLineRunner {
 		createLeaveApplication(admin, adminAnnual, 15, 2, LeaveStatus.APPLIED, "Personal matters", "");
 		
 		createLeaveApplication(john, johnAnnual, 20, 9, LeaveStatus.UPDATED, "Overseas vacation", "");
+		createLeaveApplication(john, johnAnnual, 10, 2, LeaveStatus.APPLIED, "TEST", "");		
 		
 		// create public holidays
 		PublicHoliday ny2026 = new PublicHoliday();
