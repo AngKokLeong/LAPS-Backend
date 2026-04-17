@@ -146,11 +146,12 @@ public class StaffController {
 				if (leaveApplicationControllerDTO.getApplicationResult()) {
 					// show success message
 					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+					ra.addFlashAttribute("successMessage", "Leave application submitted successfully!");
 				} else {
 					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+					ra.addFlashAttribute("errorMessage", leaveApplicationControllerDTO.getLeaveApprovalReason());
 				}
-
-				ra.addFlashAttribute("successMessage", "Leave application submitted successfully!");
+				
 
 			} else if (leaveApplication.getType().equals(LeaveType.MEDICAL)) {
 				MedicalLeaveServiceDTO medicalLeaveServiceDTO = new MedicalLeaveServiceDTO();
@@ -170,11 +171,12 @@ public class StaffController {
 				if (leaveApplicationControllerDTO.getApplicationResult()) {
 					// show success message
 					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+					ra.addFlashAttribute("successMessage", "Leave application submitted successfully!");
 				} else {
 					model.addAttribute("leaveApplicationInformation", leaveApplicationControllerDTO);
+					ra.addFlashAttribute("errorMessage", leaveApplicationControllerDTO.getLeaveApprovalReason());
 				}
-
-				ra.addFlashAttribute("successMessage", "Leave application submitted successfully!");
+				
 			} else if (leaveApplication.getType().equals(LeaveType.COMPENSATION)) {
 				CompensationLeaveServiceDTO compDTO = new CompensationLeaveServiceDTO();
 				compDTO.setStaffId(leaveApplication.getStaffId());

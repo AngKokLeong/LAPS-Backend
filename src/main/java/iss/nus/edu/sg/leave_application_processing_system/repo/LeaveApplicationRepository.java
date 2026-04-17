@@ -64,6 +64,29 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
       Pageable pageable
     );
     
+
+    @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :staffId " +
+            "AND l.leaveStatus IN :statusList " +
+            "AND (:start <= l.endDate AND :end >= l.startDate)")
+     List<LeaveApplication> findOverlappingLeaves(
+         @Param("staffId") Long staffId, 
+         @Param("start") LocalDate start, 
+         @Param("end") LocalDate end, 
+         @Param("statusList") List<LeaveStatus> statusList
+     );
+
+     // Fixed field names to leaveType and leaveStatus
+     @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :staffId " +
+            "AND l.leaveType = :leaveType " +
+            "AND l.leaveStatus = :leaveStatus " +
+            "AND FUNCTION('YEAR', l.startDate) = :year")
+     List<LeaveApplication> findByEmployeeIdAndLeaveTypeAndLeaveStatusAndYear(
+         @Param("staffId") Long staffId, 
+         @Param("leaveType") LeaveType leaveType, 
+         @Param("leaveStatus") LeaveStatus leaveStatus, 
+         @Param("year") int year
+     );
+
     // For reporting: get leaves by manager, date range, and optional leave type
     @Query("""
     SELECT l FROM LeaveApplication l
@@ -82,8 +105,10 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
         @Param("leaveType") LeaveType leaveType
     );
 
+
     // For dashboard: recent leaves for employee
     @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :employeeId")
     org.springframework.data.domain.Page<LeaveApplication> findTop5RecentByEmployeeId(@Param("employeeId") Long employeeId, org.springframework.data.domain.Pageable pageable);
+
 
 }

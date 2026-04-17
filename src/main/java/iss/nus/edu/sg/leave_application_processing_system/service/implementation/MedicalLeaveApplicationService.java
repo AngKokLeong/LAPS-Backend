@@ -5,16 +5,18 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.LeaveApplicationService;
-
+import iss.nus.edu.sg.leave_application_processing_system.service.LeaveValidationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 
@@ -22,6 +24,7 @@ import iss.nus.edu.sg.leave_application_processing_system.service.business_logic
 import iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification_impl.medical_leave_specification.MedicalLeavePeriodWIthinCalendarYear;
 import iss.nus.edu.sg.leave_application_processing_system.service.business_logic.specification_impl.medical_leave_specification.MedicalLeavePeriodWithinSixtyDays;
 
+@Service
 public class MedicalLeaveApplicationService implements LeaveApplicationService{
 
     @Autowired
@@ -30,7 +33,8 @@ public class MedicalLeaveApplicationService implements LeaveApplicationService{
     @Autowired
     private LeaveApplicationRepository leaveApplicationRepository;
 
-
+    @Autowired
+    private LeaveValidationService validationService;
 
     @Override
     public List<ControllerDTO> viewApplicationStatus(ServiceDTO serviceDTO) {
@@ -41,22 +45,27 @@ public class MedicalLeaveApplicationService implements LeaveApplicationService{
     public ControllerDTO submitApplication(ServiceDTO serviceDTO) {
         
         MedicalLeaveServiceDTO dto = (MedicalLeaveServiceDTO) serviceDTO.getAllAttribute();
+        
+        LeaveApplicationControllerDTO valDto = new LeaveApplicationControllerDTO();
+        valDto.setStaffId(dto.getStaffId());
+        valDto.setType(LeaveType.MEDICAL);
+        valDto.setStartDate(dto.getLeavePeriodStart());
+        valDto.setEndDate(dto.getLeavePeriodEnd());
+        valDto.setHalfDay(dto.isHalfDay());
 
-        //evaluate the number of leave
-        int numberOfWeekEnds = 0;
+        double totalNumberOfLeaveApplied = validationService.calculateDays(
+                valDto.getStartDate(), 
+                valDto.getEndDate(), 
+                valDto.isHalfDay()
+            );
+        
+     // 4. Run Universal Validation (Balance, Overlap, 14-day rule, etc.)
+        String errorMessage = validationService.validate(valDto, totalNumberOfLeaveApplied);
 
-        for (int dayOfMonth = dto.getLeavePeriodStart().getDayOfMonth(); dayOfMonth <= dto.getLeavePeriodEnd().getDayOfMonth(); dayOfMonth++){
-            LocalDate leavePeriodDay = LocalDate.of(dto.getLeavePeriodStart().getYear(), dto.getLeavePeriodStart().getMonth(), dayOfMonth);
-            if (leavePeriodDay.getDayOfWeek().getValue() > 5){
-                ++numberOfWeekEnds;
-            }
-        }
-
-          // increment the total leave applied by 1 to include the date from and date to
-        double totalNumberOfLeaveApplied = (dto.getLeavePeriodEnd().getDayOfYear() - dto.getLeavePeriodStart().getDayOfYear() + 1) - numberOfWeekEnds;
-
-        if (dto.isHalfDay()){
-            totalNumberOfLeaveApplied = totalNumberOfLeaveApplied / 2;
+        if (errorMessage != null) {
+            LeaveApplicationControllerDTO errorResponse = new LeaveApplicationControllerDTO(false);
+            errorResponse.setLeaveApprovalReason(errorMessage);
+            return errorResponse;
         }
 
         int test = LocalDate.of(2026, 01,01).getDayOfYear();
@@ -78,6 +87,8 @@ public class MedicalLeaveApplicationService implements LeaveApplicationService{
     
         if (!status) {
             //possible to add error message into the object
+        	LeaveApplicationControllerDTO errorResponse = new LeaveApplicationControllerDTO(false);
+            errorResponse.setLeaveApprovalReason(errorMessage);
             return new LeaveApplicationControllerDTO(false);
         }
 
