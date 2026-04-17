@@ -23,11 +23,14 @@
             <div class="p-4 border-b border-gray-200 bg-purple-50">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
-                        <span class="text-white font-semibold text-lg">SM</span>
+                        <span class="text-white font-semibold text-lg"
+							th:text="${#authentication.principal.initials}">SM</span>
                     </div>
-                    <div class="flex-1">
-                        <p class="font-semibold text-gray-900">Sarah Manager</p>
-                        <p class="text-xs text-gray-600">sarah@company.com</p>
+                    <div class="flex-1" sec:authorize="isAuthenticated()">
+                        <p class="font-semibold text-gray-900"
+							th:text="${#authentication.principal.employee.name}">Name</p>
+                        <p class="text-xs text-gray-600"
+							th:text="${#authentication.principal.employee.email}">Email</p>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
                             Manager
                         </span>

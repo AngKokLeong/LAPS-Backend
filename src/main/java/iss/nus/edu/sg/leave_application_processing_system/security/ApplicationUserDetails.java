@@ -34,4 +34,19 @@ public class ApplicationUserDetails implements UserDetails {
     public String getUsername() {
         return employee.getEmail();
     }
+    
+    public String getInitials() {
+        String name = this.employee.getName();
+        if (name == null || name.isBlank()) {
+            return "??";
+        }
+
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length == 1) {
+            return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
+        }
+
+        // Returns first letter of first name and first letter of last name
+        return (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
+    }
 }
