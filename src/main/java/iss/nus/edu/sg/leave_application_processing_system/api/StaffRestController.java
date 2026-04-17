@@ -58,7 +58,11 @@ public class StaffRestController {
             int pendingRequests = pendingApps.size();
 
             // Recent leaves (last 5)
-            List<LeaveApplication> recentLeaves = leaveAppRepo.findTop5RecentByEmployeeId(employee.getId(), PageRequest.of(0, 5)).getContent();
+            List<LeaveApplication> recentLeaves = leaveAppRepo.findTop5RecentByEmployeeId(employee.getId(), PageRequest.of(0, 5))
+                .getContent()
+                .stream()
+                .sorted((a, b) -> b.getAppliedDate().compareTo(a.getAppliedDate()))
+                .collect(Collectors.toList());
             List<DashboardDTO.LeaveSummaryDTO> recentLeaveDTOs = recentLeaves.stream()
                 .map(app -> new DashboardDTO.LeaveSummaryDTO(
                     app.getLeaveType().toString(),
