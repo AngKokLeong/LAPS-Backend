@@ -16,6 +16,7 @@ import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication
 import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.LeaveApplicationService;
+import iss.nus.edu.sg.leave_application_processing_system.service.LeaveValidationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.CompensationLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 
@@ -24,12 +25,14 @@ public class CompensationLeaveApplicationService implements LeaveApplicationServ
 
 	private CompensationLedgerRepository compRepo;
 	private LeaveApplicationRepository laRepo;
+	private LeaveValidationService validationService;
 	
 	
 	public CompensationLeaveApplicationService(CompensationLedgerRepository compRepo,
-			LeaveApplicationRepository laRepo) {
+			LeaveApplicationRepository laRepo, LeaveValidationService validationService) {
 		this.compRepo = compRepo;
 		this.laRepo = laRepo;
+		this.validationService = validationService;
 	}
 
 	@Override
@@ -41,73 +44,60 @@ public class CompensationLeaveApplicationService implements LeaveApplicationServ
 	@Override
 	public ControllerDTO submitApplication(ServiceDTO serviceDTO) {
 		LeaveApplicationControllerDTO response = new LeaveApplicationControllerDTO();
-		CompensationLeaveServiceDTO dto = (CompensationLeaveServiceDTO) serviceDTO.getAllAttribute();
-        int year = dto.getLeavePeriodStart().getYear();
+        CompensationLeaveServiceDTO dto = (CompensationLeaveServiceDTO) serviceDTO.getAllAttribute();
         
-        //calculate leave duration, excluding weekends
-        double daysRequested = calculateDuration(dto.getLeavePeriodStart(), dto.getLeavePeriodEnd(), dto.isHalfDay());
-        
-        // Check if counted days are zero ---
-        if (daysRequested <= 0) {
+        // Map to the Universal Validation DTO
+        LeaveApplicationControllerDTO valDto = new LeaveApplicationControllerDTO();
+        valDto.setStaffId(dto.getStaffId());
+        valDto.setType(LeaveType.COMPENSATION);
+        valDto.setStartDate(dto.getLeavePeriodStart());
+        valDto.setEndDate(dto.getLeavePeriodEnd());
+        valDto.setHalfDay(dto.isHalfDay());
+
+        // Calculate duration using the shared logic (includes Public Holidays!)
+        double daysRequested = validationService.calculateDays(
+            valDto.getStartDate(), 
+            valDto.getEndDate(), 
+            valDto.isHalfDay()
+        );
+
+        // Run Universal Validation
+        String errorMessage = validationService.validate(valDto, daysRequested);
+
+        if (errorMessage != null) {
             response.setApplicationResult(false);
-            response.setLeaveApprovalReason("Cannot apply for leave only on weekends.");
+            response.setLeaveApprovalReason(errorMessage);
             return response;
         }
 
+        // Fetch Ledger for persistence
+        int year = dto.getLeavePeriodStart().getYear();
         Optional<CompensationLedger> ledgerOpt = compRepo.findByEmployeeIdAndYearApplied(dto.getStaffId(), year);
 
         if (ledgerOpt.isPresent()) {
             CompensationLedger ledger = ledgerOpt.get();
 
-            // Check balance
-            if ((ledger.getEarnedDays() - ledger.getUsedDays()) >= daysRequested) {
-
-                // create a new LeaveApplication record
-                LeaveApplication newApp = new LeaveApplication();
-                newApp.setEmployee(ledger.getEmployee());
-                newApp.setStartDate(dto.getLeavePeriodStart());
-                newApp.setEndDate(dto.getLeavePeriodEnd());
-                newApp.setLeaveType(LeaveType.COMPENSATION);
-                newApp.setLedger(ledger);
-                newApp.setLeaveStatus(LeaveStatus.APPLIED);
-                newApp.setReason(dto.getReason());
-                newApp.setHalfDay(dto.isHalfDay());
-                newApp.setAppliedDate(LocalDate.now());
-                
-                laRepo.save(newApp);
-                
-                response.setApplicationResult(true);
-                return response;
-            }
+            // Create and Save LeaveApplication
+            LeaveApplication newApp = new LeaveApplication();
+            newApp.setEmployee(ledger.getEmployee());
+            newApp.setStartDate(dto.getLeavePeriodStart());
+            newApp.setEndDate(dto.getLeavePeriodEnd());
+            newApp.setLeaveType(LeaveType.COMPENSATION);
+            newApp.setLedger(ledger);
+            newApp.setLeaveStatus(LeaveStatus.APPLIED);
+            newApp.setReason(dto.getReason());
+            newApp.setHalfDay(dto.isHalfDay());
+            newApp.setAppliedDate(LocalDate.now());
+            
+            laRepo.save(newApp);
+            
+            response.setApplicationResult(true);
+            return response;
         }
 
         response.setApplicationResult(false);
-        response.setLeaveApprovalReason("Insufficient compensation balance.");
+        response.setLeaveApprovalReason("Compensation ledger record not found for this year.");
         return response;
 	}
-
-	private double calculateDuration(LocalDate start, LocalDate end, boolean isHalfDay) {
-		
-		double workingDaysCount = 0;
-	    LocalDate current = start;
-
-	    while (!current.isAfter(end)) {
-	        DayOfWeek dow = current.getDayOfWeek();
-	        
-	        // Only count the day if it's NOT a weekend
-	        if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
-	            workingDaysCount++;
-	        }
-	        current = current.plusDays(1);
-	    }
-
-	    // Apply the 0.5 multiplier if the half-day box is checked
-	    if (isHalfDay) {
-	        return workingDaysCount * 0.5;
-	    }
-
-	    return workingDaysCount;
-	}
-	
 	
 }
