@@ -1,6 +1,7 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CalendarEventControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.security.ApplicationUserDetails;
@@ -29,43 +31,51 @@ public class LeaveCalendarController {
         
     	Long staffId = userDetails.getEmployee().getId();
         
-    	// 2. Reuse the Team's Service DTO structure
         ViewLeaveRequestsServiceDTO serviceDTO = new ViewLeaveRequestsServiceDTO();
         serviceDTO.setStaffId(staffId);
 
-        // 3. Fetch data using the existing service method
-        // This returns the List of ControllerDTOs your teammate used
         List<ControllerDTO> leaveRequestControllerDTOs = viewLeaveRequestsService
                 .retrieveAllLeaveRequestByEmployeeId(serviceDTO);
 
-        // 4. Map the teammate's DTO to your CalendarEventDTO
+        // 4. Map DTO to CalendarEventDTO
         return leaveRequestControllerDTOs.stream()
                 .map(dto -> (LeaveRequestControllerDTO) dto.getAllAttribute())
                 .map(this::convertToCalendarEvent)
                 .collect(Collectors.toList());
     }
 
-    private CalendarEventDTO convertToCalendarEvent(LeaveRequestControllerDTO leave) {
+    private CalendarEventControllerDTO convertToCalendarEvent(LeaveRequestControllerDTO leave) {
         // FullCalendar 'end' is exclusive: Add 1 day to the end date
         String endDateStr = leave.getEndDate().plusDays(1).toString();
 
-        return CalendarEventDTO.builder()
-                .id(String.valueOf(leave.getId()))
-                .title(leave.getLeaveType() + " (" + leave.getLeaveStatus() + ")")
-                .start(leave.getStartDate().toString())
-                .end(endDateStr)
-                .color(determineColor(leave.getLeaveStatus().toString()))
-                .textColor("#ffffff")
-                .description(leave.getReason())
-                .build();
+        // Create the object using the default constructor
+        CalendarEventControllerDTO event = new CalendarEventControllerDTO();
+        
+        event.setId(String.valueOf(leave.getLeaveRequestId()));
+        
+        String displayStatus = leave.getLeaveStatus().toString();
+        if (displayStatus.equals("APPLIED") || displayStatus.equals("UPDATED")) {
+            displayStatus = "PENDING";
+        }
+        
+        event.setTitle(leave.getLeaveType() + " (" + displayStatus + ")");
+        event.setStart(leave.getStartDate().toString());
+        event.setEnd(endDateStr);
+        event.setColor(determineColor(leave.getLeaveStatus().toString()));
+        event.setTextColor("#ffffff");
+        event.setDescription(leave.getReason());
+
+        return event;
     }
 
     private String determineColor(String status) {
         return switch (status.toUpperCase()) {
-            case "APPROVED" -> "#28a745"; // Green
-            case "PENDING"  -> "#ffc107"; // Amber
-            case "REJECTED" -> "#dc3545"; // Red
-            default -> "#6c757d";         // Gray
+            case "APPROVED" -> "#28a745"; // Success Green
+            case "REJECTED" -> "#dc3545"; // Danger Red
+            case "APPLIED", "UPDATED" -> "#ffc107"; // Warning Amber (Pending)
+            case "CANCELLED" -> "#6c757d"; // Subtle Gray
+            default -> "#e9ecef"; // Very light gray for others
         };
     }
+    
 }
