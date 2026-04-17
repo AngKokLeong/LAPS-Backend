@@ -10,7 +10,6 @@ public class ManagerQueryServiceDTO implements ServiceDTO {
 	
 	@Override
 	public ServiceDTO getAllAttribute() {
-		// TODO Auto-generated method stub
 		return this;
 	}
 

@@ -17,11 +17,12 @@ public interface LeaveEntitlementRepository extends JpaRepository<LeaveEntitleme
             int yearApplied
     );
 
-    List<LeaveEntitlement> findByEmployeeId(Long employeeId);
+    @Query("SELECT le FROM LeaveEntitlement le WHERE le.employeeId.id = :employeeId")
+    List<LeaveEntitlement> findByEmployeeId_Id(@Param("employeeId") Long employeeId);
     
     @Query("SELECT le FROM LeaveEntitlement le " + 
             "WHERE le.employeeId.manager.id = :managerId " + 
             "AND le.yearApplied = :year")
-     List<LeaveEntitlement> findAllByManagerId(@Param("managerId") Long managerId, @Param("year") int year);
+    List<LeaveEntitlement> findAllByManagerId(@Param("managerId") Long managerId, @Param("year") int year);
 
 }

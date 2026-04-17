@@ -1,8 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 
@@ -18,7 +16,6 @@ public class SubordinateLeaveBalanceControllerDTO implements ControllerDTO {
 	
 	@Override
 	public ControllerDTO getAllAttribute() {
-		// TODO Auto-generated method stub
 		return this;
 	}
 		
