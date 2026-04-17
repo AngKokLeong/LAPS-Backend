@@ -17,6 +17,7 @@ import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.LeaveApplicationService;
+import iss.nus.edu.sg.leave_application_processing_system.service.LeaveValidationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.AnnualLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 
@@ -35,6 +36,9 @@ public class AnnualLeaveApplicationService implements LeaveApplicationService{
 
     @Autowired
     private LeaveApplicationRepository leaveApplicationRepository;
+    
+    @Autowired
+    private LeaveValidationService validationService;
 
 
 
@@ -48,27 +52,32 @@ public class AnnualLeaveApplicationService implements LeaveApplicationService{
     public ControllerDTO submitApplication(ServiceDTO serviceDTO) {
         AnnualLeaveServiceDTO dto = (AnnualLeaveServiceDTO) serviceDTO.getAllAttribute();
 
-        //evaluate the number of leave
-        int numberOfWeekEnds = 0;
+        LeaveApplicationControllerDTO valDto = new LeaveApplicationControllerDTO();
+        valDto.setStaffId(dto.getStaffId());
+        valDto.setType(dto.getType());
+        valDto.setStartDate(dto.getLeavePeriodStart());
+        valDto.setEndDate(dto.getLeavePeriodEnd());
+        valDto.setHalfDay(dto.isHalfDay());
+        
+        // Handles weekends + holidays
+        double totalNumberOfLeaveApplied = validationService.calculateDays(
+                dto.getLeavePeriodStart(), 
+                dto.getLeavePeriodEnd(), 
+                dto.isHalfDay()
+            );
 
-        for (int dayOfMonth = dto.getLeavePeriodStart().getDayOfMonth(); dayOfMonth <= dto.getLeavePeriodEnd().getDayOfMonth(); dayOfMonth++){
-            LocalDate leavePeriodDay = LocalDate.of(dto.getLeavePeriodStart().getYear(), dto.getLeavePeriodStart().getMonth(), dayOfMonth);
-            if (leavePeriodDay.getDayOfWeek().getValue() > 5){
-                ++numberOfWeekEnds;
-            }
+        // VALIDATION: Check balance and rules before proceeding
+        // This replaces his boolean status check with a more detailed one
+        String errorMessage = validationService.validate(valDto, totalNumberOfLeaveApplied);
+        
+        if (errorMessage != null) {
+            LeaveApplicationControllerDTO errorResponse = new LeaveApplicationControllerDTO(false);
+            errorResponse.setLeaveApprovalReason(errorMessage);
+            return errorResponse;
         }
 
-        // increment the total leave applied by 1 to include the date from and date to
-        double totalNumberOfLeaveApplied = (dto.getLeavePeriodEnd().getDayOfYear() - dto.getLeavePeriodStart().getDayOfYear() + 1) - numberOfWeekEnds;
 
-        if (dto.isHalfDay()){
-            totalNumberOfLeaveApplied = totalNumberOfLeaveApplied / 2;
-        }
-
-
-        dto.setLeaveDuration(String.valueOf(totalNumberOfLeaveApplied));
-        
-        
+        dto.setLeaveDuration(String.valueOf(totalNumberOfLeaveApplied));            
         
         dto.setLeaveAppliedOn(LocalDate.now());
         dto.setLeaveRequestStatus(LeaveStatus.APPLIED);
@@ -82,6 +91,8 @@ public class AnnualLeaveApplicationService implements LeaveApplicationService{
 
         if (!status) {
             //possible to add error message into the object
+        	LeaveApplicationControllerDTO errorResponse = new LeaveApplicationControllerDTO(false);
+            errorResponse.setLeaveApprovalReason("Leave request does not meet requirement.");
             return new LeaveApplicationControllerDTO(false);
         }
 

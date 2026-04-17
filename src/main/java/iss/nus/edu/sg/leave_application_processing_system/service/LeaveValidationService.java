@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -14,24 +15,28 @@ import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedger;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.model.PublicHoliday;
 import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
+import iss.nus.edu.sg.leave_application_processing_system.repo.PublicHolidayRepository;
 
 @Component
 public class LeaveValidationService {
 	
-	private LeaveApplicationRepository laRepo;
-    private LeaveEntitlementRepository entitlementRepo;
-    private CompensationLedgerRepository compRepo;
+	private final LeaveApplicationRepository laRepo;
+    private final LeaveEntitlementRepository entitlementRepo;
+    private final CompensationLedgerRepository compRepo;
+    private final PublicHolidayRepository phRepo;
     
     
 
     public LeaveValidationService(LeaveApplicationRepository laRepo, LeaveEntitlementRepository entitlementRepo,
-			CompensationLedgerRepository compRepo) {
+			CompensationLedgerRepository compRepo, PublicHolidayRepository phRepo) {
 		this.laRepo = laRepo;
 		this.entitlementRepo = entitlementRepo;
 		this.compRepo = compRepo;
+		this.phRepo = phRepo;
 	}
 
 public String validate(LeaveApplicationControllerDTO dto, double workingDaysRequested) {
@@ -115,14 +120,25 @@ public String validate(LeaveApplicationControllerDTO dto, double workingDaysRequ
 
     // Reuse weekend-skipping logic here
     public double calculateDays(LocalDate start, LocalDate end, boolean isHalfDay) {
+        // Fetch all holiday dates within this range
+        List<LocalDate> holidays = phRepo.findAll().stream()
+                .map(PublicHoliday::getPhDate)
+                .collect(Collectors.toList());
+
         double workingDaysCount = 0;
         LocalDate current = start;
+
         while (!current.isAfter(end)) {
-            if (current.getDayOfWeek() != DayOfWeek.SATURDAY && current.getDayOfWeek() != DayOfWeek.SUNDAY) {
+            DayOfWeek dow = current.getDayOfWeek();
+            boolean isWeekend = (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY);
+            boolean isHoliday = holidays.contains(current);
+
+            if (!isWeekend && !isHoliday) {
                 workingDaysCount++;
             }
             current = current.plusDays(1);
         }
+
         return isHalfDay ? workingDaysCount * 0.5 : workingDaysCount;
     }
 
