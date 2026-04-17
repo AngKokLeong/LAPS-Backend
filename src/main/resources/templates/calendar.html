@@ -69,14 +69,15 @@
             </div>
 
 			<!-- Calendar -->
-			<div class="bg-white rounded-xl border border-gray-200 mb-8">
-			    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-			        <h2 class="text-lg font-semibold text-gray-900">My Leave Calendar</h2>
-			        <span class="text-xs text-gray-500 italic">* Times shown reflect full day blocks</span>
-			    </div>
-			    <div class="p-6">
-			        <div id="calendar"></div>
-			    </div>
+			<div class="max-w-4xl mx-auto w-full mb-8">
+				<div class="bg-white rounded-xl border border-gray-200">
+					<div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+						<h2 class="text-lg font-semibold text-gray-900">My Leave Calendar</h2>
+					</div>
+					<div class="p-6">
+						<div id="calendar"></div>
+					</div>
+				</div>
 			</div>
 			
             <!-- Recent Leaves -->
@@ -104,24 +105,91 @@
     </div>
 
 	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-		<style>
-			/* Match the calendar's style to your gray-900 text */
-			.fc-toolbar-title {
-				font-size: 1.25rem !important;
-				font-weight: 600;
-				color: #111827;
-			}
-		
-			.fc-button-primary {
-				background-color: #3b82f6 !important;
-				border-color: #3b82f6 !important;
-			}
-		
-			.fc-daygrid-day-number {
-				color: #374151;
-				text-decoration: none !important;
-			}
-		</style>
+	
+	<style>
+	    /* --- 1. CALENDAR HEADER & TOOLBAR --- */
+	    .fc-toolbar-title {
+	        font-size: 1.5rem !important;
+	        font-weight: 800 !important;
+	        color: #1e3a8a !important; /* Blue-900 */
+	    }
+
+	    .fc .fc-button-primary {
+	        background-color: #eff6ff !important; /* Blue-50 */
+	        border: 1px solid #dbeafe !important; /* Blue-200 */
+	        color: #2563eb !important;             /* Blue-600 */
+	        font-weight: 600 !important;
+	    }
+
+	    .fc .fc-button-primary:hover {
+	        background-color: #dbeafe !important;
+	    }
+
+	    .fc .fc-button-primary:not(:disabled).fc-button-active {
+	        background-color: #2563eb !important; /* Solid Blue */
+	        color: #ffffff !important;             /* White text */
+	    }
+
+	    /* --- 2. THE DAY HEADERS (Sun, Mon...) --- */
+	    .fc-col-header-cell {
+	        background-color: #f0f9ff !important; /* Sky-50 */
+	        border-bottom: 2px solid #bae6fd !important;
+	    }
+
+	    .fc-col-header-cell-cushion {
+	        padding: 12px 0 !important;
+	        color: #0369a1 !important;
+	        font-weight: 700 !important;
+	        font-size: 0.75rem !important;
+	        text-transform: uppercase !important;
+	        text-decoration: none !important;
+	    }
+
+	    /* --- 3. THE LEAVE BLOCKS (The "SaaS" Look) --- */
+	    /* Force every event to start as a white card with NO default blue background */
+	    .custom-event {
+	        background-color: #ffffff !important;
+	        border: 1px solid #e5e7eb !important;
+	        border-radius: 4px !important;
+	        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+	    }
+
+	    .custom-event .fc-event-main {
+	        background-color: transparent !important; /* Kills the blue leak */
+	        border-left: 5px solid #9ca3af !important; /* Default Gray bar */
+	        padding: 2px 6px !important;
+	        color: #111827 !important; /* Dark text */
+	        font-weight: 600 !important;
+	        font-size: 0.75rem !important;
+	    }
+
+	    /* --- 4. TYPE SPECIFIC STRIPES (The Fix) --- */
+	    .type-annual .fc-event-main {
+	        border-left-color: #3b82f6 !important; /* Annual Blue Bar */
+	    }
+	    .type-medical .fc-event-main {
+	        border-left-color: #f43f5e !important; /* Medical Rose Bar */
+	    }
+	    .type-compensation .fc-event-main {
+	        border-left-color: #6366f1 !important; /* Compensation Indigo Bar */
+	    }
+
+	    /* --- 5. PENDING & CANCELLED STATES --- */
+	    .is-pending .fc-event-main {
+	        border-left-style: dashed !important;
+	        background-color: #f9fafb !important; /* Very light gray for pending */
+	    }
+
+	    .is-cancelled {
+	        opacity: 0.5;
+	        text-decoration: line-through;
+	    }
+
+	    /* --- 6. CLEANUP --- */
+	    .fc-daygrid-event-dot { display: none !important; }
+	    .fc-day-today { background-color: #fefce8 !important; } /* Soft yellow for today */
+	    .fc { border: none !important; }
+	</style>
 		
     <script>
 

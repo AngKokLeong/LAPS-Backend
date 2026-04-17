@@ -11,6 +11,7 @@ public class CalendarEventControllerDTO implements ControllerDTO {
     private String end;         // ISO8601 string (Exclusive end date)
     private String color;       // Hex code or CSS color name
     private String textColor;   // To ensure readability (e.g., "white")
+    private String className;
     
     // Optional: Add extra info for tooltips
     private String description;
@@ -28,6 +29,7 @@ public class CalendarEventControllerDTO implements ControllerDTO {
 		this.color = color;
 		this.textColor = textColor;
 		this.description = description;
+		
 	}
 
 
@@ -93,6 +95,12 @@ public class CalendarEventControllerDTO implements ControllerDTO {
 		this.description = description;
 	}
 	
+	public String getClassName() {
+		return className;
+	}
 	
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
 }

@@ -43,37 +43,31 @@ public class LeaveCalendarController {
     }
 
     private CalendarEventControllerDTO convertToCalendarEvent(LeaveRequestControllerDTO leave) {
-        // FullCalendar 'end' is exclusive: Add 1 day to the end date
-        String endDateStr = leave.getEndDate().plusDays(1).toString();
-
-        // Create the object using the default constructor
+    	String endDateStr = leave.getEndDate().plusDays(1).toString();
         CalendarEventControllerDTO event = new CalendarEventControllerDTO();
         
         event.setId(String.valueOf(leave.getLeaveRequestId()));
-        
-        String displayStatus = leave.getLeaveStatus().toString();
-        if (displayStatus.equals("APPLIED") || displayStatus.equals("UPDATED")) {
-            displayStatus = "PENDING";
-        }
-        
-        event.setTitle(leave.getLeaveType() + " (" + displayStatus + ")");
         event.setStart(leave.getStartDate().toString());
         event.setEnd(endDateStr);
-        event.setColor(determineColor(leave.getLeaveStatus().toString()));
-        event.setTextColor("#ffffff");
-        event.setDescription(leave.getReason());
+
+        String type = leave.getLeaveType().toString().toUpperCase();
+        String status = leave.getLeaveStatus().toString().toUpperCase();
+        boolean isPending = status.equals("APPLIED") || status.equals("UPDATED");
+
+        // Icon Logic
+        String statusIcon = isPending ? "○ " : (status.equals("CANCELLED") ? "✕ " : "● ");
+        event.setTitle(statusIcon + leave.getLeaveType());
+
+        // CLASS LOGIC: We define the "Vibe" purely through classes now
+        String cssClasses = "custom-event";
+        cssClasses += " type-" + type.toLowerCase(); // e.g., type-annual
+        if (isPending) cssClasses += " is-pending";
+        if (status.equals("CANCELLED")) cssClasses += " is-cancelled";
+
+        event.setClassName(cssClasses);
 
         return event;
     }
 
-    private String determineColor(String status) {
-        return switch (status.toUpperCase()) {
-            case "APPROVED" -> "#28a745"; // Success Green
-            case "REJECTED" -> "#dc3545"; // Danger Red
-            case "APPLIED", "UPDATED" -> "#ffc107"; // Warning Amber (Pending)
-            case "CANCELLED" -> "#6c757d"; // Subtle Gray
-            default -> "#e9ecef"; // Very light gray for others
-        };
-    }
     
 }
