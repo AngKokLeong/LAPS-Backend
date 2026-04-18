@@ -67,7 +67,7 @@ public class AnnualLeaveApplicationService implements LeaveApplicationService{
 
         // VALIDATION: Check balance and rules before proceeding
         // This replaces his boolean status check with a more detailed one
-        String errorMessage = validationService.validate(valDto, totalNumberOfLeaveApplied);
+        String errorMessage = validationService.validate(valDto);
         
         if (errorMessage != null) {
             LeaveApplicationControllerDTO errorResponse = new LeaveApplicationControllerDTO(false);

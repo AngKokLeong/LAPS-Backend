@@ -60,7 +60,7 @@ public class MedicalLeaveApplicationService implements LeaveApplicationService{
             );
         
      // 4. Run Universal Validation (Balance, Overlap, 14-day rule, etc.)
-        String errorMessage = validationService.validate(valDto, totalNumberOfLeaveApplied);
+        String errorMessage = validationService.validate(valDto);
 
         if (errorMessage != null) {
             LeaveApplicationControllerDTO errorResponse = new LeaveApplicationControllerDTO(false);
