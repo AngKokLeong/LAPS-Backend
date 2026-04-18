@@ -1,5 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.service.implementation;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,8 @@ public class ViewLeaveRequestsService {
 			
 			leaveRequestControllerDTO.setStartDate(leaveApplication.getStartDate());
 			leaveRequestControllerDTO.setEndDate(leaveApplication.getEndDate());
+
+			leaveRequestControllerDTO.setCurrentDate(LocalDate.now());
 
 			long fullDays = java.time.temporal.ChronoUnit.DAYS.between(leaveApplication.getStartDate(), leaveApplication.getEndDate()) + 1;
 			double duration = leaveApplication.isHalfDay() ? fullDays - 0.5 : fullDays;
