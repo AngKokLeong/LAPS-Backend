@@ -224,7 +224,7 @@ public class DataInitializer implements CommandLineRunner {
 		johnAnnual.setLeaveType(LeaveType.ANNUAL);
 		johnAnnual.setYearApplied(2026);
 		johnAnnual.setTotalDays(14);
-		johnAnnual.setUsedDays(1);
+		johnAnnual.setUsedDays(4);
 		entitlementRepo.save(johnAnnual);
 
 		LeaveEntitlement johnMedical = new LeaveEntitlement();

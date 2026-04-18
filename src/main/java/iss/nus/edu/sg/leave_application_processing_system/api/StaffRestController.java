@@ -49,13 +49,18 @@ public class StaffRestController {
                 .stream()
                 .filter(e -> e.getYearApplied() == currentYear)
                 .toList();
-            int totalLeaveDays = entitlements.stream().mapToInt(LeaveEntitlement::getTotalDays).sum();
-            int usedDays = entitlements.stream().mapToInt(LeaveEntitlement::getUsedDays).sum();
-            int daysRemaining = totalLeaveDays - usedDays;
+            
+            LeaveEntitlement annuLeaveEntitlement = entitlements.stream()
+                .filter(e -> e.getLeaveType().toString().equals("ANNUAL"))
+                .findFirst()
+                .orElse(null);
+
+            int annualTotal = annuLeaveEntitlement != null ? annuLeaveEntitlement.getTotalDays() : 0;
+            int annualUsed = annuLeaveEntitlement != null ? annuLeaveEntitlement.getUsedDays() : 0;
+            int annualRemaining = annualTotal - annualUsed;
 
             // Pending requests
-            List<LeaveApplication> pendingApps = leaveAppRepo.findByEmployeeIdAndLeaveStatus(employee.getId(), LeaveStatus.APPLIED);
-            int pendingRequests = pendingApps.size();
+            int pendingRequests = (int) leaveAppRepo.countByEmployeeIdAndLeaveStatusIn(employee.getId(), List.of(LeaveStatus.APPLIED, LeaveStatus.UPDATED));
 
             // Recent leaves (last 5)
             List<LeaveApplication> recentLeaves = leaveAppRepo.findTop5RecentByEmployeeId(employee.getId(), PageRequest.of(0, 5))
@@ -75,10 +80,10 @@ public class StaffRestController {
 
             DashboardDTO dto = new DashboardDTO(
                 employee.getName(),
-                totalLeaveDays,
-                usedDays,
+                annualTotal,
+                annualUsed,
                 pendingRequests,
-                daysRemaining,
+                annualRemaining,
                 recentLeaveDTOs
             );
 
