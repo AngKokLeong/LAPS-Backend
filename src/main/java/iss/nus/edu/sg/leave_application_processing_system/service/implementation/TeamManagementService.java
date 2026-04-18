@@ -37,293 +37,321 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class TeamManagementService implements ManagerService {
 
-	private final OverTimeClaimRepository otClaimRepo;
-	private final LeaveApplicationRepository laRepo;
-	private final LeaveEntitlementRepository lEntitlementRepo;
-	private final CompensationLedgerRepository clRepo;
-	
-	public TeamManagementService(OverTimeClaimRepository otClaimRepo,
-			LeaveApplicationRepository laRepo, LeaveEntitlementRepository lEntitlementRepo,
-			CompensationLedgerRepository clRepo) {
-		this.otClaimRepo = otClaimRepo;
-		this.laRepo = laRepo;
-		this.lEntitlementRepo = lEntitlementRepo;
-		this.clRepo = clRepo;
-	}
-	
+    private final OverTimeClaimRepository otClaimRepo;
+    private final LeaveApplicationRepository laRepo;
+    private final LeaveEntitlementRepository lEntitlementRepo;
+    private final CompensationLedgerRepository clRepo;
 
-	@Override
-	public List<ControllerDTO> viewTeamLeaveBalances(ServiceDTO serviceDTO) {
+    public TeamManagementService(
+            OverTimeClaimRepository otClaimRepo,
+            LeaveApplicationRepository laRepo,
+            LeaveEntitlementRepository lEntitlementRepo,
+            CompensationLedgerRepository clRepo) {
+        this.otClaimRepo = otClaimRepo;
+        this.laRepo = laRepo;
+        this.lEntitlementRepo = lEntitlementRepo;
+        this.clRepo = clRepo;
+    }
 
-        ManagerQueryServiceDTO input = (ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
-        Long managerId = input.getManagerId();
-		
-        int currentYear = LocalDate.now().getYear();
-        
-        // Fetch Entitlements (Annual/Medical)
-        List<LeaveEntitlement> entitlements = lEntitlementRepo.findAllByManagerId(managerId, currentYear);
-        
-        // Fetch Compensation (OT)
-        List<CompensationLedger> compLedgers = clRepo.findAllByManagerId(managerId);
+    // ===============================
+    // MANAGER APPROVAL
+    // ===============================
 
+    @Override
+    @Transactional
+    public ControllerDTO processApproval(ServiceDTO serviceDTO) {
 
-        // Map to group by Employee ID
-        Map<Long, SubordinateLeaveBalanceControllerDTO> balanceMap = new HashMap<>();
-
-        // Process Entitlements (Annual/Medical)
-        for (LeaveEntitlement ent : entitlements) {
-            Employee emp = ent.getEmployeeId();
-            Long empId = emp.getId();
-
-            // Create DTO if not exists, and populate profile info
-            SubordinateLeaveBalanceControllerDTO dto = balanceMap.computeIfAbsent(empId, id -> {
-                SubordinateLeaveBalanceControllerDTO newDto = new SubordinateLeaveBalanceControllerDTO();
-                newDto.setEmployeeName(emp.getName());
-                newDto.setEmail(emp.getEmail());
-                newDto.setDepartment(emp.getDepartment());
-                return newDto;
-            });
-
-            // Calculate and set balances
-            int remaining = ent.getTotalDays() - ent.getUsedDays();
-            if (ent.getLeaveType() == LeaveType.ANNUAL) {
-                dto.setAnnualBalance(remaining);
-            } else if (ent.getLeaveType() == LeaveType.MEDICAL) {
-                dto.setMedicalBalance(remaining);
-            }
-        }
-
-        // Process Compensation Ledger (OT)
-        for (CompensationLedger comp : compLedgers) {
-            Long empId = comp.getEmployee().getId();
-            SubordinateLeaveBalanceControllerDTO dto = balanceMap.get(empId);
-            
-            // If the employee didn't have entitlements, we create the DTO here too
-            if (dto == null) {
-                Employee emp = comp.getEmployee();
-                dto = new SubordinateLeaveBalanceControllerDTO();
-                dto.setEmployeeName(emp.getName());
-                dto.setEmail(emp.getEmail());
-                dto.setDepartment(emp.getDepartment());
-                balanceMap.put(empId, dto);
-            }
-
-            double balance = comp.getEarnedDays() - comp.getUsedDays();
-            dto.setCompensationBalance(balance);
-        }
-
-        // Final Calculation for Total Balance
-        for (SubordinateLeaveBalanceControllerDTO dto : balanceMap.values()) {
-            dto.setTotalBalance(dto.getAnnualBalance() + dto.getMedicalBalance() + dto.getCompensationBalance());
-        }
-
-        return new ArrayList<>(balanceMap.values());
-	}
-	
-	@Override
-	@Transactional
-	public ControllerDTO processApproval(ServiceDTO serviceDTO) {
-		
-        LeaveApprovalServiceDTO request = (LeaveApprovalServiceDTO) serviceDTO.getAllAttribute();
+        LeaveApprovalServiceDTO request =
+                (LeaveApprovalServiceDTO) serviceDTO.getAllAttribute();
 
         LeaveApprovalControllerDTO response = new LeaveApprovalControllerDTO();
-        response.setApplicationId(request.getApplicationId());
-        
-     // Find the application
+
         LeaveApplication application = laRepo.findById(request.getApplicationId())
-                .orElseThrow(() -> new EntityNotFoundException("Application not found"));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Application not found"));
 
-        String actionTaken = request.getAction();
+        LeaveStatus oldStatus = application.getLeaveStatus();
+        String action = request.getAction().toUpperCase();
 
-        if ("APPROVE".equalsIgnoreCase(actionTaken)) {
-            
-        	if (application.getLeaveType() == LeaveType.COMPENSATION) {
-                updateCompensationLedger(application);
-            } else {
-                updateEntitlement(application);
+        if ("APPROVE".equals(action)) {
+
+            if (oldStatus != LeaveStatus.APPLIED) {
+                throw new IllegalStateException(
+                        "Only APPLIED requests can be approved.");
             }
 
-            // Update Application Status
+            if (application.getLeaveType() == LeaveType.COMPENSATION) {
+                deductCompensationLeave(application);
+            }
+
+						if (application.getLeaveType() == LeaveType.ANNUAL ||
+								application.getLeaveType() == LeaveType.MEDICAL) {
+								deductEntitlementLeave(application);
+						}
+					
             application.setLeaveStatus(LeaveStatus.APPROVED);
             application.setMgrRemarks(request.getManagerRemarks());
-            
+
             response.setNewStatus("APPROVED");
             response.setMessage("Application approved and balance updated.");
             response.setSuccess(true);
-        } 
-        else if ("REJECT".equalsIgnoreCase(actionTaken)) {
-            application.setLeaveStatus(LeaveStatus.REJECTED);
-            application.setMgrRemarks(request.getManagerRemarks());
-            
-            response.setNewStatus("REJECTED");
-            response.setMessage("Application has been rejected.");
-            response.setSuccess(true);
-        } 
-        else {
-            response.setSuccess(false);
-            response.setMessage("Error: Unknown action '" + actionTaken + "'");
-            return response;
         }
 
-        // 4. Save the updated application
+        else if ("REJECT".equals(action)) {
+
+            if (oldStatus == LeaveStatus.APPROVED) {
+                revertEntitlementOrCompensation(application);
+            }
+
+            application.setLeaveStatus(LeaveStatus.REJECTED);
+            application.setMgrRemarks(request.getManagerRemarks());
+
+            response.setNewStatus("REJECTED");
+            response.setMessage("Application rejected.");
+            response.setSuccess(true);
+        }
+
+        else {
+            throw new IllegalArgumentException("Unknown action: " + action);
+        }
+
         laRepo.save(application);
         return response;
-	}
-	
-	@Override
-	public List<ControllerDTO> getSubordinateLeaveRequests(ServiceDTO serviceDTO) {
-		
-	    ManagerQueryServiceDTO query = (ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
-	    Long managerId = query.getManagerId();
+    }
 
-	    List<LeaveApplication> leaveApplications = laRepo.findSubordinateLeaves(managerId);
+    // ===============================
+    // HELPER METHODS
+    // ===============================
 
-	    return leaveApplications.stream()
-	    		.map(leave -> {
-	                // Calculate duration on the fly
-	                double duration = calculateDuration(leave.getStartDate(), leave.getEndDate());
-	                
-	                return new SubordinateLeaveRequestControllerDTO(
-	                    leave.getId(),
-	                    leave.getEmployee().getName(),
-	                    leave.getEmployee().getDepartment(),
-	                    leave.getLeaveType().toString(),
-	                    leave.getStartDate(),
-	                    leave.getEndDate(),
-	                    duration, // Use the calculated value here
-	                    leave.getReason(),
-	                    leave.getAppliedDate(),
-	                    leave.getLeaveStatus().toString()
-	                );
-	            }).collect(Collectors.toList());   
-	    
-	}
+    private void deductEntitlementLeave(LeaveApplication app) {
 
-	public List<ControllerDTO> getSubordinateOTClaims(ServiceDTO serviceDTO) {
-		ManagerQueryServiceDTO query = (ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
-		
-		List<OverTimeClaim> claims = otClaimRepo.findSubordinateClaimsCustomSort(query.getManagerId()); 
-		List<ControllerDTO> otList = new ArrayList<>();
-		
-		for (OverTimeClaim claim : claims) {
-	        Duration d = Duration.between(claim.getStartDateTime(), claim.getEndDateTime());
-	        long hours = d.toHours();
-	        long mins = d.toMinutes() % 60;
-	        String formattedDuration = hours + "h " + mins + "m";
-	        
-	        OTClaimControllerDTO dto = new OTClaimControllerDTO(
-		            claim.getId(),
-		            claim.getEmployee().getName(),
-		            claim.getEmployee().getDepartment(),
-		            claim.getStartDateTime(),
-		            claim.getEndDateTime(),
-		            formattedDuration,
-		            claim.getStatus(),
-		            claim.getOtDescription()
-		    );
+        int year = app.getStartDate().getYear();
 
-	        otList.add(dto);
-	    }
+        LeaveEntitlement entitlement =
+                lEntitlementRepo
+                        .findByEmployeeId_IdAndLeaveTypeAndYearApplied(
+                                app.getEmployee().getId(),
+                                app.getLeaveType(),
+                                year)
+                        .orElseThrow(() ->
+                                new IllegalStateException("Entitlement not found"));
 
-	    return otList;
-	}
-	
-	// helper method to calculate business day (PH not considered yet)
-	// can replace with KL's method later
-	private double calculateDuration(LocalDate start, LocalDate end) {
-	    if (start == null || end == null || start.isAfter(end)) {
-	        return 0.0;
-	    }
+        double days =
+                calculateDuration(app.getStartDate(), app.getEndDate(), app.isHalfDay());
 
-	    long days = 0;
-	    LocalDate current = start;
+        double newUsed = entitlement.getUsedDays() + days;
 
-	    while (!current.isAfter(end)) {
-	        DayOfWeek dow = current.getDayOfWeek();
-	        // Check if the day is NOT Saturday or Sunday
-	        if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
-	            days++;
-	        }
-	        current = current.plusDays(1);
-	    }
-	    
-	    return (double) days;
-	}
-	
-	private double calculateDuration(LocalDate start, LocalDate end, boolean isHalfDay) {
-		
-		double workingDaysCount = 0;
-	    LocalDate current = start;
+        if (newUsed > entitlement.getTotalDays()) {
+            throw new IllegalArgumentException(
+                    "Insufficient leave balance.");
+        }
 
-	    while (!current.isAfter(end)) {
-	        DayOfWeek dow = current.getDayOfWeek();
-	        
-	        // Only count the day if it's NOT a weekend
-	        if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
-	            workingDaysCount++;
-	        }
-	        current = current.plusDays(1);
-	    }
+        entitlement.setUsedDays((int) (entitlement.getUsedDays() + days));
+        lEntitlementRepo.save(entitlement);
+    }
 
-	    // Apply the 0.5 multiplier if the half-day box is checked
-	    if (isHalfDay) {
-	        return workingDaysCount * 0.5;
-	    }
+    private void deductCompensationLeave(LeaveApplication app) {
 
-	    return workingDaysCount;
-	}
-	
-	// helper method to update leave entitlement
-	private void updateEntitlement(LeaveApplication app) {
-	    // Find entitlement by Employee, LeaveType, and Year
-	    int year = app.getStartDate().getYear();
-	    LeaveEntitlement entitlement = lEntitlementRepo
-	            .findByEmployeeId_IdAndLeaveTypeAndYearApplied(app.getEmployee().getId(), app.getLeaveType(), year)
-	            .orElseThrow(() -> new IllegalStateException("No entitlement record found for this employee/year"));
+        int year = app.getStartDate().getYear();
 
-	    // Increment used days
-	    int newUsedDays = entitlement.getUsedDays() + (int) calculateDuration(app.getStartDate(), app.getEndDate());
-	    
-	    // Safety check: Don't exceed total allowed
-	    if (newUsedDays > entitlement.getTotalDays()) {
-	        throw new IllegalArgumentException("Approval failed: Employee has insufficient leave balance.");
-	    }
+        CompensationLedger ledger =
+                clRepo.findByEmployeeIdAndYearApplied(
+                                app.getEmployee().getId(), year)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException("Compensation ledger not found"));
 
-	    entitlement.setUsedDays(newUsedDays);
-	    lEntitlementRepo.save(entitlement);
-	}
-	
-	// helper method to update compensation ledger
-	private void updateCompensationLedger(LeaveApplication application) {
-	    int year = application.getStartDate().getYear();
-	    Long employeeId = application.getEmployee().getId();
+        double days =
+                calculateDuration(app.getStartDate(), app.getEndDate(), app.isHalfDay());
 
-	    // Fetch the ledger record
-	    CompensationLedger ledger = clRepo.findByEmployeeIdAndYearApplied(employeeId, year)
-	            .orElseThrow(() -> new EntityNotFoundException("Compensation Ledger not found for this employee"));
+        double newUsed = ledger.getUsedDays() + days;
 
-	    // Calculate the actual working days (excluding weekends)
-	    double daysToDeduct = calculateDuration(
-	        application.getStartDate(), 
-	        application.getEndDate(), 
-	        application.isHalfDay()
-	    );
-	    
-	    // Increment used days
-	    double newUsedDays = ledger.getUsedDays() + calculateDuration(application.getStartDate(), application.getEndDate());
-	    
-	    // Safety check: Don't exceed total allowed
-	    if (newUsedDays > ledger.getEarnedDays()) {
-	        throw new IllegalArgumentException("Approval failed: Employee has insufficient compensation leave balance.");
-	    }
+        if (newUsed > ledger.getEarnedDays()) {
+            throw new IllegalArgumentException(
+                    "Insufficient compensation balance.");
+        }
 
-	    // Update the used days
-	    ledger.setUsedDays(ledger.getUsedDays() + daysToDeduct);
+        ledger.setUsedDays(newUsed);
+        clRepo.save(ledger);
+    }
 
-	    // 4. Save to repository
-	    clRepo.save(ledger);
-	}
-	
-	
-	
+    private void revertEntitlementOrCompensation(LeaveApplication app) {
+
+        double days =
+                calculateDuration(app.getStartDate(), app.getEndDate(), app.isHalfDay());
+
+        int year = app.getStartDate().getYear();
+
+        if (app.getLeaveType() == LeaveType.COMPENSATION) {
+
+            CompensationLedger ledger =
+                    clRepo.findByEmployeeIdAndYearApplied(
+                                    app.getEmployee().getId(), year)
+                            .orElseThrow(() ->
+                                    new EntityNotFoundException("Compensation ledger not found"));
+
+            ledger.setUsedDays(ledger.getUsedDays() - days);
+            clRepo.save(ledger);
+
+        } else {
+
+            LeaveEntitlement entitlement =
+                    lEntitlementRepo
+                            .findByEmployeeId_IdAndLeaveTypeAndYearApplied(
+                                    app.getEmployee().getId(),
+                                    app.getLeaveType(),
+                                    year)
+                            .orElseThrow(() ->
+                                    new IllegalStateException("Entitlement not found"));
+
+            entitlement.setUsedDays((int)(entitlement.getUsedDays() - days));
+            lEntitlementRepo.save(entitlement);
+        }
+    }
+
+    private double calculateDuration(LocalDate start, LocalDate end, boolean isHalfDay) {
+
+        double workingDays = 0;
+        LocalDate current = start;
+
+        while (!current.isAfter(end)) {
+            DayOfWeek dow = current.getDayOfWeek();
+            if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
+                workingDays++;
+            }
+            current = current.plusDays(1);
+        }
+
+        return isHalfDay ? workingDays * 0.5 : workingDays;
+    }
+
+		@Override
+		public List<ControllerDTO> viewTeamLeaveBalances(ServiceDTO serviceDTO) {
+
+				ManagerQueryServiceDTO input =
+						(ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
+
+				Long managerId = input.getManagerId();
+				int currentYear = LocalDate.now().getYear();
+
+				List<LeaveEntitlement> entitlements =
+						lEntitlementRepo.findAllByManagerId(managerId, currentYear);
+
+				List<CompensationLedger> compLedgers =
+						clRepo.findAllByManagerId(managerId);
+
+				Map<Long, SubordinateLeaveBalanceControllerDTO> balanceMap = new HashMap<>();
+
+				// Annual / Medical
+				for (LeaveEntitlement ent : entitlements) {
+						Employee emp = ent.getEmployeeId();
+
+						SubordinateLeaveBalanceControllerDTO dto =
+								balanceMap.computeIfAbsent(emp.getId(), id -> {
+										SubordinateLeaveBalanceControllerDTO d =
+												new SubordinateLeaveBalanceControllerDTO();
+										d.setEmployeeName(emp.getName());
+										d.setEmail(emp.getEmail());
+										d.setDepartment(emp.getDepartment());
+										return d;
+								});
+
+						double remaining = ent.getTotalDays() - ent.getUsedDays();
+						if (ent.getLeaveType() == LeaveType.ANNUAL) {
+								dto.setAnnualBalance((int)remaining);
+						} else if (ent.getLeaveType() == LeaveType.MEDICAL) {
+								dto.setMedicalBalance((int)remaining);
+						}
+				}
+
+				// Compensation
+				for (CompensationLedger ledger : compLedgers) {
+						Employee emp = ledger.getEmployee();
+
+						SubordinateLeaveBalanceControllerDTO dto =
+								balanceMap.computeIfAbsent(emp.getId(), id -> {
+										SubordinateLeaveBalanceControllerDTO d =
+												new SubordinateLeaveBalanceControllerDTO();
+										d.setEmployeeName(emp.getName());
+										d.setEmail(emp.getEmail());
+										d.setDepartment(emp.getDepartment());
+										return d;
+								});
+
+						dto.setCompensationBalance(
+								ledger.getEarnedDays() - ledger.getUsedDays()
+						);
+				}
+
+				// Total
+				for (SubordinateLeaveBalanceControllerDTO dto : balanceMap.values()) {
+						dto.setTotalBalance(
+								dto.getAnnualBalance()
+							+ dto.getMedicalBalance()
+							+ dto.getCompensationBalance()
+						);
+				}
+
+				return new ArrayList<>(balanceMap.values());
+		}
+
+		@Override
+		public List<ControllerDTO> getSubordinateLeaveRequests(ServiceDTO serviceDTO) {
+
+				ManagerQueryServiceDTO query =
+						(ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
+
+				List<LeaveApplication> leaveApplications =
+						laRepo.findSubordinateLeaves(query.getManagerId());
+
+				return leaveApplications.stream()
+						.map(leave -> new SubordinateLeaveRequestControllerDTO(
+								leave.getId(),
+								leave.getEmployee().getName(),
+								leave.getEmployee().getDepartment(),
+								leave.getLeaveType().toString(),
+								leave.getStartDate(),
+								leave.getEndDate(),
+								calculateDuration(
+										leave.getStartDate(),
+										leave.getEndDate(),
+										leave.isHalfDay()
+								),
+								leave.getReason(),
+								leave.getAppliedDate(),
+								leave.getLeaveStatus().toString()
+						))
+						.collect(Collectors.toList());
+		}
+
+		@Override
+		public List<ControllerDTO> getSubordinateOTClaims(ServiceDTO serviceDTO) {
+
+				ManagerQueryServiceDTO query =
+						(ManagerQueryServiceDTO) serviceDTO.getAllAttribute();
+
+				List<OverTimeClaim> claims =
+						otClaimRepo.findSubordinateClaimsCustomSort(query.getManagerId());
+
+				return claims.stream().map(claim -> {
+
+						Duration d = Duration.between(
+								claim.getStartDateTime(),
+								claim.getEndDateTime()
+						);
+
+						long hours = d.toHours();
+						long mins = d.toMinutes() % 60;
+
+						return new OTClaimControllerDTO(
+								claim.getId(),
+								claim.getEmployee().getName(),
+								claim.getEmployee().getDepartment(),
+								claim.getStartDateTime(),
+								claim.getEndDateTime(),
+								hours + "h " + mins + "m",
+								claim.getStatus(),
+								claim.getOtDescription()
+						);
+				}).collect(Collectors.toList());
+		}
 }

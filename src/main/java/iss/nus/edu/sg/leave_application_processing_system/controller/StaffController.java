@@ -330,39 +330,45 @@ public class StaffController {
 		return "redirect:/staff/submit-ot-claim";
 	}
 
+	// Cancel Leave Request
 	@PostMapping("/cancel-leave-request")
-	public String cancelLeaveRequest(@ModelAttribute CancelLeaveRequestControllerDTO cancelLeaveRequestControllerDTO,
-			HttpSession session, RedirectAttributes redirectAttrs) {
-		String role = (String) session.getAttribute("userRole");
+	public String cancelLeaveRequest(
+		@ModelAttribute CancelLeaveRequestControllerDTO controllerDTO,
+		HttpSession session,
+		RedirectAttributes redirectAttrs) {
 
-		if (role == null || role.toString().isEmpty())
-			return "redirect:/";
+    // 1. Basic session validation
+    Long employeeId = (Long) session.getAttribute("id");
+    if (employeeId == null) {
+        return "redirect:/";
+    }
 
-		Long employeeId = (Long) session.getAttribute("id");
-		if (employeeId == null) {
-			return "redirect:/";
-		}
+    // 2. Build service DTO (ONLY trusted fields)
+    CancelLeaveRequestServiceDTO serviceDTO = new CancelLeaveRequestServiceDTO();
+    serviceDTO.setEmployeeId(employeeId);
+    serviceDTO.setLeaveRequestId(controllerDTO.getLeaveRequestId());
+    serviceDTO.setReason(controllerDTO.getReason());
 
-		CancelLeaveRequestServiceDTO cancelLeaveRequestServiceDTO = new CancelLeaveRequestServiceDTO();
-		cancelLeaveRequestServiceDTO.setEmployeeId(employeeId);
-		cancelLeaveRequestServiceDTO.setStartDate(cancelLeaveRequestControllerDTO.getStartDate());
-		cancelLeaveRequestServiceDTO.setEndDate(cancelLeaveRequestControllerDTO.getEndDate());
-		cancelLeaveRequestServiceDTO.setLeaveRequestId(cancelLeaveRequestControllerDTO.getLeaveRequestId());
-		cancelLeaveRequestServiceDTO.setLeaveStatus(cancelLeaveRequestControllerDTO.getLeaveStatus());
-		cancelLeaveRequestServiceDTO.setReason(cancelLeaveRequestControllerDTO.getReason());
+    // 3. Delegate to service
+    CancelLeaveRequestControllerDTO result = (CancelLeaveRequestControllerDTO)
+		cancelLeaveRequestService
+		.cancelLeaveRequest(serviceDTO)
+		.getAllAttribute();
 
-		ControllerDTO controllerDTO = cancelLeaveRequestService.cancelLeaveRequest(cancelLeaveRequestServiceDTO);
-
-		CancelLeaveRequestControllerDTO result = (CancelLeaveRequestControllerDTO) controllerDTO.getAllAttribute();
-
-		if (result.getOperationResult()) {
-			redirectAttrs.addFlashAttribute("message", "The leave request is cancelled.");
-			redirectAttrs.addFlashAttribute("cancelLeaveRequestData", result);
-		} else {
-			redirectAttrs.addFlashAttribute("message", "The leave request is not cancelled.");
-			redirectAttrs.addFlashAttribute("cancelLeaveRequestData", result);
-		}
-
+    // 4. Flash messaging
+    if (result.getOperationResult()) {
+			redirectAttrs.addFlashAttribute(
+				"successMessage",
+				"Leave request cancelled successfully."
+			);
+    } else {
+      redirectAttrs.addFlashAttribute(
+        "errorMessage",
+        result.getOperationComments() != null
+        ? result.getOperationComments()
+        : "Unable to cancel leave request."
+			);
+    } 
 		return "redirect:/staff/my-leave-requests";
 	}
 
