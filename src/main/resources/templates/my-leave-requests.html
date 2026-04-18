@@ -399,6 +399,35 @@
 						box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
 						z-index: 50;
 					}
+					
+					/* Style the Public Holidays */
+					/* 1. Remove the default background and borders for holidays */
+					.type-ph {
+					    background-color: transparent !important;
+					    border: none !important;
+					}
+
+					/* 2. Target the inner container to add the dot */
+					.type-ph .fc-event-main {
+					    display: flex !important;
+					    align-items: center !important;
+					    padding-left: 4px !important;
+					    background-color: transparent !important;
+					}
+
+					/* 3. Create the colored dot using ::before */
+					.type-ph .fc-event-main::before {
+					    content: '●';
+					    color: #8b5cf6; /* A nice purple for holidays */
+					    margin-right: 6px;
+					    font-size: 10px;
+					}
+
+					/* 4. Remove the "time" if FullCalendar tries to show it */
+					.type-ph .fc-event-time {
+					    display: none !important;
+					}
+					
 				</style>
 				
 				<div class="max-w-5xl mx-auto">
@@ -447,6 +476,12 @@
 						                    <span class="w-3 h-3 rounded-full bg-amber-500"></span>
 						                    <span class="text-sm text-gray-600 font-medium">Compensation</span>
 						                </div>
+										
+										<div class="flex items-center gap-2">
+										    <span class="text-purple-500 font-bold text-xs">●</span>
+										    <span class="text-sm text-gray-600">Public Holiday</span>
+										</div>
+										
 						            </div>
 						        </div>
 

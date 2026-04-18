@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CalendarEventControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
+import iss.nus.edu.sg.leave_application_processing_system.model.PublicHoliday;
 import iss.nus.edu.sg.leave_application_processing_system.security.ApplicationUserDetails;
+import iss.nus.edu.sg.leave_application_processing_system.service.PublicHolidayService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewLeaveRequestsService;
 
@@ -19,9 +21,12 @@ import iss.nus.edu.sg.leave_application_processing_system.service.implementation
 public class LeaveCalendarController {
 	
 	private final ViewLeaveRequestsService viewLeaveRequestsService;
+	private final PublicHolidayService phService;
 
-    public LeaveCalendarController(ViewLeaveRequestsService viewLeaveRequestsService) {
+    public LeaveCalendarController(ViewLeaveRequestsService viewLeaveRequestsService,
+    		PublicHolidayService phService) {
         this.viewLeaveRequestsService = viewLeaveRequestsService;
+        this.phService = phService;
     }
     
     @GetMapping("/api/calendar")
@@ -34,12 +39,33 @@ public class LeaveCalendarController {
 
         List<ControllerDTO> leaveRequestControllerDTOs = viewLeaveRequestsService
                 .retrieveAllLeaveRequestByEmployeeId(serviceDTO);
-
-        // 4. Map DTO to CalendarEventDTO
-        return leaveRequestControllerDTOs.stream()
+        
+        // Map DTO to CalendarEventDTO
+        List<CalendarEventControllerDTO> events = leaveRequestControllerDTOs.stream()
                 .map(dto -> (LeaveRequestControllerDTO) dto.getAllAttribute())
                 .map(this::convertToCalendarEvent)
                 .collect(Collectors.toList());
+        
+        // Get Public Holidays and map to CalendarEventDTO
+        List<PublicHoliday> publicHolidays = phService.findAll();
+        
+        List<CalendarEventControllerDTO> holidayEvents = publicHolidays.stream()
+            .map(ph -> {
+                CalendarEventControllerDTO dto = new CalendarEventControllerDTO();
+                dto.setId("PH-" + ph.getId());
+                dto.setTitle(ph.getPhName());
+                dto.setStart(ph.getPhDate().toString());
+                dto.setEnd(ph.getPhDate().toString());
+                dto.setClassName("type-ph"); // Matches the CSS we just wrote
+                dto.setColor("transparent"); // No background box
+                dto.setTextColor("#4b5563"); // Gray text
+                return dto;
+            })
+            .collect(Collectors.toList());
+        
+        // Combine them
+        events.addAll(holidayEvents);
+        return events;
     }
 
     private CalendarEventControllerDTO convertToCalendarEvent(LeaveRequestControllerDTO leave) {
