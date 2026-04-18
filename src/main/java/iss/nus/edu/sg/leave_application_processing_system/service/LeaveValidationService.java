@@ -38,17 +38,32 @@ public class LeaveValidationService {
 		this.compRepo = compRepo;
 		this.phRepo = phRepo;
 	}
+    
+    public class DayCountResult {
+        public double workingDays = 0;
+        public int weekendCount = 0;
+        public int holidayCount = 0;
+    }
 
-public String validate(LeaveApplicationControllerDTO dto, double workingDaysRequested) {
+    public String validate(LeaveApplicationControllerDTO dto) {
+        
+    	DayCountResult countDetail = calculateDaysDetail(dto.getStartDate(), dto.getEndDate(), dto.isHalfDay());
+        double workingDaysRequested = countDetail.workingDays;
         
         // Basic Date Logic
         if (dto.getEndDate().isBefore(dto.getStartDate())) {
             return "End date cannot be earlier than start date.";
         }
 
-        // Weekend Check
+        // Non-Working Day Checks
         if (workingDaysRequested <= 0) {
-            return "The selected period consists only of weekends.";
+        	if (countDetail.weekendCount > 0 && countDetail.holidayCount > 0) {
+                return "The selected period consists only of weekends and public holidays.";
+            } else if (countDetail.holidayCount > 0) {
+                return "The selected period consists only of public holidays.";
+            } else {
+                return "The selected period consists only of weekends.";
+            }
         }
 
         // Company Rule: 14 Calendar Day Limit
@@ -140,6 +155,32 @@ public String validate(LeaveApplicationControllerDTO dto, double workingDaysRequ
         }
 
         return isHalfDay ? workingDaysCount * 0.5 : workingDaysCount;
+    }
+    
+    public DayCountResult calculateDaysDetail(LocalDate start, LocalDate end, boolean isHalfDay) {
+        DayCountResult result = new DayCountResult();
+        List<LocalDate> holidays = phRepo.findAll().stream()
+                .map(PublicHoliday::getPhDate)
+                .collect(Collectors.toList());
+
+        LocalDate current = start;
+        while (!current.isAfter(end)) {
+            DayOfWeek dow = current.getDayOfWeek();
+            boolean isWeekend = (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY);
+            boolean isHoliday = holidays.contains(current);
+
+            if (isWeekend) {
+                result.weekendCount++;
+            } else if (isHoliday) {
+                result.holidayCount++;
+            } else {
+                result.workingDays++;
+            }
+            current = current.plusDays(1);
+        }
+        
+        if (isHalfDay) result.workingDays *= 0.5;
+        return result;
     }
 
 }

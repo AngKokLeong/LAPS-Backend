@@ -61,7 +61,7 @@ public class CompensationLeaveApplicationService implements LeaveApplicationServ
         );
 
         // Run Universal Validation
-        String errorMessage = validationService.validate(valDto, daysRequested);
+        String errorMessage = validationService.validate(valDto);
 
         if (errorMessage != null) {
             response.setApplicationResult(false);
