@@ -360,17 +360,18 @@ public class DataInitializer implements CommandLineRunner {
 		// Past (Annual & Medical)
 		createLeaveApplication(john, johnMedical, null, -14, 1, LeaveStatus.APPROVED, "Morning Migraine", "");
 		createLeaveApplication(john, johnAnnual, null, -10, 1, LeaveStatus.APPROVED, "Bank appointment", "");
-		createLeaveApplication(john, johnAnnual, null, -2, 1.0, LeaveStatus.REJECTED, "Short Getaway", "Department peak period - all hands on deck for project milestone.");
+		createLeaveApplication(john, johnAnnual, null, 0, 1.0, LeaveStatus.REJECTED, "Short Getaway", "Department peak period - all hands on deck for project milestone.");
 
 		// NEW: April Compensation Leave (Using those 2.0 earned days)
 		createLeaveApplication(john, null, johnLedger, -2, 1, LeaveStatus.APPROVED, "Compensatory rest for weekend deployment", "");
 
 		// Future (April/May)
-		createLeaveApplication(john, johnAnnual, null, 2, 2, LeaveStatus.APPLIED, "Family Dinner", ""); 
-		createLeaveApplication(john, johnMedical, null, 5, 1, LeaveStatus.UPDATED, "Dental Surgery", "Rescheduled");
+		createLeaveApplication(john, johnAnnual, null, 2, 2, LeaveStatus.APPROVED, "Family Dinner", ""); 
+		createLeaveApplication(john, johnMedical, null, 7, 1, LeaveStatus.UPDATED, "Dental Surgery", "Rescheduled");
+		createLeaveApplication(john, johnAnnual, null, 15, 1, LeaveStatus.APPROVED, "Secret", "");
+		createLeaveApplication(john, johnAnnual, null, 30, 1, LeaveStatus.CANCELLED, "Just want to rest", "Plan changed");
 
 		// NEW: May Compensation Leave
-		createLeaveApplication(john, null, johnLedger, 15, 1, LeaveStatus.APPLIED, "Off-in-lieu for project go-live", "");
 		createLeaveApplication(john, null, johnLedger, 45, 0.5, LeaveStatus.APPLIED, "Friday afternoon off", ""); // Using the 0.5 usage logic
 
 
