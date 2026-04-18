@@ -32,6 +32,7 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
             LeaveStatus leaveStatus
     );
     
+    // for dashboard
     @Query("SELECT l FROM LeaveApplication l " +
     	       "WHERE l.employee.manager.id = :managerId " +
     	       "ORDER BY CASE " +
@@ -40,6 +41,8 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
     	       "l.appliedDate DESC")
     List<LeaveApplication> findSubordinateLeaves(@Param("managerId") Long managerId);
     
+    long countByEmployeeIdAndLeaveStatusIn(Long employeeId, List<LeaveStatus> statusList);
+
     // For movement register workflow (movement-register.html)
     @Query("""
     SELECT new iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveMovementDTO(

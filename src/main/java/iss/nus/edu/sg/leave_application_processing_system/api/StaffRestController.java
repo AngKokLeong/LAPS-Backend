@@ -60,8 +60,7 @@ public class StaffRestController {
             int annualRemaining = annualTotal - annualUsed;
 
             // Pending requests
-            List<LeaveApplication> pendingApps = leaveAppRepo.findByEmployeeIdAndLeaveStatus(employee.getId(), LeaveStatus.APPLIED);
-            int pendingRequests = pendingApps.size();
+            int pendingRequests = (int) leaveAppRepo.countByEmployeeIdAndLeaveStatusIn(employee.getId(), List.of(LeaveStatus.APPLIED, LeaveStatus.UPDATED));
 
             // Recent leaves (last 5)
             List<LeaveApplication> recentLeaves = leaveAppRepo.findTop5RecentByEmployeeId(employee.getId(), PageRequest.of(0, 5))
