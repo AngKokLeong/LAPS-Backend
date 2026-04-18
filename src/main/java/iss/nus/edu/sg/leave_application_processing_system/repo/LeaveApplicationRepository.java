@@ -112,5 +112,8 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
 
     // for my-leave-request, sorted by start date descending
     List<LeaveApplication> findByEmployeeIdOrderByStartDateDesc(Long empId);
+    
+ // Finds all leaves for a manager's team, sorted by start date
+    List<LeaveApplication> findByEmployee_ManagerIdOrderByStartDateDesc(Long managerId);
 
 }
