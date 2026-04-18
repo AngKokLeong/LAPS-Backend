@@ -1,7 +1,10 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.service.EmployeeService;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.EmployeeServiceDTO;
 
 @Controller
 @RequestMapping("/admin")
@@ -24,7 +28,7 @@ public class AdminController {
 	}
 
 	@GetMapping("/employee-management")
-	public String employeeManagement(HttpSession session) {  
+	public String employeeManagement(HttpSession session, Model model) {  
 	  	
 		String extractedRoleData = (String) session.getAttribute("userRole");
 		
@@ -36,6 +40,10 @@ public class AdminController {
 	    if (!role.equals(Role.ADMIN)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
 	    }
+	    
+	    List<EmployeeServiceDTO> employeeList = employeeService.getAllEmployees();
+        
+        model.addAttribute("employees", employeeList);
 	    
 		return "employee-management";       
 	}

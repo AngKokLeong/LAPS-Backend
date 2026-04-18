@@ -1,8 +1,13 @@
 package iss.nus.edu.sg.leave_application_processing_system.service;
 
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.EmployeeServiceDTO;
 
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
@@ -30,5 +35,19 @@ public class EmployeeService {
 
 		return false;
 	}
+	
+	public List<EmployeeServiceDTO> getAllEmployees() {
+        
+		return employeeRepository.findAll().stream()
+            .map(emp -> new EmployeeServiceDTO(
+                emp.getId(),         
+                emp.getName(),       
+                emp.getEmail(),
+                emp.getDepartment(),
+                emp.getRole().toString(),
+                emp.getStatus()
+            ))
+            .collect(Collectors.toList());
+    }
 
 }
