@@ -14,51 +14,49 @@
 		<!-- Main Content -->
 		<main class="flex-1 p-8">
 			
-			<div class="mb-8">
-				<h1 class="text-3xl font-semibold text-gray-900">My Leave Requests</h1>
-				<p class="text-gray-500 mt-1">View and manage your leave requests</p>
+			<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+			    <div>
+			        <h1 class="text-3xl font-semibold text-gray-900">My Leave Requests</h1>
+			        <p class="text-gray-500 mt-1">View and manage your leave requests</p>
+			    </div>
+
+			    <div class="inline-flex p-1 bg-gray-100 rounded-xl border border-gray-200 h-fit">
+			        <button id="showCardBtn" onclick="switchView('card')"
+			            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all bg-white text-blue-600 shadow-sm border border-gray-200">
+			            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+			            </svg>
+			            Card View
+			        </button>
+			        <button id="showCalendarBtn" onclick="switchView('calendar')"
+			            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:text-gray-900">
+			            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+			            </svg>
+			            Calendar View
+			        </button>
+			    </div>
 			</div>
 
-			<div class="flex justify-end mb-6">
-				<div class="inline-flex p-1 bg-gray-100 rounded-xl border border-gray-200">
-					<button id="showCardBtn" onclick="switchView('card')"
-						class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all bg-white text-blue-600 shadow-sm border border-gray-200">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-						</svg>
-						Card View
+			<!-- Card View -->	
+			<div id="cardViewContainer">
+
+				<!-- Filter Tabs -->
+				<div class="mb-6 flex items-center gap-2 border-b border-gray-200">
+					<button class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium"
+						th:text="'All (' + ${allCount} + ')'"></button>
+					<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
+						th:text="'Pending (' + ${pendingCount} + ')'"></button>
+					<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
+						th:text="'Approved (' + ${approvedCount} + ')'">
+						Approved (5)
 					</button>
-					<button id="showCalendarBtn" onclick="switchView('calendar')"
-						class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:text-gray-900">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-							</path>
-						</svg>
-						Calendar View
+					<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
+						th:text="'Rejected (' + ${rejectedCount} + ')'">
+						Rejected (1)
 					</button>
 				</div>
-			</div>
-
-			<!-- Filter Tabs -->
-			<div class="mb-6 flex items-center gap-2 border-b border-gray-200">
-				<button class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium"
-					th:text="'All (' + ${allCount} + ')'"></button>
-				<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-					th:text="'Pending (' + ${pendingCount} + ')'"></button>
-				<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-					th:text="'Approved (' + ${approvedCount} + ')'">
-					Approved (5)
-				</button>
-				<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-					th:text="'Rejected (' + ${rejectedCount} + ')'">
-					Rejected (1)
-				</button>
-			</div>
-
-			<!-- Card View -->
-			<div id="cardViewContainer">
+				
 				<div class="space-y-5">
 					<!-- Pending Leave Request -->
 
@@ -763,53 +761,90 @@
 
 	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 	
-		<script th:inline="javascript">
-	    // GLOBAL REFERENCE FOR THE FRAGMENT
-	    var calendar;
+	<script th:inline="javascript">
+		// GLOBAL REFERENCE FOR THE FRAGMENT
+		var calendar;
 
-	    // VIEW SWITCHER (Updated for Card View)
-	    function switchView(viewType) {
-	        // Updated IDs to match your new HTML
-	        const cardContainer = document.getElementById('cardViewContainer');
-	        const calendarContainer = document.getElementById('calendarViewContainer');
-	        const cardBtn = document.getElementById('showCardBtn');
-	        const calendarBtn = document.getElementById('showCalendarBtn');
+		// INITIALIZATION (This was missing)
+		document.addEventListener('DOMContentLoaded', function () {
+			const calendarEl = document.getElementById('calendar');
 
-	        const activeClasses = ['bg-white', 'text-blue-600', 'shadow-sm', 'border', 'border-gray-200'];
-	        const inactiveClasses = ['text-gray-600', 'hover:text-gray-900'];
-			
-			if (window.calendar) {
-			    window.calendar.render();
+			if (calendarEl) {
+				calendar = new FullCalendar.Calendar(calendarEl, {
+					initialView: 'dayGridMonth',
+					headerToolbar: false, // Using your custom header
+					events: '/api/calendar', // Your working API endpoint
+
+					// Updates your custom "April 2026" title
+					datesSet: function (info) {
+						const titleEl = document.getElementById('customCalendarTitle');
+						if (titleEl) titleEl.innerText = info.view.title;
+					},
+
+					// Maps your JSON 'className' to the event elements
+					eventDidMount: function (info) {
+						if (info.event.extendedProps.className) {
+							info.event.extendedProps.className.split(' ').forEach(cls => {
+								if (cls.trim()) info.el.classList.add(cls);
+							});
+						}
+					}
+				});
+
+				calendar.render();
+
+				// Link your custom prev/next/today buttons
+				document.getElementById('prevBtn').onclick = () => calendar.prev();
+				document.getElementById('nextBtn').onclick = () => calendar.next();
+				document.getElementById('todayBtn').onclick = () => calendar.today();
 			}
 
-	        if (viewType === 'card') {
-	            cardContainer.classList.remove('hidden');
-	            calendarContainer.classList.add('hidden');
+			// delete button listener
+			const confirmCheckbox = document.getElementById('confirmDelete');
+			const confirmBtn = document.getElementById('confirmDeleteBtn');
+			if (confirmCheckbox && confirmBtn) {
+				confirmCheckbox.addEventListener('change', function () {
+					confirmBtn.disabled = !this.checked;
+				});
+			}
+		});
 
-	            // Set Card Button Active
-	            cardBtn.classList.add(...activeClasses);
-	            cardBtn.classList.remove(...inactiveClasses);
-	            
-	            calendarBtn.classList.remove(...activeClasses);
-	            calendarBtn.classList.add(...inactiveClasses);
-	        } else {
-	            cardContainer.classList.add('hidden');
-	            calendarContainer.classList.remove('hidden');
+		// VIEW SWITCHER (Updated for Card View)
+		function switchView(viewType) {
+		    const cardView = document.getElementById('cardViewContainer');
+		    const calendarView = document.getElementById('calendarViewContainer');
+		    const cardBtn = document.getElementById('showCardBtn');
+		    const calendarBtn = document.getElementById('showCalendarBtn');
 
-	            // Set Calendar Button Active
-	            calendarBtn.classList.add(...activeClasses);
-	            calendarBtn.classList.remove(...inactiveClasses);
-	            
-	            cardBtn.classList.remove(...activeClasses);
-	            cardBtn.classList.add(...inactiveClasses);
+		    // Define the Tailwind classes for Active and Inactive states
+		    const activeClass = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all bg-white text-blue-600 shadow-sm border border-gray-200";
+		    const inactiveClass = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:text-gray-900";
 
-	            // Re-render FullCalendar if it exists
-	            if (typeof calendar !== 'undefined' && calendar !== null) {
-	                calendar.render();
-	            }
-	        }
-	    }
-		
+		    if (viewType === 'card') {
+		        // Show/Hide containers
+		        cardView.classList.remove('hidden');
+		        calendarView.classList.add('hidden');
+		        
+		        // Update Button Highlighting
+		        cardBtn.className = activeClass;
+		        calendarBtn.className = inactiveClass;
+		    } else {
+		        // Show/Hide containers
+		        cardView.classList.add('hidden');
+		        calendarView.classList.remove('hidden');
+		        
+		        // Update Button Highlighting
+		        calendarBtn.className = activeClass;
+		        cardBtn.className = inactiveClass;
+
+		        // Force Calendar Refresh
+		        if (calendar) {
+		            calendar.updateSize();
+		            calendar.refetchEvents();
+		        }
+		    }
+		}
+
 		// --- MODAL FUNCTIONS (KEEPING YOUR EXISTING LOGIC) ---
 		// Cancel Modal Functions
 		function openCancelModal(button) {
@@ -898,18 +933,6 @@
 			document.getElementById('confirmDelete').checked = false;
 			document.getElementById('confirmDeleteBtn').disabled = true;
 		}
-
-		// Enable/disable delete button based on checkbox
-		document.addEventListener('DOMContentLoaded', function () {
-			const confirmCheckbox = document.getElementById('confirmDelete');
-			const confirmBtn = document.getElementById('confirmDeleteBtn');
-
-			if (confirmCheckbox && confirmBtn) {
-				confirmCheckbox.addEventListener('change', function () {
-					confirmBtn.disabled = !this.checked;
-				});
-			}
-		});
 
 		// Helper function for status badge styling
 		function getStatusBadgeClass(status) {
@@ -1038,7 +1061,7 @@
 			}
 		});
 
-		
+
 
 	</script>
 
