@@ -1,0 +1,329 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Learner Lab template: creates VPC, EC2, and RDS MySQL.
+  Credentials are supplied externally (e.g. GitHub Actions).
+
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+
+  PublicSubnetCidr:
+    Type: String
+    Default: 10.0.1.0/24
+
+  PrivateSubnetCidr:
+    Type: String
+    Default: 10.0.2.0/24
+
+
+
+  KeyPairName:
+    Type: String
+    Default: vockey
+
+
+  LabInstanceProfileArn:
+    Type: String
+    Default: arn:aws:iam::290556388285:instance-profile/LabInstanceProfile
+
+
+
+
+  GitRepostiory:
+    Type: String
+    Description: URL to download the Spring Boot WAR (S3 presigned URL or GitHub Releases URL)
+
+
+  DBUsername:
+    Type: String
+    NoEcho: true
+    MinLength: 1
+    MaxLength: 16
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+
+  
+  PrivateSubnetCidrAZ1:
+    Type: String
+    Default: 10.0.3.0/24
+
+  PrivateSubnetCidrAZ2:
+    Type: String
+    Default: 10.0.4.0/24
+
+
+Resources:
+
+  # ------------------
+  # S3 Artifact Bucket
+  # ------------------
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-artifacts-${AWS::AccountId}"
+
+  ArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ArtifactBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com
+            Action:
+              - s3:GetObject
+            Resource: !Sub "${ArtifactBucket.Arn}/*"
+
+  # ------------------
+  # CodeDeploy Application
+  # ------------------
+  CodeDeployApp:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: !Sub "${AWS::StackName}-app"
+      ComputePlatform: Server
+
+  CodeDeployDeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    DependsOn: EC2Instance
+    Properties:
+      ApplicationName: !Ref CodeDeployApp
+      DeploymentGroupName: !Sub "${AWS::StackName}-dg"
+      ServiceRoleArn: arn:aws:iam::${AWS::AccountId}:role/LabRole
+      DeploymentConfigName: CodeDeployDefault.AllAtOnce
+      Ec2TagFilters:
+        - Key: DeployTarget
+          Value: !Sub "${AWS::StackName}-ec2"
+          Type: KEY_AND_VALUE
+      DeploymentStyle:
+        DeploymentType: IN_PLACE
+        DeploymentOption: WITHOUT_TRAFFIC_CONTROL
+
+  # ------------------
+  # VPC & Networking
+  # ------------------
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: SpringBootVPC
+
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCidr
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [0, !GetAZs '']
+
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCidr
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [0, !GetAZs '']
+
+
+   
+  PrivateSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCidrAZ1
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [0, !GetAZs '']
+
+  PrivateSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCidrAZ2
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [1, !GetAZs '']
+   
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  # ------------------
+  # Security Groups
+  # ------------------
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8080   # adjust to your app port
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow MySQL from EC2
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref EC2SecurityGroup
+
+  # ------------------
+  # EC2 Instance
+  # ------------------
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    DependsOn:
+      - PublicSubnetRouteTableAssociation
+      - AttachGateway
+      - MySQLDB
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+    Properties:
+      InstanceType: t3.micro
+      KeyName: vockey
+      IamInstanceProfile: LabInstanceProfile
+      ImageId: ami-098e39bafa7e7303d
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroup
+      Tags:
+        - Key: DeployTarget
+          Value: !Sub "${AWS::StackName}-ec2"
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          exec > /var/log/user-data.log 2>&1
+          set -e
+
+          # --- 1. System update & cfn-bootstrap ---
+          yum update -y
+          yum install -y aws-cfn-bootstrap
+
+          # --- 2. Java 17 (Corretto) ---
+          rpm --import https://yum.corretto.aws/corretto.key
+          curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
+          yum install -y java-17-amazon-corretto-headless
+
+          # --- 3. Tomcat ---
+          yum install -y tomcat
+
+          # Set JAVA_HOME for Tomcat
+          echo 'JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' >> /etc/tomcat/tomcat.conf
+
+          # Create webapps dir if missing and set permissions
+          mkdir -p /var/lib/tomcat/webapps
+          chown -R tomcat:tomcat /var/lib/tomcat/webapps
+          chmod -R 755 /var/lib/tomcat/webapps
+
+          # Write DB config as JAVA_OPTS so Spring Boot reads them on Tomcat startup
+          echo "JAVA_OPTS=\"\$JAVA_OPTS -Dspring.profiles.active=prod -Dspring.datasource.url=jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true -Dspring.datasource.username=${DBUsername} -Dspring.datasource.password=${DBPassword}\"" >> /etc/tomcat/tomcat.conf
+
+          systemctl enable tomcat
+          systemctl start tomcat
+
+          # --- 4. CodeDeploy agent ---
+          yum install -y ruby wget
+          cd /tmp
+          wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
+          chmod +x ./install
+          ./install auto
+          systemctl enable codedeploy-agent
+          systemctl start codedeploy-agent
+
+          # --- 5. Signal CloudFormation ---
+          /opt/aws/bin/cfn-signal -e $? \
+            --stack  ${AWS::StackName} \
+            --resource EC2Instance \
+            --region  ${AWS::Region}
+
+
+  # ------------------
+  # RDS MySQL
+  # ------------------
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: RDS private subnets in two AZs
+      SubnetIds:
+        - !Ref PrivateSubnetAZ1
+        - !Ref PrivateSubnetAZ2
+
+  MySQLDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: mysql
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups:
+        - !GetAtt DBSecurityGroup.GroupId
+      PubliclyAccessible: false
+      BackupRetentionPeriod: 0
+      DeletionProtection: false
+
+Outputs:
+  VPCId:
+    Value: !Ref VPC
+
+  EC2PublicIP:
+    Value: !GetAtt EC2Instance.PublicIp
+
+  MySQLEndpoint:
+    Value: !GetAtt MySQLDB.Endpoint.Address
+
+  ArtifactBucketName:
+    Value: !Ref ArtifactBucket
+
+  CodeDeployAppName:
+    Value: !Ref CodeDeployApp
+
+  CodeDeployDeploymentGroupName:
+    Value: !Ref CodeDeployDeploymentGroup
