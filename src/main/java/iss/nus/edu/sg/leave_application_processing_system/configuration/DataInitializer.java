@@ -1,5 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.configuration;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -26,6 +27,7 @@ import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationR
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.PublicHolidayRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.CompensationService;
 
 @Component
 @Profile("local")
@@ -38,11 +40,12 @@ public class DataInitializer implements CommandLineRunner {
     private PublicHolidayRepository phRepo;
     private OverTimeClaimRepository otClaimRepo;
     private CompensationLedgerRepository compensationLedgerRepo;
-    private PasswordEncoder passwordEncoder;
+    private CompensationService compensationService;
+		private PasswordEncoder passwordEncoder;
     
     public DataInitializer(EmployeeRepository empRepo, LeaveApplicationRepository leaveRepo,
     		LeaveEntitlementRepository entitlementRepo, PublicHolidayRepository phRepo,
-    		OverTimeClaimRepository otClaimRepo, CompensationLedgerRepository compensationLedgerRepo,
+    		OverTimeClaimRepository otClaimRepo, CompensationLedgerRepository compensationLedgerRepo, CompensationService compensationService,
     		PasswordEncoder passwordEncoder) {
     	this.empRepo = empRepo;
     	this.leaveRepo = leaveRepo;
@@ -50,6 +53,7 @@ public class DataInitializer implements CommandLineRunner {
     	this.phRepo = phRepo;
     	this.otClaimRepo = otClaimRepo;
     	this.compensationLedgerRepo = compensationLedgerRepo;
+			this.compensationService = compensationService;
     	this.passwordEncoder = passwordEncoder;
     }
     
@@ -512,13 +516,13 @@ public class DataInitializer implements CommandLineRunner {
 		otClaimRepo.save(jasonPendingOT);
 
 		// 2. An already Approved Claim
-		OverTimeClaim jasonApprovedOT = new OverTimeClaim();
-		jasonApprovedOT.setEmployee(jason);
-		jasonApprovedOT.setStartDateTime(LocalDateTime.of(2026, 4, 10, 18, 30)); // Last Friday
-		jasonApprovedOT.setEndDateTime(LocalDateTime.of(2026, 4, 10, 20, 0));
-		jasonApprovedOT.setOtDescription("Emergency server maintenance");
-		jasonApprovedOT.setStatus(OTClaimStatus.APPROVED);
-		otClaimRepo.save(jasonApprovedOT);
+		seedApprovedOT(
+    jason,
+    LocalDateTime.of(2026, 4, 10, 18, 30),
+    LocalDateTime.of(2026, 4, 10, 20, 0),
+    "Emergency server maintenance"
+		);
+
 
 		// --- OT Claim for MARIA ---
 
@@ -557,29 +561,26 @@ public class DataInitializer implements CommandLineRunner {
 		otClaimRepo.save(daricePendingOT);
 		
 		// Add more approved OT claims
-		OverTimeClaim williamApprovedOT = new OverTimeClaim();
-		williamApprovedOT.setEmployee(william);
-		williamApprovedOT.setStartDateTime(LocalDateTime.of(2026, 4, 2, 17, 00)); 
-		williamApprovedOT.setEndDateTime(LocalDateTime.of(2026, 4, 2, 20, 0));
-		williamApprovedOT.setOtDescription("OT claim");
-		williamApprovedOT.setStatus(OTClaimStatus.APPROVED);
-		otClaimRepo.save(williamApprovedOT);
+		seedApprovedOT(
+    william,
+    LocalDateTime.of(2026, 4, 2, 17, 0),
+    LocalDateTime.of(2026, 4, 2, 20, 0),
+    "OT claim"
+		);
 		
-		OverTimeClaim adminApprovedOT = new OverTimeClaim();
-		adminApprovedOT.setEmployee(admin);
-		adminApprovedOT.setStartDateTime(LocalDateTime.of(2026, 4, 4, 8, 30)); 
-		adminApprovedOT.setEndDateTime(LocalDateTime.of(2026, 4, 4, 12, 0));
-		adminApprovedOT.setOtDescription("OT claim");
-		adminApprovedOT.setStatus(OTClaimStatus.APPROVED);
-		otClaimRepo.save(adminApprovedOT);
-		
-		OverTimeClaim leonApprovedOT = new OverTimeClaim();
-		leonApprovedOT.setEmployee(leon);
-		leonApprovedOT.setStartDateTime(LocalDateTime.of(2026, 4, 5, 9, 30)); 
-		leonApprovedOT.setEndDateTime(LocalDateTime.of(2026, 4, 5, 13, 0));
-		leonApprovedOT.setOtDescription("OT claim");
-		leonApprovedOT.setStatus(OTClaimStatus.APPROVED);
-		otClaimRepo.save(leonApprovedOT);
+		seedApprovedOT(
+    admin,
+    LocalDateTime.of(2026, 4, 2, 8, 30),
+    LocalDateTime.of(2026, 4, 2, 12, 0),
+    "OT claim"
+		);
+
+		seedApprovedOT(
+    leon,
+    LocalDateTime.of(2026, 4, 5, 9, 30),
+    LocalDateTime.of(2026, 4, 5, 13, 0),
+    "OT claim"
+		);
 		
 		// Add more rejected OT claims
 		OverTimeClaim katerineRejectedOT = new OverTimeClaim();
@@ -665,5 +666,29 @@ public class DataInitializer implements CommandLineRunner {
 		
 	}
 
+	// Helper method to seed approved OT claims and update compensation ledger accordingly
+	private void seedApprovedOT(
+    Employee emp,
+    LocalDateTime start,
+    LocalDateTime end,
+    String description
+		) {
+    OverTimeClaim claim = new OverTimeClaim();
+    claim.setEmployee(emp);
+    claim.setStartDateTime(start);
+    claim.setEndDateTime(end);
+    claim.setOtDescription(description);
+    claim.setStatus(OTClaimStatus.APPROVED);
 
+    otClaimRepo.save(claim);
+
+    double hours =
+        Duration.between(start, end).toMinutes() / 60.0;
+
+    compensationService.addOvertimeHours(
+        emp.getId(),
+        Year.now().getValue(),
+        hours
+    	);
+		}
 }
