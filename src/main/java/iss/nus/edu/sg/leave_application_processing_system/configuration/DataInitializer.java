@@ -187,15 +187,15 @@ public class DataInitializer implements CommandLineRunner {
 
 		// create compensation ledger
 		int currentYear = Year.now().getValue();
-		createCompensationLedger(john, currentYear, 2.0, 0.5, 3.0);
-		createCompensationLedger(sarah, currentYear, 3.5, 1.0, 1.5);
-		createCompensationLedger(admin, currentYear, 1.5, 0.0, 2.0);
+		CompensationLedger johnLedger = createCompensationLedger(john, currentYear, 2.0, 0.5, 3.0);
+		CompensationLedger sarahLedger = createCompensationLedger(sarah, currentYear, 3.5, 1.0, 1.5);
+		CompensationLedger adminLedger = createCompensationLedger(admin, currentYear, 1.5, 0.0, 2.0);
 
 		// Add more compensation ledger
-		createCompensationLedger(jason, currentYear, 3.0, 1.5, 1.0);
-		createCompensationLedger(maria, currentYear, 3.5, 2.0, 2.5);
-		createCompensationLedger(katerine, currentYear, 4.5, 3.5, 1.5);
-		createCompensationLedger(darice, currentYear, 1.0, 0.5, 3.5);		
+		CompensationLedger jasonLedger = createCompensationLedger(jason, currentYear, 3.0, 1.5, 1.0);
+		CompensationLedger mariaLedger = createCompensationLedger(maria, currentYear, 3.5, 2.0, 2.5);
+		CompensationLedger katerineLedger = createCompensationLedger(katerine, currentYear, 4.5, 3.5, 1.5);
+		CompensationLedger dariceLedger = createCompensationLedger(darice, currentYear, 1.0, 0.5, 3.5);		
 		
 		// Leave Entitlement for Sarah
 		LeaveEntitlement sarahAnnual = new LeaveEntitlement();
@@ -353,72 +353,73 @@ public class DataInitializer implements CommandLineRunner {
 		// Create a Leave Application
 
 
-		// --- JOHN: The "Demo Star" (Heavy April/May Activity) ---
-		// Past (April)
-		createLeaveApplication(john, johnMedical, -14, 1, LeaveStatus.APPROVED, "Morning Migraine", "");
-		createLeaveApplication(john, johnAnnual, -10, 1, LeaveStatus.APPROVED, "Bank appointment", "");
-		createLeaveApplication(john, johnAnnual, -5, 1, LeaveStatus.DELETED, "Drafting-Mistake", ""); // Deleted before approval
+		// Current Date: April 18, 2026
+		// Signature: (Employee, Entitlement, Ledger, startDays, duration, Status, Reason, Remarks)
 
-		// Current/Near Future (April/May)
-		createLeaveApplication(john, johnAnnual, 2, 2, LeaveStatus.APPLIED, "Family Dinner", ""); 
-		createLeaveApplication(john, johnMedical, 5, 1, LeaveStatus.UPDATED, "Dental Surgery", "Rescheduled from morning to afternoon");
-		createLeaveApplication(john, johnAnnual, 12, 1, LeaveStatus.REJECTED, "Friday Off", "Too many people away this day");
-		createLeaveApplication(john, johnAnnual, 20, 3, LeaveStatus.CANCELLED, "Short Trip", "Trip postponed by travel agency"); // Cancelled after approval
+		// --- JOHN: The "Demo Star" (Mix of Annual, Medical, and Compensation) ---
+		// Past (Annual & Medical)
+		createLeaveApplication(john, johnMedical, null, -14, 1, LeaveStatus.APPROVED, "Morning Migraine", "");
+		createLeaveApplication(john, johnAnnual, null, -10, 1, LeaveStatus.APPROVED, "Bank appointment", "");
+		createLeaveApplication(john, johnAnnual, null, -2, 1.0, LeaveStatus.REJECTED, "Short Getaway", "Department peak period - all hands on deck for project milestone.");
 
-		// Further Future (May)
-		createLeaveApplication(john, johnAnnual, 35, 2, LeaveStatus.APPLIED, "Course Workshop", "");
-		createLeaveApplication(john, johnMedical, 40, 1, LeaveStatus.APPLIED, "Regular Checkup", "");
+		// NEW: April Compensation Leave (Using those 2.0 earned days)
+		createLeaveApplication(john, null, johnLedger, -2, 1, LeaveStatus.APPROVED, "Compensatory rest for weekend deployment", "");
 
+		// Future (April/May)
+		createLeaveApplication(john, johnAnnual, null, 2, 2, LeaveStatus.APPLIED, "Family Dinner", ""); 
+		createLeaveApplication(john, johnMedical, null, 5, 1, LeaveStatus.UPDATED, "Dental Surgery", "Rescheduled");
 
-		// --- SARAH (Used: 2 Annual, 3 Medical) ---
-		createLeaveApplication(sarah, sarahMedical, -60, 3, LeaveStatus.APPROVED, "Severe Flu", "");
-		createLeaveApplication(sarah, sarahAnnual, -15, 2, LeaveStatus.APPROVED, "Birthday Break", "");
-		createLeaveApplication(sarah, sarahAnnual, 45, 5, LeaveStatus.APPLIED, "Summer Holiday", "");
+		// NEW: May Compensation Leave
+		createLeaveApplication(john, null, johnLedger, 15, 1, LeaveStatus.APPLIED, "Off-in-lieu for project go-live", "");
+		createLeaveApplication(john, null, johnLedger, 45, 0.5, LeaveStatus.APPLIED, "Friday afternoon off", ""); // Using the 0.5 usage logic
 
 
-		// --- JASON (Used: 5 Annual, 3 Medical) ---
-		createLeaveApplication(jason, jasonAnnual, -70, 5, LeaveStatus.APPROVED, "New Year Trip", "");
-		createLeaveApplication(jason, jasonMedical, -20, 3, LeaveStatus.APPROVED, "Food Poisoning", "");
-		createLeaveApplication(jason, jasonAnnual, 15, 2, LeaveStatus.UPDATED, "Wedding Ceremony", "Changing dates per invite");
+		// --- SARAH (Used: 2 Annual, 3 Medical, 1.0 Comp) ---
+		createLeaveApplication(sarah, sarahMedical, null, -60, 3, LeaveStatus.APPROVED, "Severe Flu", "");
+		createLeaveApplication(sarah, null, sarahLedger, -30, 1, LeaveStatus.APPROVED, "Time off for extra shift", "");
+		createLeaveApplication(sarah, sarahAnnual, null, -15, 2, LeaveStatus.APPROVED, "Birthday Break", "");
 
 
-		// --- MARIA (Used: 11 Annual, 1 Medical) ---
-		createLeaveApplication(maria, mariaAnnual, -100, 5, LeaveStatus.APPROVED, "Winter Vacation", "");
-		createLeaveApplication(maria, mariaAnnual, -50, 4, LeaveStatus.APPROVED, "Renovation", "");
-		createLeaveApplication(maria, mariaAnnual, -15, 2, LeaveStatus.APPROVED, "Spring Festival", "");
-		createLeaveApplication(maria, mariaMedical, -5, 1, LeaveStatus.APPROVED, "Fever", "");
-		createLeaveApplication(maria, mariaAnnual, 10, 1, LeaveStatus.REJECTED, "Monday Blues", "Not a valid reason for leave");
+		// --- JASON (Used: 5 Annual, 3 Medical, 1.5 Comp) ---
+		createLeaveApplication(jason, jasonAnnual, null, -70, 5, LeaveStatus.APPROVED, "New Year Trip", "");
+		createLeaveApplication(jason, null, jasonLedger, -40, 1.5, LeaveStatus.APPROVED, "OT Compensation", "");
+		createLeaveApplication(jason, jasonMedical, null, -20, 3, LeaveStatus.APPROVED, "Food Poisoning", "");
 
 
-		// --- ADMIN (Used: 4 Annual, 19 Medical) ---
-		createLeaveApplication(admin, adminMedical, -80, 14, LeaveStatus.APPROVED, "Hospital Stay", "MC Provided");
-		createLeaveApplication(admin, adminMedical, -40, 5, LeaveStatus.APPROVED, "Recovery", "");
-		createLeaveApplication(admin, adminAnnual, -10, 4, LeaveStatus.APPROVED, "Personal Matters", "");
-		createLeaveApplication(admin, adminAnnual, 5, 2, LeaveStatus.CANCELLED, "Urgent Trip", "Meeting rescheduled, no longer need leave");
+		// --- MARIA (Used: 11 Annual, 1 Medical, 2.0 Comp) ---
+		createLeaveApplication(maria, mariaAnnual, null, -100, 5, LeaveStatus.APPROVED, "Winter Vacation", "");
+		createLeaveApplication(maria, null, mariaLedger, -75, 2, LeaveStatus.APPROVED, "Comp leave from Q1 crunch", "");
+		createLeaveApplication(maria, mariaAnnual, null, -50, 4, LeaveStatus.APPROVED, "Renovation", "");
+		createLeaveApplication(maria, mariaMedical, null, -5, 1, LeaveStatus.APPROVED, "Fever", "");
 
 
-		// --- LEON (Used: 7 Annual, 30 Medical) ---
-		createLeaveApplication(leon, leonMedical, -90, 30, LeaveStatus.APPROVED, "Prolonged Illness", "HR Notified");
-		createLeaveApplication(leon, leonAnnual, -20, 7, LeaveStatus.APPROVED, "Mental Health Break", "");
-		createLeaveApplication(leon, leonAnnual, 100, 5, LeaveStatus.APPLIED, "Year-end Holiday", "");
+		// --- ADMIN (Used: 4 Annual, 19 Medical, 0 Comp) ---
+		createLeaveApplication(admin, adminMedical, null, -80, 14, LeaveStatus.APPROVED, "Hospital Stay", "");
+		createLeaveApplication(admin, adminAnnual, null, -10, 4, LeaveStatus.APPROVED, "Personal Matters", "");
+		createLeaveApplication(admin, null, adminLedger, 10, 1, LeaveStatus.REJECTED, "Claiming OT", "Ledger balance is 0.0 used, but keep for record");
 
 
-		// --- WILLIAM (Used: 9 Annual, 10 Medical) ---
-		createLeaveApplication(william, williamMedical, -85, 10, LeaveStatus.APPROVED, "Surgical Procedure", "");
-		createLeaveApplication(william, williamAnnual, -30, 9, LeaveStatus.APPROVED, "Moving House", "");
-		createLeaveApplication(william, williamAnnual, 60, 3, LeaveStatus.DELETED, "Mistyped dates", "");
+		// --- LEON (No Ledger - Pure Entitlement) ---
+		createLeaveApplication(leon, leonMedical, null, -90, 30, LeaveStatus.APPROVED, "Prolonged Illness", "");
+		createLeaveApplication(leon, leonAnnual, null, -20, 7, LeaveStatus.APPROVED, "Mental Health Break", "");
 
 
-		// --- KATERINE (Used: 5 Annual, 15 Medical) ---
-		createLeaveApplication(katerine, katerineMedical, -50, 10, LeaveStatus.APPROVED, "Therapy", "");
-		createLeaveApplication(katerine, katerineMedical, -15, 5, LeaveStatus.APPROVED, "Chronic Back Pain", "");
-		createLeaveApplication(katerine, katerineAnnual, -5, 5, LeaveStatus.APPROVED, "Hiking", "");
+		// --- WILLIAM (No Ledger - Pure Entitlement) ---
+		createLeaveApplication(william, williamMedical, null, -85, 10, LeaveStatus.APPROVED, "Surgical Procedure", "");
+		createLeaveApplication(william, williamAnnual, null, -30, 9, LeaveStatus.APPROVED, "Moving House", "");
 
 
-		// --- DARICE (Used: 8 Annual, 59 Medical) ---
-		createLeaveApplication(darice, dariceMedical, -120, 30, LeaveStatus.APPROVED, "Treatment Phase 1", "");
-		createLeaveApplication(darice, dariceMedical, -60, 29, LeaveStatus.APPROVED, "Treatment Phase 2", "");
-		createLeaveApplication(darice, dariceAnnual, -25, 8, LeaveStatus.APPROVED, "Respite", "");
+		// --- KATERINE (Used: 5 Annual, 15 Medical, 3.5 Comp) ---
+		createLeaveApplication(katerine, katerineMedical, null, -50, 10, LeaveStatus.APPROVED, "Therapy", "");
+		createLeaveApplication(katerine, null, katerineLedger, -35, 3.5, LeaveStatus.APPROVED, "Consolidated OT claim", "");
+		createLeaveApplication(katerine, katerineAnnual, null, -5, 5, LeaveStatus.APPROVED, "Hiking", "");
+
+
+		// --- DARICE (Used: 8 Annual, 59 Medical, 0.5 Comp) ---
+		createLeaveApplication(darice, dariceMedical, null, -120, 30, LeaveStatus.APPROVED, "Treatment Phase 1", "");
+		createLeaveApplication(darice, null, dariceLedger, -90, 0.5, LeaveStatus.APPROVED, "Medical follow-up (Comp)", "");
+		createLeaveApplication(darice, dariceMedical, null, -60, 29, LeaveStatus.APPROVED, "Treatment Phase 2", "");
+		createLeaveApplication(darice, dariceAnnual, null, -25, 8, LeaveStatus.APPROVED, "Respite", "");
 		
 	
 		
@@ -606,14 +607,22 @@ public class DataInitializer implements CommandLineRunner {
 		
     }
 	
-	private void createLeaveApplication(Employee emp, LeaveEntitlement LE, int startDaysFromNow, int durationDays, LeaveStatus status, String reason, String mgrRemarks) {
+	private void createLeaveApplication(Employee emp, LeaveEntitlement LE, CompensationLedger cl, int startDaysFromNow, double durationDays, LeaveStatus status, String reason, String mgrRemarks) {
 	    LeaveApplication app = new LeaveApplication();
 	    app.setEmployee(emp);
 	    app.setEntitlement(LE);
-	    app.setLeaveType(LE.getLeaveType());
+	    app.setLedger(cl);
+	    
+	    // SAFE TYPE CHECK: If LE is null, default to COMPENSATION
+	    LeaveType type = (LE != null) ? LE.getLeaveType() : LeaveType.COMPENSATION;
+	    app.setLeaveType(type);
 
 	    LocalDate start = LocalDate.now().plusDays(startDaysFromNow);
-	    LocalDate end = start.plusDays(durationDays - 1); 
+	    
+	    // If duration is 0.5 or 1.0, end date is the SAME as start date.
+	    // We use (int) Math.ceil(durationDays) to handle the span.
+	    long daysToAdd = (long) Math.max(0, Math.ceil(durationDays) - 1);
+	    LocalDate end = start.plusDays(daysToAdd);
 	    
 	    app.setStartDate(start);
 	    app.setEndDate(end);
@@ -624,15 +633,14 @@ public class DataInitializer implements CommandLineRunner {
 	    // Logic: Medical leave is applied 0-1 days before/on start. 
 	    // Annual leave is applied 7-30 days before start.
 	    int leadTime;
-
-	    if (LE.getLeaveType() == LeaveType.MEDICAL) {
-	        leadTime = 0; // Medical leave is usually reported the day of
+	    if (type == LeaveType.MEDICAL) {
+	        leadTime = 0; 
 	    } else if (durationDays > 5) {
-	        leadTime = 60; // Big vacations are planned a month in advance
+	        leadTime = 60; 
 	    } else if (durationDays > 2) {
 	        leadTime = 20;
 	    } else {
-	        leadTime = 7; // Short leaves are planned a week in advance
+	        leadTime = 7; 
 	    }
 	    
 	    app.setAppliedDate(start.minusDays(leadTime));
@@ -644,7 +652,7 @@ public class DataInitializer implements CommandLineRunner {
 		return passwordEncoder.encode(rawPassword);
 	}
 
-	private void createCompensationLedger(Employee employee, int yearApplied, double earnedDays, double usedDays,
+	private CompensationLedger createCompensationLedger(Employee employee, int yearApplied, double earnedDays, double usedDays,
 			double unconvertedHours) {
 		CompensationLedger ledger = new CompensationLedger();
 		ledger.setEmployee(employee);
@@ -652,7 +660,8 @@ public class DataInitializer implements CommandLineRunner {
 		ledger.setEarnedDays(earnedDays);
 		ledger.setUsedDays(usedDays);
 		ledger.setUnconvertedHours(unconvertedHours);
-		compensationLedgerRepo.save(ledger);
+		return compensationLedgerRepo.save(ledger);
+		
 	}
 
 
