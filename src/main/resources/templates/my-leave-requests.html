@@ -43,25 +43,30 @@
 
 				<!-- Filter Tabs -->
 				<div class="mb-6 flex items-center gap-2 border-b border-gray-200">
-					<button class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium"
-						th:text="'All (' + ${allCount} + ')'"></button>
-					<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-						th:text="'Pending (' + ${pendingCount} + ')'"></button>
-					<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-						th:text="'Approved (' + ${approvedCount} + ')'">
-						Approved (5)
-					</button>
-					<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-						th:text="'Rejected (' + ${rejectedCount} + ')'">
-						Rejected (1)
-					</button>
+				    <button onclick="filterCards('ALL', this)" 
+				            class="filter-tab px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium">
+				        All (<span th:text="${allCount}">0</span>)
+				    </button>
+				    <button onclick="filterCards('PENDING', this)" 
+				            class="filter-tab px-4 py-3 text-gray-600 hover:text-gray-900 border-b-2 border-transparent">
+				        Pending (<span th:text="${pendingCount}">0</span>)
+				    </button>
+				    <button onclick="filterCards('APPROVED', this)" 
+				            class="filter-tab px-4 py-3 text-gray-600 hover:text-gray-900 border-b-2 border-transparent">
+				        Approved (<span th:text="${approvedCount}">0</span>)
+				    </button>
+				    <button onclick="filterCards('REJECTED', this)" 
+				            class="filter-tab px-4 py-3 text-gray-600 hover:text-gray-900 border-b-2 border-transparent">
+				        Rejected (<span th:text="${rejectedCount}">0</span>)
+				    </button>
 				</div>
 				
 				<div class="space-y-5">
 					<!-- Pending Leave Request -->
 
 					<div th:each="leaveRequest : ${leaveRequestList}"
-						class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+						class="leave-card bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+					     th:classappend="'status-' + ${leaveRequest.leaveStatus}">
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-4">
 								<div class="w-12 h-12 rounded-lg flex items-center justify-center"
@@ -1098,6 +1103,38 @@
 
 			// Form will submit
 			return true;
+		}
+		
+		function filterCards(status, element) {
+		    // 1. Update Tab Highlighting
+		    document.querySelectorAll('.filter-tab').forEach(tab => {
+		        tab.classList.remove('text-blue-600', 'border-blue-600', 'font-medium');
+		        tab.classList.add('text-gray-600', 'border-transparent');
+		    });
+		    element.classList.add('text-blue-600', 'border-blue-600', 'font-medium');
+
+		    // 2. Filter the Cards
+		    const allCards = document.querySelectorAll('.leave-card');
+		    
+		    allCards.forEach(card => {
+		        if (status === 'ALL') {
+		            card.classList.remove('hidden');
+		        } else if (status === 'PENDING') {
+		            // Check for both original 'Applied' and 'Updated' states
+		            if (card.classList.contains('status-APPLIED') || card.classList.contains('status-UPDATED')) {
+		                card.classList.remove('hidden');
+		            } else {
+		                card.classList.add('hidden');
+		            }
+		        } else {
+		            // Match specific status: status-APPROVED, status-REJECTED, etc.
+		            if (card.classList.contains('status-' + status)) {
+		                card.classList.remove('hidden');
+		            } else {
+		                card.classList.add('hidden');
+		            }
+		        }
+		    });
 		}
 
 		// Calculate days when dates change
