@@ -1,0 +1,64 @@
+name: Deploy CloudFormation Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_access_key_id:
+        description: 'AWS Access Key ID'
+        required: true
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key'
+        required: true
+      aws_session_token:
+        description: 'AWS Session Token'
+        required: true
+      stack_name:
+        description: 'CloudFormation Stack Name'
+        required: true
+        default: 'laps-backend'
+      db_username:
+        description: 'RDS Master Username'
+        required: true
+      db_password:
+        description: 'RDS Master Password (min 8 chars)'
+        required: true
+      git_repository:
+        description: 'Spring Boot WAR URL'
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set lowercase stack name
+        id: vars
+        run: echo "stack_name=$(echo '${{ github.event.inputs.stack_name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          aws-access-key-id: ${{ github.event.inputs.aws_access_key_id }}
+          aws-secret-access-key: ${{ github.event.inputs.aws_secret_access_key }}
+          aws-session-token: ${{ github.event.inputs.aws_session_token }}
+          aws-region: us-east-1
+
+      - name: Deploy CloudFormation Stack
+        run: |
+          aws cloudformation deploy \
+            --template-file aws_cloudformation/cloudformation-stack.yaml \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --parameter-overrides \
+              DBUsername=${{ github.event.inputs.db_username }} \
+              DBPassword=${{ github.event.inputs.db_password }} \
+              GitRepostiory=${{ github.event.inputs.git_repository }} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --region us-east-1
+
+      - name: Get Stack Outputs
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --query "Stacks[0].Outputs" \
+            --output table
