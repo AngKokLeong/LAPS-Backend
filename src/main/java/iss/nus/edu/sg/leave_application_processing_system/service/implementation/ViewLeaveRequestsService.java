@@ -31,7 +31,7 @@ public class ViewLeaveRequestsService {
 
         //Retrieve the data from the database
 		//need to pass the staffId into the method
-        List<LeaveApplication> leaveApplicationList = leaveApplicationRepository.findByEmployeeId(viewLeaveRequestsServiceDTO.getStaffId());
+        List<LeaveApplication> leaveApplicationList = leaveApplicationRepository.findByEmployeeIdOrderByStartDateDesc(viewLeaveRequestsServiceDTO.getStaffId());
 
 		List<ControllerDTO> leaveRequestControllerDTOList = new ArrayList<>();
 

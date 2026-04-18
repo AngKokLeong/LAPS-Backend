@@ -71,10 +71,9 @@
       <!-- Navigation Menu -->
       <nav class="p-4 space-y-1">
         <!-- Dashboard -->
-        <a
+        <a id="nav-dashboard"
           th:href="@{/staff}"
-          class="flex items-center gap-3 px-4 py-3 text-blue-600 bg-blue-50 rounded-lg transition-colors"
-        >
+		     class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
           <svg
             class="w-5 h-5"
             fill="none"
@@ -99,7 +98,7 @@
         </div>
 
         <!-- Apply for Leave -->
-        <a
+        <a id="nav-apply"
           th:href="@{/staff/apply-leave}"
           class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
         >
@@ -120,7 +119,7 @@
         </a>
 
         <!-- My Leaves -->
-        <a
+        <a id="nav-my-leaves"
           th:href="@{/staff/my-leave-requests}"
           class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
         >
@@ -140,7 +139,7 @@
           <span>My Leaves</span>
         </a>
 
-        <a
+        <a id="nav-movement"
           th:href="@{/staff/movement-register}"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
         >
@@ -160,7 +159,7 @@
           <span>Movement Register</span>
         </a>
 
-        <a
+        <a id="nav-ot"
           th:href="@{/staff/submit-ot-claim}"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
         >
@@ -206,5 +205,7 @@
         </div>
       </nav>
     </aside>
+
+	
   </body>
 </html>

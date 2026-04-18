@@ -14,7 +14,7 @@ public class TeamLeaveHistoryServiceDTO implements ServiceDTO {
     private LocalDate leaveStartDate;
     private LocalDate leaveEndDate;
     private String leaveDuration;
-    private int numberOfLeaveDay;
+    private double numberOfLeaveDay;
     private LeaveStatus leaveStatus;
     private String reviewBy;
     private LocalDate leaveRequestUpdatedDate;
@@ -78,11 +78,11 @@ public class TeamLeaveHistoryServiceDTO implements ServiceDTO {
         this.leaveEndDate = leaveEndDate;
     }
 
-    public int getNumberOfLeaveDay() {
+    public double getNumberOfLeaveDay() {
         return numberOfLeaveDay;
     }
 
-    public void setNumberOfLeaveDay(int numberOfLeaveDay) {
+    public void setNumberOfLeaveDay(double numberOfLeaveDay) {
         this.numberOfLeaveDay = numberOfLeaveDay;
     }
 
