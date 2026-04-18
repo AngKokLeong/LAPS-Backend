@@ -110,5 +110,7 @@ public interface LeaveApplicationRepository extends JpaRepository<LeaveApplicati
     @Query("SELECT l FROM LeaveApplication l WHERE l.employee.id = :employeeId")
     org.springframework.data.domain.Page<LeaveApplication> findTop5RecentByEmployeeId(@Param("employeeId") Long employeeId, org.springframework.data.domain.Pageable pageable);
 
+    // for my-leave-request, sorted by start date descending
+    List<LeaveApplication> findByEmployeeIdOrderByStartDateDesc(Long empId);
 
 }
