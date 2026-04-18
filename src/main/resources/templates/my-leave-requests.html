@@ -5,821 +5,1042 @@
 
 <head th:replace="~{fragments/common_header :: head('View Leaves - Leave Management System')}"></head>
 
+
 <body class="bg-gray-50">
-    <div class="flex min-h-screen">
-        <!-- Dynamic Navigation Sidebar -->
-        <div th:replace="~{fragments/layout-parts :: dynamic_sidebar}"></div>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-8">
-            <div class="mb-8">
-                <h1 class="text-3xl font-semibold text-gray-900">My Leave Requests</h1>
-                <p class="text-gray-500 mt-1">View and manage your leave requests</p>
-            </div>
-
-            <!-- Filter Tabs -->
-            <div class="mb-6 flex items-center gap-2 border-b border-gray-200">
-                <button class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium"
-                    th:text="'All (' + ${allCount} + ')'"></button>
-                <button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-                    th:text="'Pending (' + ${pendingCount} + ')'"></button>
-                <button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-                    th:text="'Approved (' + ${approvedCount} + ')'">
-                    Approved (5)
-                </button>
-                <button class="px-4 py-3 text-gray-600 hover:text-gray-900"
-                    th:text="'Rejected (' + ${rejectedCount} + ')'">
-                    Rejected (1)
-                </button>
-            </div>
-
-            <!-- Leave Requests List -->
-            <div class="space-y-5">
-                <!-- Pending Leave Request -->
-
-
-
-
-
-                <div th:each="leaveRequest : ${leaveRequestList}"
-                    class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center"
-                                style="background-color: rgba(59, 130, 246, 0.2);">
-                                <svg class="w-6 h-6" style="color: #3b82f6;" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900" th:text="${leaveRequest.leaveType}"></h3>
-                                <p class="text-sm text-gray-500 mt-1" th:text="${leaveRequest.leavePeriod}"></p>
-                            </div>
-                        </div>
-
-                        <div th:switch="${#strings.toString(leaveRequest.leaveStatus)}">
-                            <span th:case="'APPLIED'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium border bg-blue-50 text-blue-700 border-blue-200">
-                                Applied</span>
-                            <span th:case="'UPDATED'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium border bg-purple-50 text-purple-700 border-purple-200">Updated</span>
-                            <span th:case="'APPROVED'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium border bg-green-50 text-green-700 border-green-200">Approved</span>
-                            <span th:case="'REJECTED'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium border bg-red-50 text-red-700 border-red-200">Rejected</span>
-                            <span th:case="'CANCELLED'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium border bg-orange-50 text-orange-700 border-orange-200">Cancelled</span>
-                            <span th:case="'DELETED'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium border bg-gray-50 text-gray-700 border-gray-200">Deleted</span>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Duration</p>
-                            <p class="text-sm font-medium text-gray-900" th:text="${leaveRequest.leavePeriod}"></p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Applied On</p>
-                            <p class="text-sm font-medium text-gray-900" th:text="${leaveRequest.leaveAppliedOn}"></p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Approver</p>
-                            <p class="text-sm font-medium text-gray-900" th:text="${leaveRequest.leaveApprover}"></p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
-                        <p class="text-xs text-gray-500 mb-1">Reason</p>
-                        <p class="text-sm text-gray-700" th:text="${leaveRequest.reason}"></p>
-                    </div>
-
-                    <div
-                        th:replace="~{fragments/view-my-requests-components/status-stepper :: status_stepper(${leaveRequest})}">
-                    </div>
-
-
-                    <div th:switch="${#strings.toString(leaveRequest.leaveStatus)}">
-                        <div th:case="'APPLIED'">
-
-
-                            <div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
-                                <button
-                                    class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors font-medium"
-                                    onclick="openEditModal(this)"
-                                    th:data-leave-type="${leaveRequest.leaveType}"
-                                    th:data-leave-period="${leaveRequest.leavePeriod}"
-                                    th:data-reason="${leaveRequest.reason}"
-                                    th:data-leave-duration="${leaveRequest.leaveDuration}"
-                                    th:data-leave-status="${leaveRequest.leaveStatus}"
-                                    th:data-leave-request-id="${leaveRequest.leaveRequestId}"
-                                    th:data-leave-start-date="${leaveRequest.startDate}"
-                                    th:data-leave-end-date="${leaveRequest.endDate}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                        </path>
-                                    </svg>
-                                    Edit Request
-                                </button>
-                                <button
-                                    class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-                                    onclick="openDeleteModal(this)"
-                                    th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                        </path>
-                                    </svg>
-                                    Delete Request
-                                </button>
-                            </div>
-                        </div>
-
-                        <div th:case="'UPDATED'">
-
-
-                            <div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
-                                <button
-                                    class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors font-medium"
-                                    onclick="openEditModal(this)"
-                                    th:data-leave-type="${leaveRequest.leaveType}"
-                                    th:data-leave-period="${leaveRequest.leavePeriod}"
-                                    th:data-leave-duration="${leaveRequest.leaveDuration}"
-                                    th:data-leave-status="${leaveRequest.leaveStatus}"
-                                    th:data-leave-request-id="${leaveRequest.leaveRequestId}"
-                                    th:data-leave-start-date="${leaveRequest.startDate}"
-                                    th:data-leave-end-date="${leaveRequest.endDate}"
-                                    th:data-reason="${leaveRequest.reason}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                        </path>
-                                    </svg>
-                                    Edit Request
-                                </button>
-                                <button
-                                    class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-                                    onclick="openDeleteModal(this)"
-                                    th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                        </path>
-                                    </svg>
-                                    Delete Request
-                                </button>
-                            </div>
-                        </div>
-
-                        <div th:case="'APPROVED'">
-                            <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <div>
-                                        <p class="text-sm font-medium text-green-900"
-                                            th:text="'Approved on ' + ${leaveRequest.leaveApprovalTransactionDate}"></p>
-                                        <p class="text-xs text-green-700 mt-1"
-                                            th:text="${leaveRequest.leaveApprovalReason}">Sarah Manager</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
-                                <button
-                                    class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
-                                    onclick="openCancelModal(this)"
-                                    th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z">
-                                        </path>
-                                    </svg>
-                                    Cancel Request
-                                </button>
-                            </div>
-                        </div>
-                        <div th:case="'REJECTED'">
-                            <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z">
-                                        </path>
-                                    </svg>
-                                    <div>
-                                        <p class="text-sm font-medium text-red-900"
-                                            th:text="${leaveRequest.leaveApprovalTransactionDate}"></p>
-                                        <p class="text-xs text-red-700 mt-1"
-                                            th:text="${leaveRequest.leaveApprovalReason}"></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div th:case="'CANCELLED'">
-                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-4">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-orange-600 mt-0.5" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z">
-                                        </path>
-                                    </svg>
-                                    <div>
-                                        <p class="text-sm font-medium text-orange-900"
-                                            th:text="${leaveRequest.leaveApprovalTransactionDate}"></p>
-                                        <p class="text-xs text-orange-700 mt-1"
-                                            th:text="${leaveRequest.leaveApprovalReason}"></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                    </div>
-                </div>
-
-            </div>
-        </main>
-    </div>
-
-    <!-- Edit Request Modal -->
-    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <!-- Modal Header -->
-            <div class="border-b border-gray-200 p-6 sticky top-0 bg-white rounded-t-2xl">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold text-gray-900">Edit Leave Request</h2>
-                    <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="p-6">
-                <div class="mb-6">
-                    <div class="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p class="text-sm text-blue-800">
-                            <strong>Note:</strong> Editing will change the status to "Updated" and require manager
-                            re-approval.
-                        </p>
-                    </div>
-                </div>
-
-                <form class="space-y-5" th:action="@{/staff/update-leave-request}" th:object="${updateLeaveRequestDTO}" th:method="post">
-                    <input type="hidden" name="leaveRequestId" id="updateLeaveRequestId" />
-                    <input type="hidden" name="leaveStatus" id="updateLeaveRequestStatus" />
-
-                    <!-- Leave Type -->
-                    <div>
-                        <label for="editLeaveType" class="block text-sm font-medium text-gray-700 mb-2">
-                            Leave Type <span class="text-red-500">*</span>
-                        </label>
-                        <select id="editLeaveType" name="leaveType" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
-                            <option value="ANNUAL" selected>Annual Leave</option>
-                            <option value="MEDICAL">Medical Leave</option>
-                            <option value="COMPENSATION">Compensation Leave</option>
-                        </select>
-                    </div>
-
-                    <!-- Date Fields -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="editStartDate" class="block text-sm font-medium text-gray-700 mb-2">
-                                Start Date <span class="text-red-500">*</span>
-                            </label>
-                            <input id="editStartDate" name="startDate" type="date" value="2026-05-05" required
-                                onchange="calculateDays()"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
-                        </div>
-
-                        <div>
-                            <label for="editEndDate" class="block text-sm font-medium text-gray-700 mb-2">
-                                End Date <span class="text-red-500">*</span>
-                            </label>
-                            <input id="editEndDate" name="endDate" type="date" value="2026-05-06" required
-                                onchange="calculateDays()"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
-                        </div>
-                    </div>
-
-                    <!-- Calculated Days Display -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                                <span class="text-sm font-medium">Total Leave Duration:</span>
-                            </div>
-                            <span id="calculatedDays" class="text-lg font-bold text-blue-600">2 days</span>
-                        </div>
-                    </div>
-
-                    <!-- Update Summary -->
-                    <div>
-                        <label for="editReason" class="block text-sm font-medium text-gray-700 mb-2">
-                            Reason for Leave <span class="text-red-500">*</span>
-                        </label>
-                        <textarea id="editReason" name="reason" rows="4" required
-                            placeholder="Please provide a detailed reason for your leave request..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">Please provide sufficient detail to help your manager
-                            review the request</p>
-                    </div>
-
-
-
-                    <!-- Update Summary -->
-                    <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                        <div class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                </path>
-                            </svg>
-                            <div class="flex-1">
-                                <p class="text-sm font-medium text-purple-900 mb-1">What happens next?</p>
-                                <ul class="text-xs text-purple-800 space-y-1">
-                                    <li>• Your request status will change to "Updated"</li>
-                                    <li>• Your manager will be notified to review the changes</li>
-                                    <li>• Previous approval (if any) will be reset</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-            
-                    <!-- Modal Footer -->
-                    <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl sticky bottom-0">
-                        <div class="flex gap-3">
-                            <button onclick="closeEditModal()"
-                                class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
-                                Cancel
-                            </button>
-                            <button type="submit" onclick="return submitEditRequest()"
-                                class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">
-                                Update Request
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cancel Request Modal -->
-    <div id="cancelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <!-- Modal Header -->
-            <div class="border-b border-gray-200 p-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold text-gray-900">Cancel Leave Request</h2>
-                    <button onclick="closeCancelModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Modal Body -->
-            <form th:action="@{/staff/cancel-leave-request}" th:object="${cancelLeaveRequestControllerDTO}" method="post">
-                <div class="p-6">
-
-
-                    <input type="hidden" name="leaveRequestId" id="cancelLeaveRequestId" />
-                    <input type="hidden" name="startDate" id="cancelLeaveStartDate" />
-                    <input type="hidden" name="endDate" id="cancelLeaveEndDate" />
-                    <input type="hidden" name="leaveStatus" id="cancelLeaveRequestStatus" />
-                    <input type="hidden" name="leaveType" id="cancelLeaveRequestType" />
-                    <div class="mb-6">
-                        <div class="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                            <svg class="w-6 h-6 text-orange-600 flex-shrink-0" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                </path>
-                            </svg>
-                            <p class="text-sm text-orange-800">
-                                <strong>Warning:</strong> This will cancel your approved leave request. Your leave
-                                balance
-                                will be restored.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Leave Details:</h3>
-                            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Leave Type:</span>
-                                    <span class="font-medium text-gray-900" id="leaveType" name="leaveType">Vacation Leave</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Duration:</span>
-                                    <span class="font-medium text-gray-900" id="leavePeriod">4/15/2026 -
-                                        4/20/2026</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Total Days:</span>
-                                    <span class="font-medium text-gray-900" id="leaveDuration">5 days</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Status:</span>
-                                    <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700"
-                                        id="leaveStatus">Approved</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Reason -->
-                        <div>
-                            <label for="cancelReason" class="block text-sm font-medium text-gray-700 mb-2">
-                                Cancellation Reason <span class="text-red-500">*</span>
-                            </label>
-                            <textarea id="cancelReason" name="reason" rows="4" required
-                                placeholder="Please provide a detailed reason for your leave request..."
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none">Personal matters</textarea>
-                            <p class="text-xs text-gray-500 mt-1">Please provide sufficient detail to help your manager
-                                review the request</p>
-                        </div>
-
-
-                    </div>
-                </div>
-           
-
-                <!-- Modal Footer -->
-                <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl">
-                    <div class="flex gap-3">
-                        <button onclick="closeCancelModal()"
-                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
-                            Keep Request
-                        </button>
-                        <button type="submit" 
-                            class="flex-1 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium shadow-sm">
-                            Confirm Cancellation
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Request Modal -->
-    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <!-- Modal Header -->
-            <div class="border-b border-gray-200 p-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold text-gray-900">Delete Leave Request</h2>
-                    <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Modal Body -->
-            <form th:action="@{/staff/delete-leave-request}" th:object="${deleteLeaveRequestDTO}" method="post">
-                <div class="p-6">
-                    <input type="hidden" name="leaveRequestId" id="deleteLeaveRequestId" />
-                    <input type="hidden" name="leaveType" id="deleteLeaveType" />
-                    <input type="hidden" name="leaveStatus" id="deleteLeaveStatus" />
-                    <input type="hidden" name="startDate" id="deleteStartDate" />
-                    <input type="hidden" name="endDate" id="deleteEndDate" />
-
-                    <div class="mb-6">
-                        <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-                            <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                            </path>
-                            </svg>
-                            <p class="text-sm text-red-800">
-                                <strong>Warning:</strong> This action cannot be undone. The request will be permanently
-                                deleted.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Request to Delete:</h3>
-                            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Leave Type:</span>
-                                    <span class="font-medium text-gray-900" id="deleteLeaveTypeDisplay">-</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Duration:</span>
-                                    <span class="font-medium text-gray-900" id="deleteLeavePeriod">-</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Total Days:</span>
-                                    <span class="font-medium text-gray-900" id="deleteLeaveDuration">-</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Status:</span>
-                                    <span id="deleteLeaveStatusDisplay"
-                                        class="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">-</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">
-                                Deletion Reason (Optional)
-                            </label>
-                            <textarea id="deleteReason" name="reason" rows="3"
-                                placeholder="You may provide a reason for deleting this request..."
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none"></textarea>
-                        </div>
-
-                        <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                            <input type="checkbox" id="confirmDelete"
-                                class="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" />
-                            <label for="confirmDelete" class="text-sm text-gray-700">
-                                I understand that this action is permanent and cannot be reversed
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Footer -->
-                <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl">
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeDeleteModal()"
-                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
-                            Cancel
-                        </button>
-                        <button type="submit" id="confirmDeleteBtn" disabled
-                            class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                            Delete Request
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // Cancel Modal Functions
-        function openCancelModal(button) {
-            const leaveType = button.getAttribute('data-leave-type');
-            const leavePeriod = button.getAttribute('data-leave-period');
-            const reason = button.getAttribute('data-reason');
-            const leaveDurationData = button.getAttribute('data-leave-duration');
-            const leaveStatus = button.getAttribute('data-leave-status');
-            const leaveRequestId = button.getAttribute('data-leave-request-id');
-            const leaveStartDate = button.getAttribute('data-leave-start-date');
-            const leaveEndDate = button.getAttribute('data-leave-end-date');
-
-
-
-            document.getElementById('leaveType').innerText = leaveType;
-            document.getElementById('leavePeriod').innerText = leavePeriod;
-            document.getElementById('leaveDuration').innerText = leaveDurationData;
-            document.getElementById('leaveStatus').innerText = leaveStatus;
-            document.getElementById('cancelLeaveRequestId').value = leaveRequestId;
-            document.getElementById('cancelLeaveStartDate').value = leaveStartDate;
-            document.getElementById('cancelLeaveEndDate').value = leaveEndDate;
-            document.getElementById('cancelLeaveRequestStatus').value = leaveStatus;
-            document.getElementById('cancelLeaveRequestType').value = leaveType;
-            document.getElementById('cancelReason').value = reason || '';
-
-            document.getElementById('cancelModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-
-
-
-
-        }
-
-        function closeCancelModal() {
-            document.getElementById('cancelModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            document.getElementById('cancelReason').value = '';
-        }
-
-        function submitCancelRequest() {
-            // Form will submit
-            return true;
-        }
-
-        // Delete Modal Functions
-        function openDeleteModal(button) {
-            const leaveType = button.getAttribute('data-leave-type');
-            const leavePeriod = button.getAttribute('data-leave-period');
-            const reason = button.getAttribute('data-reason');
-            const leaveDurationData = button.getAttribute('data-leave-duration');
-            const leaveStatus = button.getAttribute('data-leave-status');
-            const leaveRequestId = button.getAttribute('data-leave-request-id');
-            const leaveStartDate = button.getAttribute('data-leave-start-date');
-            const leaveEndDate = button.getAttribute('data-leave-end-date');
-
-            // Set hidden fields
-            document.getElementById('deleteLeaveRequestId').value = leaveRequestId;
-            document.getElementById('deleteLeaveType').value = leaveType;
-            document.getElementById('deleteLeaveStatus').value = leaveStatus;
-            document.getElementById('deleteStartDate').value = leaveStartDate;
-            document.getElementById('deleteEndDate').value = leaveEndDate;
-
-            // Set display fields
-            document.getElementById('deleteLeaveTypeDisplay').textContent = leaveType || '-';
-            document.getElementById('deleteLeavePeriod').textContent = leavePeriod || '-';
-            document.getElementById('deleteLeaveDuration').textContent = leaveDurationData || '-';
-            
-            // Set status badge
-            const statusDisplay = document.getElementById('deleteLeaveStatusDisplay');
-            statusDisplay.textContent = leaveStatus || '-';
-            statusDisplay.className = 'px-2 py-1 rounded text-xs font-medium ' + getStatusBadgeClass(leaveStatus);
-
-            // Reset form
-            document.getElementById('deleteReason').value = reason || '';
-            document.getElementById('confirmDelete').checked = false;
-            document.getElementById('confirmDeleteBtn').disabled = true;
-
-            document.getElementById('deleteModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            document.getElementById('deleteReason').value = '';
-            document.getElementById('confirmDelete').checked = false;
-            document.getElementById('confirmDeleteBtn').disabled = true;
-        }
-
-        // Enable/disable delete button based on checkbox
-        document.addEventListener('DOMContentLoaded', function () {
-            const confirmCheckbox = document.getElementById('confirmDelete');
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-
-            if (confirmCheckbox && confirmBtn) {
-                confirmCheckbox.addEventListener('change', function () {
-                    confirmBtn.disabled = !this.checked;
-                });
-            }
-        });
-
-        // Helper function for status badge styling
-        function getStatusBadgeClass(status) {
-            switch (status) {
-                case 'APPLIED': return 'bg-blue-100 text-blue-700';
-                case 'UPDATED': return 'bg-purple-100 text-purple-700';
-                case 'APPROVED': return 'bg-green-100 text-green-700';
-                case 'REJECTED': return 'bg-red-100 text-red-700';
-                case 'CANCELLED': return 'bg-orange-100 text-orange-700';
-                case 'DELETED': return 'bg-gray-100 text-gray-700';
-                default: return 'bg-gray-100 text-gray-700';
-            }
-        }
-
-        // Close modals when clicking outside
-        document.getElementById('cancelModal')?.addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeCancelModal();
-            }
-        });
-
-        document.getElementById('deleteModal')?.addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeDeleteModal();
-            }
-        });
-
-        // Close modals with Escape key
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeCancelModal();
-                closeDeleteModal();
-                closeEditModal();
-            }
-        });
-
-        // Edit Modal Functions
-        function openEditModal(button) {
-            const leaveType = button.getAttribute('data-leave-type');
-            const leaveStatus = button.getAttribute('data-leave-status');
-            const leaveRequestId = button.getAttribute('data-leave-request-id');
-            const leaveStartDate = button.getAttribute('data-leave-start-date');
-            const leaveEndDate = button.getAttribute('data-leave-end-date');
-            const reason = button.getAttribute('data-reason');
-
-            document.getElementById('editLeaveType').value = leaveType;
-            document.getElementById('editStartDate').value = leaveStartDate;
-            document.getElementById('editEndDate').value = leaveEndDate;
-            document.getElementById('editReason').value = reason || '';
-
-            // Set hidden id and status
-            document.getElementById('updateLeaveRequestId').value = leaveRequestId;
-            document.getElementById('updateLeaveRequestStatus').value = leaveStatus;
-
-            // Calculate days
-            calculateDays();
-
-            document.getElementById('editModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            // Reset form
-            document.getElementById('editLeaveType').value = 'personal';
-            document.getElementById('editStartDate').value = '';
-            document.getElementById('editEndDate').value = '';
-            document.getElementById('editReason').value = '';
-        }
-
-        function submitEditRequest() {
-            const leaveType = document.getElementById('editLeaveType').value;
-            const startDate = document.getElementById('editStartDate').value;
-            const endDate = document.getElementById('editEndDate').value;
-
-            if (!startDate || !endDate) {
-                alert('Please select both start and end dates');
-                return false;
-            }
-
-            if (!reason) {
-                alert('Please provide a reason for your leave');
-                return false;
-            }
-
-            if (new Date(startDate) > new Date(endDate)) {
-                alert('End date must be after start date');
-                return false;
-            }
-
-            // Form will submit
-            return true;
-        }
-
-        // Calculate days when dates change
-        function calculateWeekdays(startDate, endDate) {
-            let count = 0;
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-                const day = date.getDay();
-                if (day !== 0 && day !== 6) { // Exclude Sunday (0) and Saturday (6)
-                    count++;
-                }
-            }
-            return count;
-        }
-
-        function calculateDays() {
-            const startDate = document.getElementById('editStartDate').value;
-            const endDate = document.getElementById('editEndDate').value;
-
-            if (startDate && endDate) {
-                const diffDays = calculateWeekdays(startDate, endDate);
-                document.getElementById('calculatedDays').textContent = diffDays + ' day' + (diffDays !== 1 ? 's' : '');
-            } else {
-                document.getElementById('calculatedDays').textContent = '0 days';
-            }
-        }
-
-        // Close edit modal when clicking outside
-        document.getElementById('editModal')?.addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeEditModal();
-            }
-        });
-    </script>
+	<div class="flex min-h-screen">
+		<!-- Dynamic Navigation Sidebar -->
+		<div th:replace="~{fragments/layout-parts :: dynamic_sidebar}"></div>
+
+		<!-- Main Content -->
+		<main class="flex-1 p-8">
+			
+			<div class="mb-8">
+				<h1 class="text-3xl font-semibold text-gray-900">My Leave Requests</h1>
+				<p class="text-gray-500 mt-1">View and manage your leave requests</p>
+			</div>
+
+			<div class="flex justify-end mb-6">
+				<div class="inline-flex p-1 bg-gray-100 rounded-xl border border-gray-200">
+					<button id="showCardBtn" onclick="switchView('card')"
+						class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all bg-white text-blue-600 shadow-sm border border-gray-200">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+						</svg>
+						Card View
+					</button>
+					<button id="showCalendarBtn" onclick="switchView('calendar')"
+						class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:text-gray-900">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+							</path>
+						</svg>
+						Calendar View
+					</button>
+				</div>
+			</div>
+
+			<!-- Filter Tabs -->
+			<div class="mb-6 flex items-center gap-2 border-b border-gray-200">
+				<button class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium"
+					th:text="'All (' + ${allCount} + ')'"></button>
+				<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
+					th:text="'Pending (' + ${pendingCount} + ')'"></button>
+				<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
+					th:text="'Approved (' + ${approvedCount} + ')'">
+					Approved (5)
+				</button>
+				<button class="px-4 py-3 text-gray-600 hover:text-gray-900"
+					th:text="'Rejected (' + ${rejectedCount} + ')'">
+					Rejected (1)
+				</button>
+			</div>
+
+			<!-- Card View -->
+			<div id="cardViewContainer">
+				<div class="space-y-5">
+					<!-- Pending Leave Request -->
+
+					<div th:each="leaveRequest : ${leaveRequestList}"
+						class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+						<div class="flex items-start justify-between mb-4">
+							<div class="flex items-center gap-4">
+								<div class="w-12 h-12 rounded-lg flex items-center justify-center"
+									style="background-color: rgba(59, 130, 246, 0.2);">
+									<svg class="w-6 h-6" style="color: #3b82f6;" fill="none" stroke="currentColor"
+										viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+											d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+										</path>
+									</svg>
+								</div>
+								<div>
+									<h3 class="font-semibold text-gray-900" th:text="${leaveRequest.leaveType}"></h3>
+									<p class="text-sm text-gray-500 mt-1" th:text="${leaveRequest.leavePeriod}"></p>
+								</div>
+							</div>
+
+							<div th:switch="${#strings.toString(leaveRequest.leaveStatus)}">
+								<span th:case="'APPLIED'"
+									class="px-4 py-2 rounded-lg text-sm font-medium border bg-blue-50 text-blue-700 border-blue-200">
+									Applied</span>
+								<span th:case="'UPDATED'"
+									class="px-4 py-2 rounded-lg text-sm font-medium border bg-purple-50 text-purple-700 border-purple-200">Updated</span>
+								<span th:case="'APPROVED'"
+									class="px-4 py-2 rounded-lg text-sm font-medium border bg-green-50 text-green-700 border-green-200">Approved</span>
+								<span th:case="'REJECTED'"
+									class="px-4 py-2 rounded-lg text-sm font-medium border bg-red-50 text-red-700 border-red-200">Rejected</span>
+								<span th:case="'CANCELLED'"
+									class="px-4 py-2 rounded-lg text-sm font-medium border bg-orange-50 text-orange-700 border-orange-200">Cancelled</span>
+								<span th:case="'DELETED'"
+									class="px-4 py-2 rounded-lg text-sm font-medium border bg-gray-50 text-gray-700 border-gray-200">Deleted</span>
+							</div>
+						</div>
+
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+							<div>
+								<p class="text-xs text-gray-500 mb-1">Duration</p>
+								<p class="text-sm font-medium text-gray-900" th:text="${leaveRequest.leavePeriod}"></p>
+							</div>
+							<div>
+								<p class="text-xs text-gray-500 mb-1">Applied On</p>
+								<p class="text-sm font-medium text-gray-900" th:text="${leaveRequest.leaveAppliedOn}">
+								</p>
+							</div>
+							<div>
+								<p class="text-xs text-gray-500 mb-1">Approver</p>
+								<p class="text-sm font-medium text-gray-900" th:text="${leaveRequest.leaveApprover}">
+								</p>
+							</div>
+						</div>
+
+						<div class="bg-gray-50 rounded-lg p-3 mb-4">
+							<p class="text-xs text-gray-500 mb-1">Reason</p>
+							<p class="text-sm text-gray-700" th:text="${leaveRequest.reason}"></p>
+						</div>
+
+						<div
+							th:replace="~{fragments/view-my-requests-components/status-stepper :: status_stepper(${leaveRequest})}">
+						</div>
+
+
+						<div th:switch="${#strings.toString(leaveRequest.leaveStatus)}">
+							<div th:case="'APPLIED'">
+
+
+								<div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
+									<button
+										class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+										onclick="openEditModal(this)" th:data-leave-type="${leaveRequest.leaveType}"
+										th:data-leave-period="${leaveRequest.leavePeriod}"
+										th:data-reason="${leaveRequest.reason}"
+										th:data-leave-duration="${leaveRequest.leaveDuration}"
+										th:data-leave-status="${leaveRequest.leaveStatus}"
+										th:data-leave-request-id="${leaveRequest.leaveRequestId}"
+										th:data-leave-start-date="${leaveRequest.startDate}"
+										th:data-leave-end-date="${leaveRequest.endDate}">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+											</path>
+										</svg>
+										Edit Request
+									</button>
+									<button
+										class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+										onclick="openDeleteModal(this)"
+										th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+											</path>
+										</svg>
+										Delete Request
+									</button>
+								</div>
+							</div>
+
+							<div th:case="'UPDATED'">
+
+
+								<div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
+									<button
+										class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+										onclick="openEditModal(this)" th:data-leave-type="${leaveRequest.leaveType}"
+										th:data-leave-period="${leaveRequest.leavePeriod}"
+										th:data-leave-duration="${leaveRequest.leaveDuration}"
+										th:data-leave-status="${leaveRequest.leaveStatus}"
+										th:data-leave-request-id="${leaveRequest.leaveRequestId}"
+										th:data-leave-start-date="${leaveRequest.startDate}"
+										th:data-leave-end-date="${leaveRequest.endDate}"
+										th:data-reason="${leaveRequest.reason}">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+											</path>
+										</svg>
+										Edit Request
+									</button>
+									<button
+										class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+										onclick="openDeleteModal(this)"
+										th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+											</path>
+										</svg>
+										Delete Request
+									</button>
+								</div>
+							</div>
+
+							<div th:case="'APPROVED'">
+								<div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+									<div class="flex items-start gap-2">
+										<svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor"
+											viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+										</svg>
+										<div>
+											<p class="text-sm font-medium text-green-900"
+												th:text="'Approved on ' + ${leaveRequest.leaveApprovalTransactionDate}">
+											</p>
+											<p class="text-xs text-green-700 mt-1"
+												th:text="${leaveRequest.leaveApprovalReason}">Sarah Manager</p>
+										</div>
+									</div>
+								</div>
+
+								<div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
+									<button
+										class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
+										onclick="openCancelModal(this)"
+										th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z">
+											</path>
+										</svg>
+										Cancel Request
+									</button>
+								</div>
+							</div>
+							<div th:case="'REJECTED'">
+								<div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+									<div class="flex items-start gap-2">
+										<svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor"
+											viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z">
+											</path>
+										</svg>
+										<div>
+											<p class="text-sm font-medium text-red-900"
+												th:text="${leaveRequest.leaveApprovalTransactionDate}"></p>
+											<p class="text-xs text-red-700 mt-1"
+												th:text="${leaveRequest.leaveApprovalReason}"></p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div th:case="'CANCELLED'">
+								<div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-4">
+									<div class="flex items-start gap-2">
+										<svg class="w-5 h-5 text-orange-600 mt-0.5" fill="none" stroke="currentColor"
+											viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z">
+											</path>
+										</svg>
+										<div>
+											<p class="text-sm font-medium text-orange-900"
+												th:text="${leaveRequest.leaveApprovalTransactionDate}"></p>
+											<p class="text-xs text-orange-700 mt-1"
+												th:text="${leaveRequest.leaveApprovalReason}"></p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Calendar View -->
+			<div id="calendarViewContainer" class="hidden">
+				
+				<style>
+					/* --- 1. CALENDAR LAYOUT & HEADER --- */
+					#calendar {
+						font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+					}
+
+					/* Remove the default FullCalendar header since we built a custom one */
+					.fc-header-toolbar {
+						display: none !important;
+					}
+
+					/* Modernize Day Headers (Mon, Tue, etc.) */
+					.fc-col-header-cell {
+						background-color: #f9fafb !important;
+						border-bottom: 1px solid #e5e7eb !important;
+						padding: 12px 0 !important;
+					}
+
+					.fc-col-header-cell-cushion {
+						color: #6b7280 !important;
+						font-size: 0.75rem !important;
+						font-weight: 700 !important;
+						text-transform: uppercase;
+						letter-spacing: 0.05em;
+						text-decoration: none !important;
+					}
+
+					/* --- 2. LEAVE BLOCK (EVENT) STYLING --- */
+					.custom-event {
+						background-color: #ffffff !important;
+						border: 1px solid #e5e7eb !important;
+						border-radius: 6px !important;
+						box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+						margin: 1px 2px !important;
+						overflow: hidden;
+					}
+
+					.custom-event .fc-event-main {
+						border-left: 5px solid #9ca3af !important;
+						/* Default bar color */
+						padding: 4px 8px !important;
+						color: #111827 !important;
+						font-weight: 600 !important;
+						font-size: 0.8rem !important;
+						display: flex;
+						align-items: center;
+					}
+
+					/* --- 3. COLOR STRIPES BY TYPE --- */
+					.type-annual .fc-event-main {
+						border-left-color: #3b82f6 !important;
+					}
+
+					/* Blue */
+					.type-medical .fc-event-main {
+						border-left-color: #f43f5e !important;
+					}
+
+					/* Rose/Red */
+					.type-compensation .fc-event-main {
+						border-left-color: #6366f1 !important;
+					}
+
+					/* Indigo/Purple */
+
+					/* --- 4. STATUS & PENDING EFFECTS --- */
+					/* Dashed border for applied/updated status */
+					.is-pending .fc-event-main {
+						border-left-style: dashed !important;
+						background-color: #f9fafb !important;
+					}
+
+					/* Muted look for Cancelled/Rejected */
+					.is-cancelled {
+						opacity: 0.6;
+						filter: grayscale(0.5);
+					}
+
+					.is-cancelled .fc-event-main {
+						text-decoration: line-through;
+						border-left-color: #d1d5db !important;
+					}
+
+					/* --- 5. GRID & INTERFACE POLISH --- */
+					/* Highlight Today */
+					.fc-day-today {
+						background-color: #eff6ff !important;
+						/* Very light blue tint */
+					}
+
+					/* Style the date numbers */
+					.fc-daygrid-day-number {
+						font-size: 0.875rem !important;
+						font-weight: 500;
+						color: #374151;
+						padding: 8px !important;
+						text-decoration: none !important;
+					}
+
+					/* Remove the default FullCalendar event dot */
+					.fc-daygrid-event-dot {
+						display: none !important;
+					}
+
+					/* Smooth transition for hover effects */
+					.custom-event:hover {
+						transform: translateY(-1px);
+						box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+						z-index: 50;
+					}
+				</style>
+				
+				<div class="bg-white rounded-xl border border-gray-200 p-6 mb-4 shadow-sm">
+					<div class="flex items-center justify-between mb-6">
+						<h2 class="text-2xl font-bold text-gray-900" id="customCalendarTitle">April 2026</h2>
+			
+						<div class="flex items-center gap-3">
+							<button id="prevBtn"
+								class="p-2 hover:bg-blue-50 text-gray-600 hover:text-blue-600 rounded-lg transition-all border border-transparent hover:border-blue-100">
+								<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+									</path>
+								</svg>
+							</button>
+							<button id="todayBtn"
+								class="px-6 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all border border-blue-100">
+								Today
+							</button>
+							<button id="nextBtn"
+								class="p-2 hover:bg-blue-50 text-gray-600 hover:text-blue-600 rounded-lg transition-all border border-transparent hover:border-blue-100">
+								<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+								</svg>
+							</button>
+						</div>
+					</div>
+			
+					<div id="calendar"></div>
+				</div>
+			</div>
+			
+
+		</main>
+	</div>
+
+	<!-- Edit Request Modal -->
+	<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+
+		<div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+			<!-- Modal Header -->
+			<div class="border-b border-gray-200 p-6 sticky top-0 bg-white rounded-t-2xl">
+				<div class="flex items-center justify-between">
+					<h2 class="text-2xl font-semibold text-gray-900">Edit Leave Request</h2>
+					<button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<!-- Modal Body -->
+			<div class="p-6">
+				<div class="mb-6">
+					<div class="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+						<svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor"
+							viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+						<p class="text-sm text-blue-800">
+							<strong>Note:</strong> Editing will change the status to "Updated" and require manager
+							re-approval.
+						</p>
+					</div>
+				</div>
+
+				<form class="space-y-5" th:action="@{/staff/update-leave-request}" th:object="${updateLeaveRequestDTO}"
+					th:method="post">
+					<input type="hidden" name="leaveRequestId" id="updateLeaveRequestId" />
+					<input type="hidden" name="leaveStatus" id="updateLeaveRequestStatus" />
+
+					<!-- Leave Type -->
+					<div>
+						<label for="editLeaveType" class="block text-sm font-medium text-gray-700 mb-2">
+							Leave Type <span class="text-red-500">*</span>
+						</label>
+						<select id="editLeaveType" name="leaveType" required
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+							<option value="ANNUAL" selected>Annual Leave</option>
+							<option value="MEDICAL">Medical Leave</option>
+							<option value="COMPENSATION">Compensation Leave</option>
+						</select>
+					</div>
+
+					<!-- Date Fields -->
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label for="editStartDate" class="block text-sm font-medium text-gray-700 mb-2">
+								Start Date <span class="text-red-500">*</span>
+							</label>
+							<input id="editStartDate" name="startDate" type="date" value="2026-05-05" required
+								onchange="calculateDays()"
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
+						</div>
+
+						<div>
+							<label for="editEndDate" class="block text-sm font-medium text-gray-700 mb-2">
+								End Date <span class="text-red-500">*</span>
+							</label>
+							<input id="editEndDate" name="endDate" type="date" value="2026-05-06" required
+								onchange="calculateDays()"
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
+						</div>
+					</div>
+
+					<!-- Calculated Days Display -->
+					<div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2 text-gray-700">
+								<svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+									viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+									</path>
+								</svg>
+								<span class="text-sm font-medium">Total Leave Duration:</span>
+							</div>
+							<span id="calculatedDays" class="text-lg font-bold text-blue-600">2 days</span>
+						</div>
+					</div>
+
+					<!-- Update Summary -->
+					<div>
+						<label for="editReason" class="block text-sm font-medium text-gray-700 mb-2">
+							Reason for Leave <span class="text-red-500">*</span>
+						</label>
+						<textarea id="editReason" name="reason" rows="4" required
+							placeholder="Please provide a detailed reason for your leave request..."
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"></textarea>
+						<p class="text-xs text-gray-500 mt-1">Please provide sufficient detail to help your manager
+							review the request</p>
+					</div>
+
+
+
+					<!-- Update Summary -->
+					<div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+						<div class="flex items-start gap-3">
+							<svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+								viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+									d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+								</path>
+							</svg>
+							<div class="flex-1">
+								<p class="text-sm font-medium text-purple-900 mb-1">What happens next?</p>
+								<ul class="text-xs text-purple-800 space-y-1">
+									<li>• Your request status will change to "Updated"</li>
+									<li>• Your manager will be notified to review the changes</li>
+									<li>• Previous approval (if any) will be reset</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<!-- Modal Footer -->
+					<div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl sticky bottom-0">
+						<div class="flex gap-3">
+							<button onclick="closeEditModal()"
+								class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
+								Cancel
+							</button>
+							<button type="submit" onclick="return submitEditRequest()"
+								class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">
+								Update Request
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- Cancel Request Modal -->
+	<div id="cancelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+		<div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+			<!-- Modal Header -->
+			<div class="border-b border-gray-200 p-6">
+				<div class="flex items-center justify-between">
+					<h2 class="text-2xl font-semibold text-gray-900">Cancel Leave Request</h2>
+					<button onclick="closeCancelModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<!-- Modal Body -->
+			<form th:action="@{/staff/cancel-leave-request}" th:object="${cancelLeaveRequestControllerDTO}"
+				method="post">
+				<div class="p-6">
+
+
+					<input type="hidden" name="leaveRequestId" id="cancelLeaveRequestId" />
+					<input type="hidden" name="startDate" id="cancelLeaveStartDate" />
+					<input type="hidden" name="endDate" id="cancelLeaveEndDate" />
+					<input type="hidden" name="leaveStatus" id="cancelLeaveRequestStatus" />
+					<input type="hidden" name="leaveType" id="cancelLeaveRequestType" />
+					<div class="mb-6">
+						<div class="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+							<svg class="w-6 h-6 text-orange-600 flex-shrink-0" fill="none" stroke="currentColor"
+								viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+									d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+								</path>
+							</svg>
+							<p class="text-sm text-orange-800">
+								<strong>Warning:</strong> This will cancel your approved leave request. Your leave
+								balance
+								will be restored.
+							</p>
+						</div>
+					</div>
+
+					<div class="space-y-4">
+						<div>
+							<h3 class="text-sm font-semibold text-gray-900 mb-3">Leave Details:</h3>
+							<div class="bg-gray-50 rounded-lg p-4 space-y-2">
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Leave Type:</span>
+									<span class="font-medium text-gray-900" id="leaveType" name="leaveType">Vacation
+										Leave</span>
+								</div>
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Duration:</span>
+									<span class="font-medium text-gray-900" id="leavePeriod">4/15/2026 -
+										4/20/2026</span>
+								</div>
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Total Days:</span>
+									<span class="font-medium text-gray-900" id="leaveDuration">5 days</span>
+								</div>
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Status:</span>
+									<span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700"
+										id="leaveStatus">Approved</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Reason -->
+						<div>
+							<label for="cancelReason" class="block text-sm font-medium text-gray-700 mb-2">
+								Cancellation Reason <span class="text-red-500">*</span>
+							</label>
+							<textarea id="cancelReason" name="reason" rows="4" required
+								placeholder="Please provide a detailed reason for your leave request..."
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none">Personal matters</textarea>
+							<p class="text-xs text-gray-500 mt-1">Please provide sufficient detail to help your manager
+								review the request</p>
+						</div>
+
+
+					</div>
+				</div>
+
+
+				<!-- Modal Footer -->
+				<div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl">
+					<div class="flex gap-3">
+						<button onclick="closeCancelModal()"
+							class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
+							Keep Request
+						</button>
+						<button type="submit"
+							class="flex-1 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium shadow-sm">
+							Confirm Cancellation
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Delete Request Modal -->
+	<div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+		<div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+			<!-- Modal Header -->
+			<div class="border-b border-gray-200 p-6">
+				<div class="flex items-center justify-between">
+					<h2 class="text-2xl font-semibold text-gray-900">Delete Leave Request</h2>
+					<button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<!-- Modal Body -->
+			<form th:action="@{/staff/delete-leave-request}" th:object="${deleteLeaveRequestDTO}" method="post">
+				<div class="p-6">
+					<input type="hidden" name="leaveRequestId" id="deleteLeaveRequestId" />
+					<input type="hidden" name="leaveType" id="deleteLeaveType" />
+					<input type="hidden" name="leaveStatus" id="deleteLeaveStatus" />
+					<input type="hidden" name="startDate" id="deleteStartDate" />
+					<input type="hidden" name="endDate" id="deleteEndDate" />
+
+					<div class="mb-6">
+						<div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+							<svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor"
+								viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+									d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+								</path>
+							</svg>
+							<p class="text-sm text-red-800">
+								<strong>Warning:</strong> This action cannot be undone. The request will be permanently
+								deleted.
+							</p>
+						</div>
+					</div>
+
+					<div class="space-y-4">
+						<div>
+							<h3 class="text-sm font-semibold text-gray-900 mb-3">Request to Delete:</h3>
+							<div class="bg-gray-50 rounded-lg p-4 space-y-2">
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Leave Type:</span>
+									<span class="font-medium text-gray-900" id="deleteLeaveTypeDisplay">-</span>
+								</div>
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Duration:</span>
+									<span class="font-medium text-gray-900" id="deleteLeavePeriod">-</span>
+								</div>
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Total Days:</span>
+									<span class="font-medium text-gray-900" id="deleteLeaveDuration">-</span>
+								</div>
+								<div class="flex justify-between text-sm">
+									<span class="text-gray-600">Status:</span>
+									<span id="deleteLeaveStatusDisplay"
+										class="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">-</span>
+								</div>
+							</div>
+						</div>
+
+						<div>
+							<label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">
+								Deletion Reason (Optional)
+							</label>
+							<textarea id="deleteReason" name="reason" rows="3"
+								placeholder="You may provide a reason for deleting this request..."
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none"></textarea>
+						</div>
+
+						<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+							<input type="checkbox" id="confirmDelete"
+								class="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" />
+							<label for="confirmDelete" class="text-sm text-gray-700">
+								I understand that this action is permanent and cannot be reversed
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<!-- Modal Footer -->
+				<div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl">
+					<div class="flex gap-3">
+						<button type="button" onclick="closeDeleteModal()"
+							class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
+							Cancel
+						</button>
+						<button type="submit" id="confirmDeleteBtn" disabled
+							class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+							Delete Request
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	
+
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+	
+		<script th:inline="javascript">
+	    // GLOBAL REFERENCE FOR THE FRAGMENT
+	    var calendar;
+
+	    // VIEW SWITCHER (Updated for Card View)
+	    function switchView(viewType) {
+	        // Updated IDs to match your new HTML
+	        const cardContainer = document.getElementById('cardViewContainer');
+	        const calendarContainer = document.getElementById('calendarViewContainer');
+	        const cardBtn = document.getElementById('showCardBtn');
+	        const calendarBtn = document.getElementById('showCalendarBtn');
+
+	        const activeClasses = ['bg-white', 'text-blue-600', 'shadow-sm', 'border', 'border-gray-200'];
+	        const inactiveClasses = ['text-gray-600', 'hover:text-gray-900'];
+			
+			if (window.calendar) {
+			    window.calendar.render();
+			}
+
+	        if (viewType === 'card') {
+	            cardContainer.classList.remove('hidden');
+	            calendarContainer.classList.add('hidden');
+
+	            // Set Card Button Active
+	            cardBtn.classList.add(...activeClasses);
+	            cardBtn.classList.remove(...inactiveClasses);
+	            
+	            calendarBtn.classList.remove(...activeClasses);
+	            calendarBtn.classList.add(...inactiveClasses);
+	        } else {
+	            cardContainer.classList.add('hidden');
+	            calendarContainer.classList.remove('hidden');
+
+	            // Set Calendar Button Active
+	            calendarBtn.classList.add(...activeClasses);
+	            calendarBtn.classList.remove(...inactiveClasses);
+	            
+	            cardBtn.classList.remove(...activeClasses);
+	            cardBtn.classList.add(...inactiveClasses);
+
+	            // Re-render FullCalendar if it exists
+	            if (typeof calendar !== 'undefined' && calendar !== null) {
+	                calendar.render();
+	            }
+	        }
+	    }
+		
+		// --- MODAL FUNCTIONS (KEEPING YOUR EXISTING LOGIC) ---
+		// Cancel Modal Functions
+		function openCancelModal(button) {
+			const leaveType = button.getAttribute('data-leave-type');
+			const leavePeriod = button.getAttribute('data-leave-period');
+			const reason = button.getAttribute('data-reason');
+			const leaveDurationData = button.getAttribute('data-leave-duration');
+			const leaveStatus = button.getAttribute('data-leave-status');
+			const leaveRequestId = button.getAttribute('data-leave-request-id');
+			const leaveStartDate = button.getAttribute('data-leave-start-date');
+			const leaveEndDate = button.getAttribute('data-leave-end-date');
+
+
+
+			document.getElementById('leaveType').innerText = leaveType;
+			document.getElementById('leavePeriod').innerText = leavePeriod;
+			document.getElementById('leaveDuration').innerText = leaveDurationData;
+			document.getElementById('leaveStatus').innerText = leaveStatus;
+			document.getElementById('cancelLeaveRequestId').value = leaveRequestId;
+			document.getElementById('cancelLeaveStartDate').value = leaveStartDate;
+			document.getElementById('cancelLeaveEndDate').value = leaveEndDate;
+			document.getElementById('cancelLeaveRequestStatus').value = leaveStatus;
+			document.getElementById('cancelLeaveRequestType').value = leaveType;
+			document.getElementById('cancelReason').value = reason || '';
+
+			document.getElementById('cancelModal').classList.remove('hidden');
+			document.body.style.overflow = 'hidden';
+
+
+
+
+		}
+
+		function closeCancelModal() {
+			document.getElementById('cancelModal').classList.add('hidden');
+			document.body.style.overflow = 'auto';
+			document.getElementById('cancelReason').value = '';
+		}
+
+		function submitCancelRequest() {
+			// Form will submit
+			return true;
+		}
+
+		// Delete Modal Functions
+		function openDeleteModal(button) {
+			const leaveType = button.getAttribute('data-leave-type');
+			const leavePeriod = button.getAttribute('data-leave-period');
+			const reason = button.getAttribute('data-reason');
+			const leaveDurationData = button.getAttribute('data-leave-duration');
+			const leaveStatus = button.getAttribute('data-leave-status');
+			const leaveRequestId = button.getAttribute('data-leave-request-id');
+			const leaveStartDate = button.getAttribute('data-leave-start-date');
+			const leaveEndDate = button.getAttribute('data-leave-end-date');
+
+			// Set hidden fields
+			document.getElementById('deleteLeaveRequestId').value = leaveRequestId;
+			document.getElementById('deleteLeaveType').value = leaveType;
+			document.getElementById('deleteLeaveStatus').value = leaveStatus;
+			document.getElementById('deleteStartDate').value = leaveStartDate;
+			document.getElementById('deleteEndDate').value = leaveEndDate;
+
+			// Set display fields
+			document.getElementById('deleteLeaveTypeDisplay').textContent = leaveType || '-';
+			document.getElementById('deleteLeavePeriod').textContent = leavePeriod || '-';
+			document.getElementById('deleteLeaveDuration').textContent = leaveDurationData || '-';
+
+			// Set status badge
+			const statusDisplay = document.getElementById('deleteLeaveStatusDisplay');
+			statusDisplay.textContent = leaveStatus || '-';
+			statusDisplay.className = 'px-2 py-1 rounded text-xs font-medium ' + getStatusBadgeClass(leaveStatus);
+
+			// Reset form
+			document.getElementById('deleteReason').value = reason || '';
+			document.getElementById('confirmDelete').checked = false;
+			document.getElementById('confirmDeleteBtn').disabled = true;
+
+			document.getElementById('deleteModal').classList.remove('hidden');
+			document.body.style.overflow = 'hidden';
+		}
+
+		function closeDeleteModal() {
+			document.getElementById('deleteModal').classList.add('hidden');
+			document.body.style.overflow = 'auto';
+			document.getElementById('deleteReason').value = '';
+			document.getElementById('confirmDelete').checked = false;
+			document.getElementById('confirmDeleteBtn').disabled = true;
+		}
+
+		// Enable/disable delete button based on checkbox
+		document.addEventListener('DOMContentLoaded', function () {
+			const confirmCheckbox = document.getElementById('confirmDelete');
+			const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+			if (confirmCheckbox && confirmBtn) {
+				confirmCheckbox.addEventListener('change', function () {
+					confirmBtn.disabled = !this.checked;
+				});
+			}
+		});
+
+		// Helper function for status badge styling
+		function getStatusBadgeClass(status) {
+			switch (status) {
+				case 'APPLIED': return 'bg-blue-100 text-blue-700';
+				case 'UPDATED': return 'bg-purple-100 text-purple-700';
+				case 'APPROVED': return 'bg-green-100 text-green-700';
+				case 'REJECTED': return 'bg-red-100 text-red-700';
+				case 'CANCELLED': return 'bg-orange-100 text-orange-700';
+				case 'DELETED': return 'bg-gray-100 text-gray-700';
+				default: return 'bg-gray-100 text-gray-700';
+			}
+		}
+
+		// Close modals when clicking outside
+		document.getElementById('cancelModal')?.addEventListener('click', function (e) {
+			if (e.target === this) {
+				closeCancelModal();
+			}
+		});
+
+		document.getElementById('deleteModal')?.addEventListener('click', function (e) {
+			if (e.target === this) {
+				closeDeleteModal();
+			}
+		});
+
+		// Close modals with Escape key
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape') {
+				closeCancelModal();
+				closeDeleteModal();
+				closeEditModal();
+			}
+		});
+
+		// Edit Modal Functions
+		function openEditModal(button) {
+			const leaveType = button.getAttribute('data-leave-type');
+			const leaveStatus = button.getAttribute('data-leave-status');
+			const leaveRequestId = button.getAttribute('data-leave-request-id');
+			const leaveStartDate = button.getAttribute('data-leave-start-date');
+			const leaveEndDate = button.getAttribute('data-leave-end-date');
+			const reason = button.getAttribute('data-reason');
+
+			document.getElementById('editLeaveType').value = leaveType;
+			document.getElementById('editStartDate').value = leaveStartDate;
+			document.getElementById('editEndDate').value = leaveEndDate;
+			document.getElementById('editReason').value = reason || '';
+
+			// Set hidden id and status
+			document.getElementById('updateLeaveRequestId').value = leaveRequestId;
+			document.getElementById('updateLeaveRequestStatus').value = leaveStatus;
+
+			// Calculate days
+			calculateDays();
+
+			document.getElementById('editModal').classList.remove('hidden');
+			document.body.style.overflow = 'hidden';
+		}
+
+		function closeEditModal() {
+			document.getElementById('editModal').classList.add('hidden');
+			document.body.style.overflow = 'auto';
+			// Reset form
+			document.getElementById('editLeaveType').value = 'personal';
+			document.getElementById('editStartDate').value = '';
+			document.getElementById('editEndDate').value = '';
+			document.getElementById('editReason').value = '';
+		}
+
+		function submitEditRequest() {
+			const leaveType = document.getElementById('editLeaveType').value;
+			const startDate = document.getElementById('editStartDate').value;
+			const endDate = document.getElementById('editEndDate').value;
+
+			if (!startDate || !endDate) {
+				alert('Please select both start and end dates');
+				return false;
+			}
+
+			if (!reason) {
+				alert('Please provide a reason for your leave');
+				return false;
+			}
+
+			if (new Date(startDate) > new Date(endDate)) {
+				alert('End date must be after start date');
+				return false;
+			}
+
+			// Form will submit
+			return true;
+		}
+
+		// Calculate days when dates change
+		function calculateWeekdays(startDate, endDate) {
+			let count = 0;
+			const start = new Date(startDate);
+			const end = new Date(endDate);
+			for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+				const day = date.getDay();
+				if (day !== 0 && day !== 6) { // Exclude Sunday (0) and Saturday (6)
+					count++;
+				}
+			}
+			return count;
+		}
+
+		function calculateDays() {
+			const startDate = document.getElementById('editStartDate').value;
+			const endDate = document.getElementById('editEndDate').value;
+
+			if (startDate && endDate) {
+				const diffDays = calculateWeekdays(startDate, endDate);
+				document.getElementById('calculatedDays').textContent = diffDays + ' day' + (diffDays !== 1 ? 's' : '');
+			} else {
+				document.getElementById('calculatedDays').textContent = '0 days';
+			}
+		}
+
+		// Close edit modal when clicking outside
+		document.getElementById('editModal')?.addEventListener('click', function (e) {
+			if (e.target === this) {
+				closeEditModal();
+			}
+		});
+
+		
+
+	</script>
 
 
 </body>
