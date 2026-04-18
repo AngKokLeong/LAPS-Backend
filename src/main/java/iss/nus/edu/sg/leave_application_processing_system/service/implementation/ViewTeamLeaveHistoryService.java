@@ -13,6 +13,7 @@ import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.LeaveValidationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.TeamLeaveHistoryServiceDTO;
 
@@ -21,10 +22,13 @@ public class ViewTeamLeaveHistoryService {
     
     private final LeaveApplicationRepository leaveApplicationRepository;
     private final EmployeeRepository employeeRepository;
+    private final LeaveValidationService lvService;
 
-    public ViewTeamLeaveHistoryService(LeaveApplicationRepository leaveApplicationRepository, EmployeeRepository employeeRepository){
+    public ViewTeamLeaveHistoryService(LeaveApplicationRepository leaveApplicationRepository,
+    		EmployeeRepository employeeRepository, LeaveValidationService lvService){
         this.leaveApplicationRepository = leaveApplicationRepository;
         this.employeeRepository = employeeRepository;
+        this.lvService = lvService;
     }
 
 
@@ -32,13 +36,8 @@ public class ViewTeamLeaveHistoryService {
         
         TeamLeaveHistoryServiceDTO teamLeaveHistoryServiceDTO = (TeamLeaveHistoryServiceDTO) serviceDTO.getAllAttribute();
 
-        List<Employee> subordinateList = employeeRepository.findByManagerId(teamLeaveHistoryServiceDTO.getEmployeeId());
-
-        List<LeaveApplication> subordinateLeaveApplications = subordinateList.stream()
-                .map(Employee::getId)
-                .filter(employeeId -> employeeId != null)
-                .flatMap(employeeId -> leaveApplicationRepository.findByEmployeeId(employeeId).stream())
-                .collect(Collectors.toList());
+        
+        List<LeaveApplication> subordinateLeaveApplications = leaveApplicationRepository.findByEmployee_ManagerIdOrderByStartDateDesc(teamLeaveHistoryServiceDTO.getEmployeeId());
 
         List<ControllerDTO> controllerDTOList = subordinateLeaveApplications.stream()
                 .map(leaveApplication -> {
@@ -50,7 +49,14 @@ public class ViewTeamLeaveHistoryService {
                     dto.setLeaveType(leaveApplication.getLeaveType());
                     dto.setLeaveStartDate(leaveApplication.getStartDate());
                     dto.setLeaveEndDate(leaveApplication.getEndDate());
-                    dto.setNumberOfLeaveDay((int) ChronoUnit.DAYS.between(leaveApplication.getStartDate(), leaveApplication.getEndDate()) + 1);
+                    
+                    double actualDuration = lvService.calculateDays(
+                    	    leaveApplication.getStartDate(), 
+                    	    leaveApplication.getEndDate(), 
+                    	    leaveApplication.isHalfDay()
+                    	);
+                    
+                    dto.setNumberOfLeaveDay(actualDuration);
                     dto.setLeaveStatus(leaveApplication.getLeaveStatus());
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d");
                     String leaveDuration = leaveApplication.getStartDate().format(formatter)
