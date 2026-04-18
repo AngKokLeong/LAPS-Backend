@@ -13,9 +13,13 @@ public class LeaveRequestControllerDTO implements ControllerDTO {
     private String leavePeriod;
     private LocalDate startDate;
     private LocalDate endDate;
+    private LocalDate currentDate;
     private String leaveDuration;
     private String leaveAppliedOn;
     private String reason;
+
+    
+
     private String leaveApprover;
     private String leaveApprovalTransactionDate;
     private String leaveApprovalReason;
@@ -136,6 +140,14 @@ public class LeaveRequestControllerDTO implements ControllerDTO {
 
     public void setLeaveRequestId(Long leaveRequestId) {
         this.leaveRequestId = leaveRequestId;
+    }
+
+    public LocalDate getCurrentDate() {
+        return currentDate;
+    }
+
+    public void setCurrentDate(LocalDate currentDate) {
+        this.currentDate = currentDate;
     }
 
 }
