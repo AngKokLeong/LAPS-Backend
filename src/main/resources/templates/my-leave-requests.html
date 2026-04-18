@@ -217,8 +217,8 @@
 									</div>
 								</div>
 
-								<div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
-									<button
+								<div class="mt-4 pt-4 border-t border-gray-200 flex gap-3" th:if="${leaveRequest.startDate > leaveRequest.currentDate}">
+									<button 
 										class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
 										onclick="openCancelModal(this)"
 										th:attr="data-leave-type=${leaveRequest.leaveType}, data-leave-period=${leaveRequest.leavePeriod}, data-reason=${leaveRequest.reason}, data-leave-duration=${leaveRequest.leaveDuration}, data-leave-status=${leaveRequest.leaveStatus}, data-leave-request-id=${leaveRequest.leaveRequestId}, data-leave-start-date=${leaveRequest.startDate}, data-leave-end-date=${leaveRequest.endDate}">
@@ -229,7 +229,7 @@
 										</svg>
 										Cancel Request
 									</button>
-								</div>
+								</div> 
 							</div>
 							<div th:case="'REJECTED'">
 								<div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
@@ -891,7 +891,7 @@
 	</div>
 	
 
-	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 	
 	<script th:inline="javascript">
 		// GLOBAL REFERENCE FOR THE FRAGMENT
