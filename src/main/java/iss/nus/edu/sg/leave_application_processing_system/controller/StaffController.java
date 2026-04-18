@@ -252,13 +252,13 @@ public class StaffController {
 		// Calculate counts
 		long allCount = leaveRequestDTOList.size();
 		long pendingCount = leaveRequestDTOList.stream()
-				.filter(dto -> "APPLIED".equals(dto.getLeaveStatus()) || "UPDATED".equals(dto.getLeaveStatus()))
+				.filter(dto -> "APPLIED".equals(String.valueOf(dto.getLeaveStatus())) || "UPDATED".equals(String.valueOf(dto.getLeaveStatus())))
 				.count();
 		long approvedCount = leaveRequestDTOList.stream()
-				.filter(dto -> "APPROVED".equals(dto.getLeaveStatus()))
+				.filter(dto -> "APPROVED".equals(String.valueOf(dto.getLeaveStatus())))
 				.count();
 		long rejectedCount = leaveRequestDTOList.stream()
-				.filter(dto -> "REJECTED".equals(dto.getLeaveStatus()))
+				.filter(dto -> "REJECTED".equals(String.valueOf(dto.getLeaveStatus())))
 				.count();
 
 		model.addAttribute("leaveRequestList", leaveRequestDTOList);
@@ -436,4 +436,9 @@ public class StaffController {
 		return "redirect:/staff/my-leave-requests";
 	}
 
+	@GetMapping("/calendar")
+    public String showCalendar() {
+		
+        return "calendar"; 
+    }
 }
