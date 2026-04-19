@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import iss.nus.edu.sg.leave_application_processing_system.helper.Designation;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 
@@ -38,6 +39,28 @@ public class EmployeeService {
 		}
 
 		return false;
+	}
+	
+	public void updateEmployee(EmployeeServiceDTO dto) {
+		// 1. Fetch the existing entity
+	    Employee existing = employeeRepository.findById(dto.getId())
+	        .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+	    // 2. Map only the allowed fields
+	    existing.setName(dto.getName());
+	    existing.setEmail(dto.getEmail());
+	    existing.setDepartment(dto.getDepartment());
+	    existing.setStatus(dto.getStatus());
+	    
+	    if (dto.getDesignation() != null) {
+	        existing.setDesignation(Designation.valueOf(dto.getDesignation().toUpperCase()));
+	    }
+
+	    if (dto.getRole() != null) {
+	        existing.setRole(Role.valueOf(dto.getRole().toUpperCase()));
+	    }
+	    
+	    employeeRepository.save(existing);
 	}
 	
 	public List<EmployeeServiceDTO> getAllEmployees() {

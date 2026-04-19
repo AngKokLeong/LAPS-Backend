@@ -12,7 +12,7 @@ public class EmployeeServiceDTO implements ServiceDTO {
     private String role;
     private String status;
     private String designation;
-    private String joinDate;
+    private String joindate;
 
     
 
@@ -26,7 +26,7 @@ public class EmployeeServiceDTO implements ServiceDTO {
 		this.role = role;
 		this.status = status;
 		this.designation = designation;
-		this.joinDate = joinDate;
+		this.joindate = joindate;
 	}
 
 
@@ -137,11 +137,11 @@ public class EmployeeServiceDTO implements ServiceDTO {
 	}
 
 	public String getJoinDate() {
-		return joinDate;
+		return joindate;
 	}
 
 	public void setJoinedDate(String joinedDate) {
-		this.joinDate = joinDate;
+		this.joindate = joindate;
 	}
 	
 	

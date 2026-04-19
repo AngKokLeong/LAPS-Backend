@@ -138,5 +138,18 @@ public class AdminController {
 		
 		return "redirect:/admin/employee-management";
 	}
+	
+	@PostMapping("/employees/update")
+	public String updateEmployee(@ModelAttribute("employee") EmployeeServiceDTO employeeDto, RedirectAttributes redirectAttrs) {
+		
+		try {
+			employeeService.updateEmployee(employeeDto);
+			redirectAttrs.addFlashAttribute("successMessage", "Employee details updated successfully.");
+		} catch (Exception e) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Could not update employee: " + e.getMessage());
+		}
+
+		return "redirect:/admin/employee-management";
+	}
 
 }
