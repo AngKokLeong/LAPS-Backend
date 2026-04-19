@@ -172,8 +172,12 @@ Resources:
           ToPort: 22
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 8080   # adjust to your app port
-          ToPort: 8080
+          FromPort: 8100
+          ToPort: 8100
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8443
+          ToPort: 8443
           CidrIp: 0.0.0.0/0
 
   DBSecurityGroup:
@@ -221,22 +225,19 @@ Resources:
           trap '/opt/aws/bin/cfn-signal -e 1 --stack ${AWS::StackName} --resource EC2Instance --region ${AWS::Region}; exit 1' ERR
 
           # --- 1. System update & cfn-bootstrap ---
-          yum update -y
-          yum install -y aws-cfn-bootstrap
+          dnf update -y
 
           # --- 2. Java 17 (Corretto) ---
-          rpm --import https://yum.corretto.aws/corretto.key
-          curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
-          yum install -y java-17-amazon-corretto-headless
+          dnf install -y java-17-amazon-corretto
 
-          # --- 3. Tomcat 9 ---
+          # --- 3. Tomcat 10 ---
           set +e; useradd -r -M -U -d /opt/tomcat -s /bin/false tomcat; set -e
 
           cd /opt
-          wget -q --tries=3 --timeout=60 https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.85/bin/apache-tomcat-9.0.85.tar.gz
-          tar -xzf apache-tomcat-9.0.85.tar.gz
-          mv apache-tomcat-9.0.85 tomcat
-          rm apache-tomcat-9.0.85.tar.gz
+          wget -q --tries=3 --timeout=60 https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.18/bin/apache-tomcat-10.1.18.tar.gz
+          tar -xzf apache-tomcat-10.1.18.tar.gz
+          mv apache-tomcat-10.1.18 tomcat
+          rm apache-tomcat-10.1.18.tar.gz
 
           # Set permissions before creating files
           chown -R tomcat:tomcat /opt/tomcat
@@ -247,22 +248,53 @@ Resources:
           mkdir -p /opt/tomcat/webapps
           chown -R tomcat:tomcat /opt/tomcat/webapps
 
+          # Generate self-signed SSL certificate FIRST before server.xml update
+          keytool -genkeypair \
+            -alias tomcat \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 365 \
+            -keystore /opt/tomcat/conf/keystore.jks \
+            -storepass changeit \
+            -keypass changeit \
+            -noprompt \
+            -dname "CN=localhost, OU=Dev, O=LAPS, L=Singapore, S=Singapore, C=SG"
+          chown tomcat:tomcat /opt/tomcat/conf/keystore.jks
+          chmod 640 /opt/tomcat/conf/keystore.jks
+
+          # Update server.xml - remove HTTP connector block and enable HTTPS
+          echo 'with open("/opt/tomcat/conf/server.xml", "r") as f: lines = f.readlines()' > /tmp/fix_server.py
+          echo 'result = []' >> /tmp/fix_server.py
+          echo 'skip = False' >> /tmp/fix_server.py
+          echo 'for line in lines:' >> /tmp/fix_server.py
+          echo '    if "<Connector port=\"8080\"" in line: skip = True' >> /tmp/fix_server.py
+          echo '    if skip and ("/>" in line or "</Connector>" in line): skip = False; continue' >> /tmp/fix_server.py
+          echo '    if not skip: result.append(line)' >> /tmp/fix_server.py
+          echo 'ssl = "    <Connector port=\"8443\" protocol=\"org.apache.coyote.http11.Http11NioProtocol\" maxThreads=\"150\" SSLEnabled=\"true\">\n        <SSLHostConfig>\n            <Certificate certificateKeystoreFile=\"conf/keystore.jks\" certificateKeystorePassword=\"changeit\" type=\"RSA\" />\n        </SSLHostConfig>\n    </Connector>\n    <Connector port=\"8100\" protocol=\"HTTP/1.1\" connectionTimeout=\"20000\" />\n"' >> /tmp/fix_server.py
+          echo 'final = []' >> /tmp/fix_server.py
+          echo 'for line in result:' >> /tmp/fix_server.py
+          echo '    if "</Service>" in line: final.append(ssl)' >> /tmp/fix_server.py
+          echo '    final.append(line)' >> /tmp/fix_server.py
+          echo 'with open("/opt/tomcat/conf/server.xml", "w") as f: f.writelines(final)' >> /tmp/fix_server.py
+          python3 /tmp/fix_server.py
+
           # Create setenv.sh for Tomcat to pick up JAVA_OPTS
+          JAVA_HOME_PATH=$(dirname $(dirname $(readlink -f $(which java))))
           echo '#!/bin/bash' > /opt/tomcat/bin/setenv.sh
-          echo 'export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' >> /opt/tomcat/bin/setenv.sh
-          echo "export JAVA_OPTS=\"-Dspring.profiles.active=prod -Dspring.datasource.url=jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true -Dspring.datasource.username=${DBUsername} -Dspring.datasource.password=${DBPassword}\"" >> /opt/tomcat/bin/setenv.sh
+          echo "export JAVA_HOME=$JAVA_HOME_PATH" >> /opt/tomcat/bin/setenv.sh
+          echo "export JAVA_OPTS=\"-Dspring.profiles.active=prod -Dserver.port=8100 -Dspring.datasource.url=jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true -Dspring.datasource.username=${DBUsername} -Dspring.datasource.password=${DBPassword}\"" >> /opt/tomcat/bin/setenv.sh
           chmod +x /opt/tomcat/bin/setenv.sh
 
           # Create systemd service for Tomcat
           echo '[Unit]' > /etc/systemd/system/tomcat.service
-          echo 'Description=Apache Tomcat 9' >> /etc/systemd/system/tomcat.service
+          echo 'Description=Apache Tomcat 10' >> /etc/systemd/system/tomcat.service
           echo 'After=network.target' >> /etc/systemd/system/tomcat.service
           echo >> /etc/systemd/system/tomcat.service
           echo '[Service]' >> /etc/systemd/system/tomcat.service
           echo 'Type=forking' >> /etc/systemd/system/tomcat.service
           echo 'User=tomcat' >> /etc/systemd/system/tomcat.service
           echo 'Group=tomcat' >> /etc/systemd/system/tomcat.service
-          echo 'Environment=JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' >> /etc/systemd/system/tomcat.service
+          echo "Environment=JAVA_HOME=$JAVA_HOME_PATH" >> /etc/systemd/system/tomcat.service
           echo 'Environment=CATALINA_HOME=/opt/tomcat' >> /etc/systemd/system/tomcat.service
           echo 'Environment=CATALINA_BASE=/opt/tomcat' >> /etc/systemd/system/tomcat.service
           echo 'Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid' >> /etc/systemd/system/tomcat.service
@@ -277,16 +309,16 @@ Resources:
           systemctl enable tomcat
           systemctl start tomcat
 
-          # Wait for Tomcat to be ready on port 8080
+          # Wait for Tomcat to be ready on port 8100
           for i in $(seq 1 12); do
-            curl -sf http://localhost:8080 && break
+            curl -sf http://localhost:8100 && break
             echo "Waiting for Tomcat... attempt $i"
             sleep 5
           done
-          curl -sf http://localhost:8080
+          curl -sf http://localhost:8100
 
           # --- 4. CodeDeploy agent ---
-          yum install -y ruby wget
+          dnf install -y ruby wget
           cd /tmp
           wget -q --tries=3 --timeout=60 https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
           chmod +x ./install
@@ -294,8 +326,7 @@ Resources:
           systemctl enable codedeploy-agent
           systemctl start codedeploy-agent
 
-          # --- 4b. Verify MySQL connectivity (no client install needed) ---
-          # Use bash /dev/tcp to test port 3306 reachability
+          # --- 4b. Verify MySQL connectivity ---
           timeout 10 bash -c "echo > /dev/tcp/${MySQLDB.Endpoint.Address}/3306"
 
           # --- 5. Signal CloudFormation ---
