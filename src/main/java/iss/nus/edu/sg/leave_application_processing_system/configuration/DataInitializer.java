@@ -645,6 +645,10 @@ public class DataInitializer implements CommandLineRunner {
 	    } else {
 	    	app.setHalfDay(false);
 	    }
+
+		if (status == LeaveStatus.APPROVED){
+			app.setUpdatedDate(LocalDate.now());
+		}
 	    
 	    
 	    // Logic: Medical leave is applied 0-1 days before/on start. 
