@@ -282,7 +282,7 @@ Resources:
           JAVA_HOME_PATH=$(dirname $(dirname $(readlink -f $(which java))))
           echo '#!/bin/bash' > /opt/tomcat/bin/setenv.sh
           echo "export JAVA_HOME=$JAVA_HOME_PATH" >> /opt/tomcat/bin/setenv.sh
-          echo "export JAVA_OPTS=\"-Dspring.profiles.active=prod -Dserver.port=8100 -Dspring.datasource.url=jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true -Dspring.datasource.username=${DBUsername} -Dspring.datasource.password=${DBPassword}\"" >> /opt/tomcat/bin/setenv.sh
+          echo "export JAVA_OPTS=\"-Dspring.profiles.active=prod -Dspring.datasource.url=jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true -Dspring.datasource.username=${DBUsername} -Dspring.datasource.password=${DBPassword}\"" >> /opt/tomcat/bin/setenv.sh
           chmod +x /opt/tomcat/bin/setenv.sh
 
           # Create systemd service for Tomcat
