@@ -1,3 +1,3 @@
 #!/bin/bash
-rm -f /opt/tomcat/webapps/laps.war
-rm -rf /opt/tomcat/webapps/laps
+rm -f /opt/tomcat/webapps/ROOT.war
+rm -rf /opt/tomcat/webapps/ROOT
