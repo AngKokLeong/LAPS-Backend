@@ -16,16 +16,16 @@ on:
         description: 'CloudFormation Stack Name'
         required: true
         default: 'laps-backend'
+      vpc_second_octet:
+        description: 'VPC Second Octet (0-255), change per deployment to avoid CIDR conflicts'
+        required: false
+        default: '0'
       db_username:
         description: 'RDS Master Username'
         required: true
       db_password:
         description: 'RDS Master Password (min 8 chars)'
         required: true
-      git_repository:
-        description: 'Spring Boot WAR URL'
-        required: false
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -50,9 +50,9 @@ jobs:
             --template-file aws_cloudformation/cloudformation-stack.yaml \
             --stack-name ${{ steps.vars.outputs.stack_name }} \
             --parameter-overrides \
+              VpcSecondOctet=${{ github.event.inputs.vpc_second_octet }} \
               DBUsername=${{ github.event.inputs.db_username }} \
               DBPassword=${{ github.event.inputs.db_password }} \
-              GitRepostiory=${{ github.event.inputs.git_repository }} \
             --capabilities CAPABILITY_NAMED_IAM \
             --region us-east-1
 
