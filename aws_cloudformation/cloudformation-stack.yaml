@@ -242,6 +242,8 @@ Resources:
           # Install MariaDb client
           dnf install mariadb105 -y
 
+          # Set the Timezone to Asia/Singapore
+          timedatectl set-timezone Asia/Singapore
 
           # Set permissions before creating files
           chown -R tomcat:tomcat /opt/tomcat
