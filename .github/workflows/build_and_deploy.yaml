@@ -44,6 +44,7 @@ jobs:
 
       - name: Upload to S3
         run: |
+          ARTIFACT_KEY="app-artifact-${{ github.sha }}.zip"
           mkdir -p codedeploy-bundle/scripts
           cp appspec.yml codedeploy-bundle/
           cp scripts/*.sh codedeploy-bundle/scripts/
@@ -51,12 +52,17 @@ jobs:
           cp target/*.war codedeploy-bundle/ROOT.war
           aws deploy push \
             --application-name ${{ github.event.inputs.stack_name }}-app \
-            --s3-location s3://${{ github.event.inputs.s3_bucket }}/app-artifact.zip \
+            --s3-location s3://${{ github.event.inputs.s3_bucket }}/$ARTIFACT_KEY \
             --source codedeploy-bundle
 
       - name: Trigger CodeDeploy
         run: |
-          aws deploy create-deployment \
+          ARTIFACT_KEY="app-artifact-${{ github.sha }}.zip"
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
             --application-name ${{ github.event.inputs.stack_name }}-app \
             --deployment-group-name ${{ github.event.inputs.stack_name }}-dg \
-            --s3-location bucket=${{ github.event.inputs.s3_bucket }},key=app-artifact.zip,bundleType=zip
+            --s3-location bucket=${{ github.event.inputs.s3_bucket }},key=$ARTIFACT_KEY,bundleType=zip \
+            --query 'deploymentId' --output text)
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          aws deploy wait deployment-successful --deployment-id $DEPLOYMENT_ID
+          echo "Deployment successful"
