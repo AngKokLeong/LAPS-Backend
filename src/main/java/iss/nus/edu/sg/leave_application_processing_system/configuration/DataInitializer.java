@@ -30,7 +30,6 @@ import iss.nus.edu.sg.leave_application_processing_system.repo.PublicHolidayRepo
 import iss.nus.edu.sg.leave_application_processing_system.service.CompensationService;
 
 @Component
-@Profile("local")
 public class DataInitializer implements CommandLineRunner {
 
 
