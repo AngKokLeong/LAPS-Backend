@@ -11,18 +11,22 @@ public class EmployeeServiceDTO implements ServiceDTO {
     private String department;
     private String role;
     private String status;
+    private String designation;
+    private String joinDate;
 
     
 
 	public EmployeeServiceDTO() {}
 
-	public EmployeeServiceDTO(Long id, String name, String email, String department, String role, String status) {
+	public EmployeeServiceDTO(Long id, String name, String email, String department, String role, String status, String designation, String joinDate) {
 		this.id = id;
 		this.name = name;
 		this.email = email;
 		this.department = department;
 		this.role = role;
 		this.status = status;
+		this.designation = designation;
+		this.joinDate = joinDate;
 	}
 
 
@@ -122,6 +126,22 @@ public class EmployeeServiceDTO implements ServiceDTO {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getDesignation() {
+		return designation;
+	}
+
+	public void setDesignation(String designation) {
+		this.designation = designation;
+	}
+
+	public String getJoinDate() {
+		return joinDate;
+	}
+
+	public void setJoinedDate(String joinedDate) {
+		this.joinDate = joinDate;
 	}
 	
 	

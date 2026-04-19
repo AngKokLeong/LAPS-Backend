@@ -73,6 +73,7 @@ public class DataInitializer implements CommandLineRunner {
 		boss.setDesignation(Designation.PROFESSIONAL);
 		boss.setDepartment("CEO");
 		boss.setStatus("Active");
+		boss.setJoindate(LocalDate.of(2020, 1, 15));
 
 		empRepo.save(boss);
 		
@@ -86,6 +87,7 @@ public class DataInitializer implements CommandLineRunner {
 		sarah.setManager(boss);
 		sarah.setDepartment("IT");
 		sarah.setStatus("Active");
+		sarah.setJoindate(LocalDate.of(2018, 6, 1));
 
 		empRepo.save(sarah);
 		
@@ -99,6 +101,7 @@ public class DataInitializer implements CommandLineRunner {
 		john.setManager(sarah);
 		john.setDepartment("IT");
 		john.setStatus("Active");
+		john.setJoindate(LocalDate.of(2023, 9, 1));
 
 		empRepo.save(john);
 		
@@ -111,6 +114,7 @@ public class DataInitializer implements CommandLineRunner {
 		jason.setManager(sarah);
 		jason.setDepartment("Engineering");
 		jason.setStatus("Active");
+		jason.setJoindate(LocalDate.of(2015, 1, 1));
 
 		empRepo.save(jason);
 		
@@ -123,6 +127,7 @@ public class DataInitializer implements CommandLineRunner {
 		maria.setManager(sarah);
 		maria.setDepartment("Finance");
 		maria.setStatus("Active");
+		maria.setJoindate(LocalDate.of(2019, 3, 22));
 
 		empRepo.save(maria);
 
@@ -136,6 +141,7 @@ public class DataInitializer implements CommandLineRunner {
 		admin.setManager(sarah);
 		admin.setDepartment("HR");
 		admin.setStatus("Active");
+		admin.setJoindate(LocalDate.of(2023, 5, 2));
 
 		empRepo.save(admin);
 		
@@ -150,6 +156,7 @@ public class DataInitializer implements CommandLineRunner {
 		leon.setManager(boss);
 		leon.setDepartment("HR");
 		leon.setStatus("Active");
+		leon.setJoindate(LocalDate.of(2008, 8, 12));
 
 		empRepo.save(leon);
 		
@@ -162,6 +169,7 @@ public class DataInitializer implements CommandLineRunner {
 		william.setManager(boss);
 		william.setDepartment("Finance");
 		william.setStatus("Active");
+		william.setJoindate(LocalDate.of(2004, 10, 1));
 
 		empRepo.save(william);
 		
@@ -174,6 +182,7 @@ public class DataInitializer implements CommandLineRunner {
 		katerine.setManager(leon);
 		katerine.setDepartment("HR");
 		katerine.setStatus("Active");
+		katerine.setJoindate(LocalDate.of(2021, 3, 3));
 
 		empRepo.save(katerine);
 		
@@ -186,6 +195,7 @@ public class DataInitializer implements CommandLineRunner {
 		darice.setManager(leon);
 		darice.setDepartment("Teaching");
 		darice.setStatus("Active");
+		darice.setJoindate(LocalDate.of(2017, 1, 2));
 
 		empRepo.save(darice);
 

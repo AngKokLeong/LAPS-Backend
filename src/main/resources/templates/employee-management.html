@@ -122,6 +122,8 @@
 							        th:data-dept="${emp.department}"
 							        th:data-role="${emp.role}"
 							        th:data-status="${emp.status}"
+									th:data-designation="${emp.designation}"
+									th:data-joinDate="${emp.joinDate}"
 							        onclick="openEditModal(this)"> Edit
 							</button>
 					        
@@ -569,6 +571,18 @@
 	              <input type="text" id="edit-dept" name="department" required
 	                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
 	          </div>
+			  
+			  <div>
+			      <label class="block text-sm font-medium text-gray-700 mb-2">Designation *</label>
+			      <input type="text" id="edit-designation" name="designation" required
+			          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+			  </div>
+
+			  <div>
+			      <label class="block text-sm font-medium text-gray-700 mb-2">Join Date *</label>
+				  <input type="date" id="edit-joindate" name="joindate" readonly
+				          class="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg text-gray-500 cursor-not-allowed" />
+			  </div>
 
 	          <div>
 	              <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
@@ -696,11 +710,14 @@
 	    const dept = button.getAttribute('data-dept');
 	    const role = button.getAttribute('data-role');
 	    const status = button.getAttribute('data-status');
+		const designation = button.getAttribute('data-designation'); // New
+		const joinDate = button.getAttribute('data-joindate');
 
 	    // Show the modal
-	    document.getElementById('editModal').classList.remove('hidden');
-	    document.getElementById('editModal').style.display = 'flex';
-	    document.body.style.overflow = 'hidden';
+		const modal = document.getElementById('editModal');
+		modal.classList.remove('hidden');
+		modal.style.display = 'flex';
+		document.body.style.overflow = 'hidden';
 
 	    // Populate the form using the IDs
 	    document.getElementById('edit-id').value = id;
@@ -709,6 +726,8 @@
 	    document.getElementById('edit-dept').value = dept;
 	    document.getElementById('edit-role').value = role.toLowerCase();
 	    document.getElementById('edit-status').value = status.toLowerCase();
+		document.getElementById('edit-designation').value = designation;
+		document.getElementById('edit-joindate').value = joinDate;
 	}
 
     function closeEditModal() {

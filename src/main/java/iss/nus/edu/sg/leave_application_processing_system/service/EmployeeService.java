@@ -45,7 +45,9 @@ public class EmployeeService {
                 emp.getEmail(),
                 emp.getDepartment(),
                 emp.getRole().toString(),
-                emp.getStatus()
+                emp.getStatus(),
+                emp.getDesignation() != null ? emp.getDesignation().toString() : "",
+                emp.getJoindate() != null ? emp.getJoindate().toString() : ""
             ))
             .collect(Collectors.toList());
     }
