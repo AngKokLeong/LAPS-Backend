@@ -154,5 +154,17 @@ public class AdminController {
 
 		return "redirect:/admin/employee-management";
 	}
+	
+	@PostMapping("/employees/delete")
+	public String softDeleteEmployee(@RequestParam Long id, RedirectAttributes redirectAttrs) {
+	    try {
+	        employeeService.softDeleteEmployee(id);
+	        redirectAttrs.addFlashAttribute("successMessage", "Employee status set to INACTIVE.");
+	    } catch (Exception e) {
+	        redirectAttrs.addFlashAttribute("errorMessage", "Delete failed: " + e.getMessage());
+	    }
+	    // Redirect back to the management list page
+	    return "redirect:/admin/employee-management";
+	}
 
 }

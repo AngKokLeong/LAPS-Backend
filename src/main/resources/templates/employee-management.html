@@ -765,15 +765,14 @@
 							</path>
 						</svg>
 						<p class="text-sm text-red-800">
-							<strong>Warning:</strong> This action cannot be undone. The employee record will be permanently
-							deleted.
+							<strong>Note:</strong> This will deactivate the employee.
 						</p>
 					</div>
 				</div>
 	
 				<div class="space-y-4">
 					<div>
-						<h3 class="text-sm font-semibold text-gray-900 mb-3">Employee to Delete:</h3>
+						<h3 class="text-sm font-semibold text-gray-900 mb-3">Employee to Deactivate:</h3>
 						<div class="bg-gray-50 rounded-lg p-4 space-y-2">
 							<div class="flex justify-between text-sm">
 							    <span class="text-gray-600">Id:</span>
@@ -796,11 +795,12 @@
 					</div>
 	
 					<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-						<input type="checkbox" id="confirmDeleteEmployee"
+						<input type="checkbox" id="confirmDeleteEmployee" onchange="toggleDeleteButton()"
 							class="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" />
 						<label for="confirmDeleteEmployee" class="text-sm text-gray-700">
-							I understand that this action is permanent and will delete all associated data including leave
-							history and entitlements
+							I understand that this action will deactivate the employee. 
+							They will no longer be able to log in or apply for leave, 
+							but historical records will be preserved for audit purposes.
 						</label>
 					</div>
 				</div>
@@ -813,7 +813,7 @@
 						class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
 						Cancel
 					</button>
-					<button id="confirmDeleteBtn" onclick="submitDeleteEmployee()" disabled
+					<button id="confirmDeleteBtn" type="submit" disabled
 						class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
 						Delete Employee
 					</button>
@@ -858,25 +858,22 @@
       document.body.style.overflow = 'auto';
     }
 
-    // Delete Modal Functions
+	// Function to open the modal and populate data
 	function openDeleteModal(button) {
-	    // Get data from the button's data attributes
-		const id = button.getAttribute('data-id');
-		    const name = button.getAttribute('data-name');
-		    const email = button.getAttribute('data-email');
+	    const id = button.getAttribute('data-id');
+	    const name = button.getAttribute('data-name');
+	    const email = button.getAttribute('data-email');
 
-		    // Populate the DISPLAY (the Span)
-		    document.getElementById('deleteEmployeeIdDisplay').innerText = id;
-		    document.getElementById('deleteEmployeeName').innerText = name;
-		    document.getElementById('deleteEmployeeEmail').innerText = email;
+	    // Populate the DISPLAY
+	    document.getElementById('deleteEmployeeIdDisplay').textContent = id;
+	    document.getElementById('deleteEmployeeName').textContent = name;
+	    document.getElementById('deleteEmployeeEmail').textContent = email;
 
-		    // Populate the DATA (the Hidden Input)
-		    // Use .value here because it is an <input>
-		    document.getElementById('delete-id-input').value = id;
+	    // Populate the HIDDEN INPUT (Target the ID at the top of your form)
+	    document.getElementById('delete-id').value = id;
 
-	    // Reset the checkbox and button state (important if opening for a 2nd time)
-	    const checkbox = document.getElementById('confirmDeleteEmployee');
-	    checkbox.checked = false;
+	    // Reset UI state
+	    document.getElementById('confirmDeleteEmployee').checked = false;
 	    document.getElementById('confirmDeleteBtn').disabled = true;
 
 	    // Show the modal
@@ -886,11 +883,7 @@
 	    document.body.style.overflow = 'hidden';
 	}
 
-	// Function to enable the delete button only when checkbox is ticked
-	function toggleDeleteButton(checkbox) {
-	    document.getElementById('confirmDeleteBtn').disabled = !checkbox.checked;
-	}
-
+	// Function to close the modal
 	function closeDeleteModal() {
 	    const modal = document.getElementById('deleteModal');
 	    modal.classList.add('hidden');
@@ -898,55 +891,40 @@
 	    document.body.style.overflow = 'auto';
 	}
 
-    function closeDeleteModal() {
-      document.getElementById('deleteModal').classList.add('hidden');
-      document.body.style.overflow = 'auto';
-      document.getElementById('confirmDeleteEmployee').checked = false;
-      document.getElementById('confirmDeleteBtn').disabled = true;
-    }
+	// Simple toggle function for the checkbox
+	function toggleDeleteButton() {
+	    const checkbox = document.getElementById('confirmDeleteEmployee');
+	    const btn = document.getElementById('confirmDeleteBtn');
+	    btn.disabled = !checkbox.checked;
+	}
 
-    function submitDeleteEmployee() {
-      const name = document.getElementById('deleteEmployeeName').textContent;
-      
-      // Here you would typically send the delete request to your backend
-      console.log('Deleting employee:', name);
+	// Global Event Listeners (Clicks outside & Escape key)
+	document.addEventListener('DOMContentLoaded', function() {
+	    
+	    // Close modals when clicking outside
+	    window.onclick = function(event) {
+	        const deleteModal = document.getElementById('deleteModal');
+	        const editModal = document.getElementById('editModal');
+	        if (event.target == deleteModal) closeDeleteModal();
+	        if (event.target == editModal) closeEditModal();
+	    };
 
-      closeDeleteModal();
-      
-      // In a real application, you would refresh the data or update the UI
-      // window.location.reload();
-    }
+	    // Close modals with Escape key
+	    document.addEventListener('keydown', function(e) {
+	        if (e.key === 'Escape') {
+	            if (typeof closeEditModal === "function") closeEditModal();
+	            closeDeleteModal();
+	        }
+	    });
+	})
 
-    // Enable/disable delete button based on checkbox
-    document.addEventListener('DOMContentLoaded', function() {
-      const confirmCheckbox = document.getElementById('confirmDeleteEmployee');
-      const confirmBtn = document.getElementById('confirmDeleteBtn');
-      
-      if (confirmCheckbox && confirmBtn) {
-        confirmCheckbox.addEventListener('change', function() {
-          confirmBtn.disabled = !this.checked;
-        });
-      }
-
-      // Close edit modal on X button
-      const editCloseBtn = document.querySelector('#editModal button[onclick*="close"]');
-      if (editCloseBtn) {
-        editCloseBtn.onclick = closeEditModal;
-      }
-    });
-
-    // Close modals when clicking outside
+  /*  // Close modals when clicking outside
     document.getElementById('editModal')?.addEventListener('click', function(e) {
       if (e.target === this) {
         closeEditModal();
       }
     });
 
-    document.getElementById('deleteModal')?.addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeDeleteModal();
-      }
-    });
 
     // Close modals with Escape key
     document.addEventListener('keydown', function(e) {
@@ -959,7 +937,7 @@
     // Submit edit form
     document.querySelector('#editModal form')?.addEventListener('submit', function(e) {
       closeEditModal();
-    });
+    }); */
 
     // Old script cleanup - remove if exists
     // Close modal functionality

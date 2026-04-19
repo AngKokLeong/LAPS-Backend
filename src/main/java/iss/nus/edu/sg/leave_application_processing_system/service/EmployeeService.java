@@ -104,6 +104,18 @@ public class EmployeeService {
 	    employeeRepository.save(existing);
 	}
 	
+	public void softDeleteEmployee(Long id) {
+	    Employee emp = employeeRepository.findById(id)
+	        .orElseThrow(() -> new RuntimeException("Employee not found"));
+	    
+	    // Just change the status
+	    emp.setStatus("Inactive"); 
+	    
+	    emp.setManager(null);
+	    
+	    employeeRepository.save(emp);
+	}
+	
 	public List<EmployeeServiceDTO> getAllEmployees() {
         
 		return employeeRepository.findAll().stream()
@@ -155,4 +167,5 @@ public class EmployeeService {
 		return employeeRepository.findByRole(role);
 	}
 
+	
 }
