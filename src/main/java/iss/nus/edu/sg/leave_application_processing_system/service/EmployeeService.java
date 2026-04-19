@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
@@ -51,5 +54,21 @@ public class EmployeeService {
             ))
             .collect(Collectors.toList());
     }
+	
+	public Page<EmployeeServiceDTO> getEmployeesPaged(int page, int size) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    
+	    return employeeRepository.findAll(pageable)
+	        .map(emp -> new EmployeeServiceDTO(
+	        		emp.getId(),         
+	                emp.getName(),       
+	                emp.getEmail(),
+	                emp.getDepartment(),
+	                emp.getRole().toString(),
+	                emp.getStatus(),
+	                emp.getDesignation() != null ? emp.getDesignation().toString() : "",
+	                emp.getJoindate() != null ? emp.getJoindate().toString() : ""
+	        ));
+	}
 
 }
