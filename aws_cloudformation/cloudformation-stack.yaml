@@ -239,10 +239,17 @@ Resources:
           mv apache-tomcat-10.1.18 tomcat
           rm apache-tomcat-10.1.18.tar.gz
 
+          # Install MariaDb client
+          dnf install mariadb105 -y
+
+
           # Set permissions before creating files
           chown -R tomcat:tomcat /opt/tomcat
           chmod -R 755 /opt/tomcat/bin
           chmod -R 777 /opt/tomcat/logs /opt/tomcat/temp /opt/tomcat/work
+
+          # Rename Tomcat manager to admin-manager
+          mv /opt/tomcat/webapps/manager /opt/tomcat/webapps/admin-manager
 
           # Create webapps dir and set permissions
           mkdir -p /opt/tomcat/webapps
@@ -267,7 +274,7 @@ Resources:
           echo 'result = []' >> /tmp/fix_server.py
           echo 'skip = False' >> /tmp/fix_server.py
           echo 'for line in lines:' >> /tmp/fix_server.py
-          echo '    if "<Connector port=\"8080\"" in line: skip = True' >> /tmp/fix_server.py
+          echo '    if "<Connector port=\"8080\"" in line or "<Connector port=\"8443\"" in line: skip = True' >> /tmp/fix_server.py
           echo '    if skip and ("/>" in line or "</Connector>" in line): skip = False; continue' >> /tmp/fix_server.py
           echo '    if not skip: result.append(line)' >> /tmp/fix_server.py
           echo 'ssl = "    <Connector port=\"8443\" protocol=\"org.apache.coyote.http11.Http11NioProtocol\" maxThreads=\"150\" SSLEnabled=\"true\">\n        <SSLHostConfig>\n            <Certificate certificateKeystoreFile=\"conf/keystore.jks\" certificateKeystorePassword=\"changeit\" type=\"RSA\" />\n        </SSLHostConfig>\n    </Connector>\n    <Connector port=\"8100\" protocol=\"HTTP/1.1\" connectionTimeout=\"20000\" />\n"' >> /tmp/fix_server.py
@@ -374,17 +381,27 @@ Outputs:
   VPCId:
     Value: !Ref VPC
 
-  EC2PublicIP:
-    Value: !GetAtt EC2Instance.PublicIp
-
-  MySQLEndpoint:
-    Value: !GetAtt MySQLDB.Endpoint.Address
+  CloudFormationStackName:
+    Value: ${AWS::StackName}
 
   ArtifactBucketName:
     Value: !Ref ArtifactBucket
+
+  EC2PublicIP:
+    Value: !GetAtt EC2Instance.PublicIp
+
+  EC2PublicDNSName:
+    Value: !GetAtt EC2Instance.PublicDnsName
+
+  MySQLEndpoint:
+    Value: !GetAtt MySQLDB.Endpoint.Address
 
   CodeDeployAppName:
     Value: !Ref CodeDeployApp
 
   CodeDeployDeploymentGroupName:
     Value: !Ref CodeDeployDeploymentGroup
+  
+
+
+  
