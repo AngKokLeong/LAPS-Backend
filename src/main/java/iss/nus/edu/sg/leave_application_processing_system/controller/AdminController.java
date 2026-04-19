@@ -45,7 +45,10 @@ public class AdminController {
 	    int pageSize = 5;
 	    
 	    Page<EmployeeServiceDTO> employeePage = employeeService.getEmployeesPaged(page, pageSize, search, role);
+	    
+	    List<Employee> managers = employeeService.findByRole(Role.MANAGER);
         
+	    model.addAttribute("managers", managers);
 	    model.addAttribute("employee", new Employee());
 	    model.addAttribute("employeePage", employeePage);
 	    model.addAttribute("search", search);
@@ -137,6 +140,31 @@ public class AdminController {
 	    }
 		
 		return "redirect:/admin/employee-management";
+	}
+	
+	@PostMapping("/employees/update")
+	public String updateEmployee(@ModelAttribute("employee") EmployeeServiceDTO employeeDto, RedirectAttributes redirectAttrs) {
+		
+		try {
+			employeeService.updateEmployee(employeeDto);
+			redirectAttrs.addFlashAttribute("successMessage", "Employee details updated successfully.");
+		} catch (Exception e) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Could not update employee: " + e.getMessage());
+		}
+
+		return "redirect:/admin/employee-management";
+	}
+	
+	@PostMapping("/employees/delete")
+	public String softDeleteEmployee(@RequestParam Long id, RedirectAttributes redirectAttrs) {
+	    try {
+	        employeeService.softDeleteEmployee(id);
+	        redirectAttrs.addFlashAttribute("successMessage", "Employee status set to INACTIVE.");
+	    } catch (Exception e) {
+	        redirectAttrs.addFlashAttribute("errorMessage", "Delete failed: " + e.getMessage());
+	    }
+	    // Redirect back to the management list page
+	    return "redirect:/admin/employee-management";
 	}
 
 }
