@@ -33,10 +33,20 @@ public class EmployeeService {
 			employee.setPassword(passwordEncoder.encode(employee.getPassword()));
 		}
 
+		if (employee.getManager() != null) {
+	        Employee manager = employeeRepository.findById(employee.getManager().getId()).orElse(null);
+	        employee.setManager(manager);
+	    } else {
+	        // Explicitly set to null if no manager is assigned
+	        employee.setManager(null);
+	    }
+		
 		Employee result = employeeRepository.save(employee);
 		if (result != null){
 			return true;
 		}
+		
+
 
 		return false;
 	}
@@ -108,6 +118,10 @@ public class EmployeeService {
 	                emp.getDesignation() != null ? emp.getDesignation().toString() : "",
 	                emp.getJoindate() != null ? emp.getJoindate().toString() : ""
 	        ));
+	}
+	
+	public List<Employee> findByRole(Role role) {
+		return employeeRepository.findByRole(role);
 	}
 
 }

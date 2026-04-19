@@ -24,6 +24,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     // Manager-subordinate r/s
     List<Employee> findByManagerId(Long managerId);
     
+    List<Employee> findByRole(Role role);
+    
     @Query("SELECT e FROM Employee e WHERE " +
             "(:search IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(e.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
             "(:role IS NULL OR e.role = :role)")

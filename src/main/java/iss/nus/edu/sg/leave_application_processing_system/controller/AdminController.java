@@ -45,7 +45,10 @@ public class AdminController {
 	    int pageSize = 5;
 	    
 	    Page<EmployeeServiceDTO> employeePage = employeeService.getEmployeesPaged(page, pageSize, search, role);
+	    
+	    List<Employee> managers = employeeService.findByRole(Role.MANAGER);
         
+	    model.addAttribute("managers", managers);
 	    model.addAttribute("employee", new Employee());
 	    model.addAttribute("employeePage", employeePage);
 	    model.addAttribute("search", search);
