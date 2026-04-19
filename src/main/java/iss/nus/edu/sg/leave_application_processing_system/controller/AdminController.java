@@ -30,22 +30,25 @@ public class AdminController {
 	}
 
 	@GetMapping("/employee-management")
-	public String employeeManagement(HttpSession session, Model model, @RequestParam(defaultValue = "0") int page) {  
+	public String employeeManagement(HttpSession session, Model model,
+			@RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role) {  
 	  	
 		String extractedRoleData = (String) session.getAttribute("userRole");
 	  	if (extractedRoleData == null || extractedRoleData.toString().isEmpty()) return "redirect:/";
-		Role role = Role.valueOf(extractedRoleData);
-	    if (!role.equals(Role.ADMIN)) {
+		Role extractedRole = Role.valueOf(extractedRoleData);
+	    if (!extractedRole.equals(Role.ADMIN)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
 	    }
 	    
 	    int pageSize = 5;
 	    
-	    Page<EmployeeServiceDTO> employeePage = employeeService.getEmployeesPaged(page, pageSize);
+	    Page<EmployeeServiceDTO> employeePage = employeeService.getEmployeesPaged(page, pageSize, search, role);
         
-	    // Pass the whole page object
-	    model.addAttribute("employeePage", employeePage); 
-	    // can still pass these for convenience
+	    model.addAttribute("employeePage", employeePage);
+	    model.addAttribute("search", search);
+	    model.addAttribute("role", role);
 	    model.addAttribute("currentPage", page);
 	    
 		return "employee-management";       

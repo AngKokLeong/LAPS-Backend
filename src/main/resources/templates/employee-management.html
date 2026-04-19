@@ -18,31 +18,33 @@
       </div>
 
       <!-- Search and Filter -->
-      <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <div class="flex flex-col md:flex-row gap-4">
-          <div class="flex-1">
-            <input type="text" placeholder="Search employees by name or email..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div class="flex gap-3">
-            <select
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">All Roles</option>
-              <option value="employee">Employee</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button
-              class="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg font-medium" id="addEmployee">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              Add Employee
-            </button>
+	  <form th:action="@{/admin/employee-management}" method="get" class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+	      <div class="flex flex-col md:flex-row gap-4">
+	          <div class="flex-1">
+	              <input type="text" name="search" th:value="${search}" 
+	                  placeholder="Search employees by name or email..."
+	                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+	          </div>
+	          <div class="flex gap-3">
+	              <select name="role"
+	                  class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+	                  <option value="">All Roles</option>
+	                  <option value="ADMIN" th:selected="${role == 'ADMIN'}">Admin</option>
+	                  <option value="MANAGER" th:selected="${role == 'MANAGER'}">Manager</option>
+	                  <option value="STAFF" th:selected="${role == 'STAFF'}">Staff</option>
+	              </select>
+	              
+	              <button type="submit" class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors">
+	                  Search
+	              </button>
 
-          </div>
-        </div>
-      </div>
+	              <button type="button" class="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg font-medium" id="addEmployee">
+	                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+	                  Add Employee
+	              </button>
+	          </div>
+	      </div>
+	  </form>
 
       <!-- Employee Table -->
       <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -157,22 +159,25 @@
 			</p>
 
 		    <div class="flex items-center gap-2">
-				<a th:href="@{/admin/employee-management(page=${employeePage.number - 1})}"
+				<a th:href="@{/admin/employee-management(page=${employeePage.number - 1}, search=${search}, role=${role})}"
 				   th:if="${!employeePage.first}"
-				   class="...">Previous
-			   </a>
+				   class="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+				   Previous
+				</a>
 
-		        <div th:each="i : ${#numbers.sequence(0, employeePage.totalPages - 1)}">
-		            <a th:href="@{/admin/employee-management(page=${i})}"
-		               th:text="${i + 1}"
-		               th:classappend="${currentPage == i} ? 'bg-blue-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50'"
-		               class="px-3 py-2 rounded-lg">
-		            </a>
-		        </div>
+				<div th:each="i : ${#numbers.sequence(0, employeePage.totalPages - 1)}">
+				    <a th:href="@{/admin/employee-management(page=${i}, search=${search}, role=${role})}"
+				       th:text="${i + 1}"
+				       th:classappend="${employeePage.number == i} ? 'bg-blue-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50'"
+				       class="px-3 py-2 rounded-lg transition-colors">
+				    </a>
+				</div>
 
-				<a th:href="@{/admin/employee-management(page=${employeePage.number + 1})}"
+				<a th:href="@{/admin/employee-management(page=${employeePage.number + 1}, search=${search}, role=${role})}"
 				   th:if="${!employeePage.last}"
-				   class="...">Next
+				   class="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+				   Next
+				</a>
 			   </a>
 		    </div>
 		</div>
