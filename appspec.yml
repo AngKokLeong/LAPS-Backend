@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: ROOT.war
+  - source: laps.war
     destination: /opt/tomcat/webapps/
 hooks:
   ApplicationStop:
