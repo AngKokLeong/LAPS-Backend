@@ -263,6 +263,9 @@ Resources:
           echo 'User=tomcat' >> /etc/systemd/system/tomcat.service
           echo 'Group=tomcat' >> /etc/systemd/system/tomcat.service
           echo 'Environment=JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' >> /etc/systemd/system/tomcat.service
+          echo 'Environment=CATALINA_HOME=/opt/tomcat' >> /etc/systemd/system/tomcat.service
+          echo 'Environment=CATALINA_BASE=/opt/tomcat' >> /etc/systemd/system/tomcat.service
+          echo 'Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid' >> /etc/systemd/system/tomcat.service
           echo 'ExecStart=/opt/tomcat/bin/startup.sh' >> /etc/systemd/system/tomcat.service
           echo 'ExecStop=/opt/tomcat/bin/shutdown.sh' >> /etc/systemd/system/tomcat.service
           echo 'Restart=on-failure' >> /etc/systemd/system/tomcat.service
@@ -273,6 +276,14 @@ Resources:
           systemctl daemon-reload
           systemctl enable tomcat
           systemctl start tomcat
+
+          # Wait for Tomcat to be ready on port 8080
+          for i in $(seq 1 12); do
+            curl -sf http://localhost:8080 && break
+            echo "Waiting for Tomcat... attempt $i"
+            sleep 5
+          done
+          curl -sf http://localhost:8080
 
           # --- 4. CodeDeploy agent ---
           yum install -y ruby wget
