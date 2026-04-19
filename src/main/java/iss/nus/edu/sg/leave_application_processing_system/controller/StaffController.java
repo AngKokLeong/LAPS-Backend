@@ -211,32 +211,6 @@ public class StaffController {
 		if (role == null || role.toString().isEmpty())
 			return "redirect:/";
 
-		// Retrieve the data from the database
-		// need to pass the staffId into the method
-
-		// Leave Request Card Structure
-		// Leave Application Id
-		// Leave Type
-		// Date of the Leave Request Submitted
-		// Duration
-		// Leave Date From - Leave Date To
-
-		// Total Number of Leave Days
-		// N days
-
-		// Leave Status (Leave Request Status)
-
-		// Applied , Updated
-		// Show Edit Request button and Delete Request button
-
-		// Approved
-		// Show Cancel Request button when the Leave Period have started
-
-		// Rejected
-
-		// Cancelled
-
-		// Deleted
 
 		ViewLeaveRequestsServiceDTO viewLeaveRequestsServiceDTO = new ViewLeaveRequestsServiceDTO();
 		Long staffId = (Long) session.getAttribute("id");
