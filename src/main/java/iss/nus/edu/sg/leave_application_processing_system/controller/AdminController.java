@@ -46,6 +46,7 @@ public class AdminController {
 	    
 	    Page<EmployeeServiceDTO> employeePage = employeeService.getEmployeesPaged(page, pageSize, search, role);
         
+	    model.addAttribute("employee", new Employee());
 	    model.addAttribute("employeePage", employeePage);
 	    model.addAttribute("search", search);
 	    model.addAttribute("role", role);
@@ -128,9 +129,14 @@ public class AdminController {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
 	    }
 
-		employeeService.save(employee);
-		redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
-		return "employee-management";
+	    try {
+	    	employeeService.save(employee);
+	    	redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
+	    } catch (Exception e) {
+	    	redirectAttrs.addFlashAttribute("errorMessage", "Failed to create new employee: " + e.getMessage());
+	    }
+		
+		return "redirect:/admin/employee-management";
 	}
 
 }
