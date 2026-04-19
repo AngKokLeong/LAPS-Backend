@@ -4,36 +4,14 @@ Description: >
   Credentials are supplied externally (e.g. GitHub Actions).
 
 Parameters:
-  VpcCidr:
-    Type: String
-    Default: 10.0.0.0/16
-
-  PublicSubnetCidr:
-    Type: String
-    Default: 10.0.1.0/24
-
-  PrivateSubnetCidr:
-    Type: String
-    Default: 10.0.2.0/24
-
-
-
-  KeyPairName:
-    Type: String
-    Default: vockey
-
-
-  LabInstanceProfileArn:
-    Type: String
-    Default: arn:aws:iam::290556388285:instance-profile/LabInstanceProfile
-
-
-
-
-  GitRepostiory:
-    Type: String
-    Description: URL to download the Spring Boot WAR (S3 presigned URL or GitHub Releases URL)
-
+  VpcSecondOctet:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      Second octet for VPC CIDR (10.X.0.0/16). Change this value for each
+      deployment to avoid CIDR conflicts. e.g. 0 = 10.0.0.0/16, 1 = 10.1.0.0/16
 
   DBUsername:
     Type: String
@@ -46,15 +24,6 @@ Parameters:
     NoEcho: true
     MinLength: 8
     MaxLength: 41
-
-  
-  PrivateSubnetCidrAZ1:
-    Type: String
-    Default: 10.0.3.0/24
-
-  PrivateSubnetCidrAZ2:
-    Type: String
-    Default: 10.0.4.0/24
 
 
 Resources:
@@ -95,7 +64,7 @@ Resources:
     Properties:
       ApplicationName: !Ref CodeDeployApp
       DeploymentGroupName: !Sub "${AWS::StackName}-dg"
-      ServiceRoleArn: arn:aws:iam::${AWS::AccountId}:role/LabRole
+      ServiceRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/LabRole"
       DeploymentConfigName: CodeDeployDefault.AllAtOnce
       Ec2TagFilters:
         - Key: DeployTarget
@@ -111,7 +80,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VpcCidr
+      CidrBlock: !Sub "10.${VpcSecondOctet}.0.0/16"
       EnableDnsHostnames: true
       EnableDnsSupport: true
       Tags:
@@ -132,25 +101,15 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref PublicSubnetCidr
+      CidrBlock: !Sub "10.${VpcSecondOctet}.1.0/24"
       MapPublicIpOnLaunch: true
       AvailabilityZone: !Select [0, !GetAZs '']
 
-  PrivateSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: !Ref PrivateSubnetCidr
-      MapPublicIpOnLaunch: false
-      AvailabilityZone: !Select [0, !GetAZs '']
-
-
-   
   PrivateSubnetAZ1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref PrivateSubnetCidrAZ1
+      CidrBlock: !Sub "10.${VpcSecondOctet}.2.0/24"
       MapPublicIpOnLaunch: false
       AvailabilityZone: !Select [0, !GetAZs '']
 
@@ -158,7 +117,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref PrivateSubnetCidrAZ2
+      CidrBlock: !Sub "10.${VpcSecondOctet}.3.0/24"
       MapPublicIpOnLaunch: false
       AvailabilityZone: !Select [1, !GetAZs '']
    
@@ -181,6 +140,23 @@ Resources:
     Properties:
       SubnetId: !Ref PublicSubnet
       RouteTableId: !Ref PublicRouteTable
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateSubnetAZ1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetAZ1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetAZ2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetAZ2
+      RouteTableId: !Ref PrivateRouteTable
 
   # ------------------
   # Security Groups
@@ -223,7 +199,7 @@ Resources:
       - MySQLDB
     CreationPolicy:
       ResourceSignal:
-        Timeout: PT15M
+        Timeout: PT25M
     Properties:
       InstanceType: t3.micro
       KeyName: vockey
@@ -241,6 +217,9 @@ Resources:
           exec > /var/log/user-data.log 2>&1
           set -e
 
+          # Trap to ensure cfn-signal always runs even if script fails
+          trap '/opt/aws/bin/cfn-signal -e 1 --stack ${AWS::StackName} --resource EC2Instance --region ${AWS::Region}; exit 1' ERR
+
           # --- 1. System update & cfn-bootstrap ---
           yum update -y
           yum install -y aws-cfn-bootstrap
@@ -250,37 +229,87 @@ Resources:
           curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
           yum install -y java-17-amazon-corretto-headless
 
-          # --- 3. Tomcat ---
-          yum install -y tomcat
+          # --- 3. Tomcat 9 ---
+          set +e; useradd -r -M -U -d /opt/tomcat -s /bin/false tomcat; set -e
 
-          # Set JAVA_HOME for Tomcat
-          echo 'JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' >> /etc/tomcat/tomcat.conf
+          cd /opt
+          wget -q --tries=3 --timeout=60 https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.85/bin/apache-tomcat-9.0.85.tar.gz
+          tar -xzf apache-tomcat-9.0.85.tar.gz
+          mv apache-tomcat-9.0.85 tomcat
+          rm apache-tomcat-9.0.85.tar.gz
 
-          # Create webapps dir if missing and set permissions
-          mkdir -p /var/lib/tomcat/webapps
-          chown -R tomcat:tomcat /var/lib/tomcat/webapps
-          chmod -R 755 /var/lib/tomcat/webapps
+          # Set permissions before creating files
+          chown -R tomcat:tomcat /opt/tomcat
+          chmod -R 755 /opt/tomcat/bin
+          chmod -R 777 /opt/tomcat/logs /opt/tomcat/temp /opt/tomcat/work
 
-          # Write DB config as JAVA_OPTS so Spring Boot reads them on Tomcat startup
-          echo "JAVA_OPTS=\"\$JAVA_OPTS -Dspring.profiles.active=prod -Dspring.datasource.url=jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true -Dspring.datasource.username=${DBUsername} -Dspring.datasource.password=${DBPassword}\"" >> /etc/tomcat/tomcat.conf
+          # Create webapps dir and set permissions
+          mkdir -p /opt/tomcat/webapps
+          chown -R tomcat:tomcat /opt/tomcat/webapps
 
+          # Create setenv.sh for Tomcat to pick up JAVA_OPTS
+          echo '#!/bin/bash' > /opt/tomcat/bin/setenv.sh
+          echo 'export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' >> /opt/tomcat/bin/setenv.sh
+          echo "export JAVA_OPTS=\"-Dspring.profiles.active=prod -Dspring.datasource.url=jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true -Dspring.datasource.username=${DBUsername} -Dspring.datasource.password=${DBPassword}\"" >> /opt/tomcat/bin/setenv.sh
+          chmod +x /opt/tomcat/bin/setenv.sh
+
+          # Create systemd service for Tomcat
+          echo '[Unit]' > /etc/systemd/system/tomcat.service
+          echo 'Description=Apache Tomcat 9' >> /etc/systemd/system/tomcat.service
+          echo 'After=network.target' >> /etc/systemd/system/tomcat.service
+          echo >> /etc/systemd/system/tomcat.service
+          echo '[Service]' >> /etc/systemd/system/tomcat.service
+          echo 'Type=forking' >> /etc/systemd/system/tomcat.service
+          echo 'User=tomcat' >> /etc/systemd/system/tomcat.service
+          echo 'Group=tomcat' >> /etc/systemd/system/tomcat.service
+          echo 'Environment=JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' >> /etc/systemd/system/tomcat.service
+          echo 'Environment=CATALINA_HOME=/opt/tomcat' >> /etc/systemd/system/tomcat.service
+          echo 'Environment=CATALINA_BASE=/opt/tomcat' >> /etc/systemd/system/tomcat.service
+          echo 'Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid' >> /etc/systemd/system/tomcat.service
+          echo 'ExecStart=/opt/tomcat/bin/startup.sh' >> /etc/systemd/system/tomcat.service
+          echo 'ExecStop=/opt/tomcat/bin/shutdown.sh' >> /etc/systemd/system/tomcat.service
+          echo 'Restart=on-failure' >> /etc/systemd/system/tomcat.service
+          echo >> /etc/systemd/system/tomcat.service
+          echo '[Install]' >> /etc/systemd/system/tomcat.service
+          echo 'WantedBy=multi-user.target' >> /etc/systemd/system/tomcat.service
+
+          systemctl daemon-reload
           systemctl enable tomcat
           systemctl start tomcat
+
+          # Wait for Tomcat to be ready on port 8080
+          for i in $(seq 1 12); do
+            curl -sf http://localhost:8080 && break
+            echo "Waiting for Tomcat... attempt $i"
+            sleep 5
+          done
+          curl -sf http://localhost:8080
 
           # --- 4. CodeDeploy agent ---
           yum install -y ruby wget
           cd /tmp
-          wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
+          wget -q --tries=3 --timeout=60 https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
           chmod +x ./install
           ./install auto
           systemctl enable codedeploy-agent
           systemctl start codedeploy-agent
 
+          # --- 4b. Verify MySQL connectivity (no client install needed) ---
+          # Use bash /dev/tcp to test port 3306 reachability
+          timeout 10 bash -c "echo > /dev/tcp/${MySQLDB.Endpoint.Address}/3306"
+
           # --- 5. Signal CloudFormation ---
-          /opt/aws/bin/cfn-signal -e $? \
-            --stack  ${AWS::StackName} \
+          trap - ERR
+          SIGNAL_CODE=0
+
+          java -version || SIGNAL_CODE=1
+          systemctl is-active tomcat || SIGNAL_CODE=1
+          systemctl is-active codedeploy-agent || SIGNAL_CODE=1
+
+          /opt/aws/bin/cfn-signal -e $SIGNAL_CODE \
+            --stack ${AWS::StackName} \
             --resource EC2Instance \
-            --region  ${AWS::Region}
+            --region ${AWS::Region}
 
 
   # ------------------
@@ -300,6 +329,7 @@ Resources:
       Engine: mysql
       DBInstanceClass: db.t3.micro
       AllocatedStorage: 20
+      DBName: lapsdb
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
       DBSubnetGroupName: !Ref DBSubnetGroup

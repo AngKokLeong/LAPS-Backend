@@ -44,10 +44,15 @@ jobs:
 
       - name: Upload to S3
         run: |
+          mkdir -p codedeploy-bundle/scripts
+          cp appspec.yml codedeploy-bundle/
+          cp scripts/*.sh codedeploy-bundle/scripts/
+          chmod +x codedeploy-bundle/scripts/*.sh
+          cp target/*.war codedeploy-bundle/ROOT.war
           aws deploy push \
             --application-name ${{ github.event.inputs.stack_name }}-app \
             --s3-location s3://${{ github.event.inputs.s3_bucket }}/app-artifact.zip \
-            --source .
+            --source codedeploy-bundle
 
       - name: Trigger CodeDeploy
         run: |
