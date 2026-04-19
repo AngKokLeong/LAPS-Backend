@@ -1,10 +1,19 @@
 package iss.nus.edu.sg.leave_application_processing_system.service;
 
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.EmployeeServiceDTO;
 
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 
 @Service
@@ -29,6 +38,53 @@ public class EmployeeService {
 		}
 
 		return false;
+	}
+	
+	public List<EmployeeServiceDTO> getAllEmployees() {
+        
+		return employeeRepository.findAll().stream()
+            .map(emp -> new EmployeeServiceDTO(
+                emp.getId(),         
+                emp.getName(),       
+                emp.getEmail(),
+                emp.getDepartment(),
+                emp.getRole().toString(),
+                emp.getStatus(),
+                emp.getDesignation() != null ? emp.getDesignation().toString() : "",
+                emp.getJoindate() != null ? emp.getJoindate().toString() : ""
+            ))
+            .collect(Collectors.toList());
+    }
+	
+	public Page<EmployeeServiceDTO> getEmployeesPaged(int page, int size, String search, String roleStr) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    
+	    // Convert empty strings to null for the query logic
+	    String searchParam = (search == null || search.isEmpty()) ? null : search;
+	    
+	    // Convert String to Enum Safely
+	    Role roleEnum = null;
+	    if (roleStr != null && !roleStr.isEmpty()) {
+	        try {
+	            // This converts "ADMIN" -> Role.ADMIN
+	            roleEnum = Role.valueOf(roleStr.toUpperCase());
+	        } catch (IllegalArgumentException e) {
+	            // If someone types a weird role in the URL, we just treat it as null (All Roles)
+	            roleEnum = null;
+	        }
+	    }
+	    
+	    return employeeRepository.findBySearchAndRole(searchParam, roleEnum, pageable)
+	        .map(emp -> new EmployeeServiceDTO(
+	        		emp.getId(),         
+	                emp.getName(),       
+	                emp.getEmail(),
+	                emp.getDepartment(),
+	                emp.getRole().toString(),
+	                emp.getStatus(),
+	                emp.getDesignation() != null ? emp.getDesignation().toString() : "",
+	                emp.getJoindate() != null ? emp.getJoindate().toString() : ""
+	        ));
 	}
 
 }

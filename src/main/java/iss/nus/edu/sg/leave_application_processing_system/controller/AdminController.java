@@ -1,17 +1,23 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller;
 
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.service.EmployeeService;
+import iss.nus.edu.sg.leave_application_processing_system.service.DTO.EmployeeServiceDTO;
 
 @Controller
 @RequestMapping("/admin")
@@ -24,18 +30,27 @@ public class AdminController {
 	}
 
 	@GetMapping("/employee-management")
-	public String employeeManagement(HttpSession session) {  
+	public String employeeManagement(HttpSession session, Model model,
+			@RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role) {  
 	  	
 		String extractedRoleData = (String) session.getAttribute("userRole");
-		
-
 	  	if (extractedRoleData == null || extractedRoleData.toString().isEmpty()) return "redirect:/";
-
-		Role role = Role.valueOf(extractedRoleData);
-
-	    if (!role.equals(Role.ADMIN)) {
+		Role extractedRole = Role.valueOf(extractedRoleData);
+	    if (!extractedRole.equals(Role.ADMIN)) {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
 	    }
+	    
+	    int pageSize = 5;
+	    
+	    Page<EmployeeServiceDTO> employeePage = employeeService.getEmployeesPaged(page, pageSize, search, role);
+        
+	    model.addAttribute("employee", new Employee());
+	    model.addAttribute("employeePage", employeePage);
+	    model.addAttribute("search", search);
+	    model.addAttribute("role", role);
+	    model.addAttribute("currentPage", page);
 	    
 		return "employee-management";       
 	}
@@ -114,9 +129,14 @@ public class AdminController {
 	        return "redirect:/staff"; // Send them home if they aren't a admin
 	    }
 
-		employeeService.save(employee);
-		redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
-		return "employee-management";
+	    try {
+	    	employeeService.save(employee);
+	    	redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
+	    } catch (Exception e) {
+	    	redirectAttrs.addFlashAttribute("errorMessage", "Failed to create new employee: " + e.getMessage());
+	    }
+		
+		return "redirect:/admin/employee-management";
 	}
 
 }
