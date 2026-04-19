@@ -49,7 +49,7 @@ jobs:
           cp appspec.yml codedeploy-bundle/
           cp scripts/*.sh codedeploy-bundle/scripts/
           chmod +x codedeploy-bundle/scripts/*.sh
-          cp target/*.war codedeploy-bundle/ROOT.war
+          cp target/*.war codedeploy-bundle/laps.war
           aws deploy push \
             --application-name ${{ github.event.inputs.stack_name }}-app \
             --s3-location s3://${{ github.event.inputs.s3_bucket }}/$ARTIFACT_KEY \
