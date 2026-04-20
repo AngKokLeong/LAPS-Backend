@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.MedicalLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 

@@ -1,9 +1,9 @@
-package iss.nus.edu.sg.leave_application_processing_system.model;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.entity;
 
 import java.time.LocalDate;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.Designation;
-import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.Designation;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.Role;
 import jakarta.persistence.*;
 
 @Entity

@@ -4,9 +4,9 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.CompensationLedgerRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveEntitlementRepository;
 
 @Service
 public class LeaveBalanceService {

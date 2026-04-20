@@ -1,6 +1,6 @@
-package iss.nus.edu.sg.leave_application_processing_system.model;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.entity;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

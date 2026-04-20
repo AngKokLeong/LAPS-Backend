@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.helper;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration;
 
 public enum LeaveStatus {
 	APPLIED,

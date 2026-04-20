@@ -17,17 +17,17 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveAp
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.OTClaimControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveBalanceControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedger;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
-import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
-import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.CompensationLedger;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.CompensationLedgerRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveEntitlementRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.OverTimeClaimRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
@@ -78,7 +78,7 @@ public class TeamManagementService {
                 throw new IllegalStateException(
                         "Only APPLIED and UPDATED requests can be approved.");
             }
-            
+
             if (application.getLeaveType() == LeaveType.COMPENSATION) {
                 deductCompensationLeave(application);
             }

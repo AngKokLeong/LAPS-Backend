@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CompensationReportResponseDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveReportResponseDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.OverTimeClaimRepository;
 
 @Service
 public class ReportingService {
@@ -41,10 +41,10 @@ public class ReportingService {
             LocalDate endDate, String leaveType, Long employeeId) {
 
         // Convert leaveType string to enum (null if "all")
-        iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType leaveTypeEnum = null;
+        iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType leaveTypeEnum = null;
         if (leaveType != null && !leaveType.equalsIgnoreCase("all")) {
             try {
-                leaveTypeEnum = iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType
+                leaveTypeEnum = iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType
                         .valueOf(leaveType.toUpperCase());
             } catch (IllegalArgumentException e) {
                 // Invalid leave type, use null (all types)

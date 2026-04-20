@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.repo;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.Role;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {

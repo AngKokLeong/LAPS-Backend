@@ -29,8 +29,8 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRe
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.OTClaimControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.SubordinateLeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.TeamLeaveHistoryControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.Role;
 import iss.nus.edu.sg.leave_application_processing_system.security.ApplicationUserDetails;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;

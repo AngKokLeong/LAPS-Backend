@@ -2,10 +2,10 @@ package iss.nus.edu.sg.leave_application_processing_system.service.features.comp
 
 import org.springframework.stereotype.Service;
 
-import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedger;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.CompensationLedger;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.CompensationLedgerRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 
 @Service

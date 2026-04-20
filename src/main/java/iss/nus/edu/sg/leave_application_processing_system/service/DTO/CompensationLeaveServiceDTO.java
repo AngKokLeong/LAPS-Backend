@@ -2,7 +2,7 @@ package iss.nus.edu.sg.leave_application_processing_system.service.DTO;
 
 import java.time.LocalDate;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
 
 public class CompensationLeaveServiceDTO implements ServiceDTO {
 

@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.model;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.entity;
 
 import jakarta.persistence.*;
 

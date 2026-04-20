@@ -5,7 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.EmployeeRepository;
 
 @Service
 public class ApplicationUserDetailsService implements UserDetailsService {

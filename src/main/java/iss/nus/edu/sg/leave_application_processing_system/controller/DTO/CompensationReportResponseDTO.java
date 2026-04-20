@@ -1,7 +1,8 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
 import java.time.LocalDateTime;
-import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
+
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.OTClaimStatus;
 
 public class CompensationReportResponseDTO implements ControllerDTO {
 

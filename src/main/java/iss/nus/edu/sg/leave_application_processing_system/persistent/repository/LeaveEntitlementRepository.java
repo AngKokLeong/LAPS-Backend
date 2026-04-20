@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.repo;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
 
 public interface LeaveEntitlementRepository extends JpaRepository<LeaveEntitlement, Long>{
     Optional<LeaveEntitlement> findByEmployeeId_IdAndLeaveTypeAndYearApplied(

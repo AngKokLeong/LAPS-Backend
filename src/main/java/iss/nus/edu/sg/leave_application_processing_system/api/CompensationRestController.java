@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.OTClaimControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
-import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.CompensationLedgerRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.OverTimeClaimRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.features.compensation_leave_management.CompensationService;
 
 @RestController
