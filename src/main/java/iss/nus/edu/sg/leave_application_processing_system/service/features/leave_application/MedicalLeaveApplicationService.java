@@ -3,7 +3,6 @@ package iss.nus.edu.sg.leave_application_processing_system.service.features.leav
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
@@ -25,14 +24,15 @@ import iss.nus.edu.sg.leave_application_processing_system.service.features.share
 @Service
 public class MedicalLeaveApplicationService {
 
-    @Autowired
     private EmployeeRepository employeeRepository;
-
-    @Autowired
     private LeaveApplicationRepository leaveApplicationRepository;
-
-    @Autowired
     private LeaveValidationService validationService;
+
+    public MedicalLeaveApplicationService(EmployeeRepository employeeRepository, LeaveApplicationRepository leaveApplicationRepository, LeaveValidationService validationService){
+        this.employeeRepository = employeeRepository;
+        this.leaveApplicationRepository = leaveApplicationRepository;
+        this.validationService = validationService;
+    }
 
     public ControllerDTO submitApplication(ServiceDTO serviceDTO) {
 
