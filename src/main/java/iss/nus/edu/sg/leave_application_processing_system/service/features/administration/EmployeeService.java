@@ -1,7 +1,5 @@
 package iss.nus.edu.sg.leave_application_processing_system.service.features.administration;
 
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.EmployeeServiceDTO;
 
 import org.springframework.stereotype.Service;
@@ -17,11 +15,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveEntitlementCreditDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.Designation;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.Designation;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.Role;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveEntitlementRepository;
 
 @Service
 public class EmployeeService {

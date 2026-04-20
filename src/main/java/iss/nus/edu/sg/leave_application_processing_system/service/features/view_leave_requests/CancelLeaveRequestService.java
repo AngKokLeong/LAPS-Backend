@@ -8,14 +8,14 @@ import java.time.temporal.ChronoUnit;
 import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CancelLeaveRequestControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedger;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
-import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.CompensationLedger;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.CompensationLedgerRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.CancelLeaveRequestServiceDTO;
 import jakarta.transaction.Transactional;
 

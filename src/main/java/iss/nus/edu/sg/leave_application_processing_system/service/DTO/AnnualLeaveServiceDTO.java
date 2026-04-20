@@ -4,9 +4,9 @@ import java.time.LocalDate;
 
 import com.googlecode.jmapper.annotations.JMap;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
 
 
 

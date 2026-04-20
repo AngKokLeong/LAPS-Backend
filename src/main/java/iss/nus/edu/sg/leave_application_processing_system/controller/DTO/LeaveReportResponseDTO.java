@@ -1,7 +1,8 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
 import java.time.LocalDate;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
 
 public class LeaveReportResponseDTO implements ControllerDTO {
 

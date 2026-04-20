@@ -1,8 +1,8 @@
-package iss.nus.edu.sg.leave_application_processing_system.model;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.entity;
 
 import java.time.LocalDateTime;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.OTClaimStatus;
 import jakarta.persistence.*;
 
 @Entity

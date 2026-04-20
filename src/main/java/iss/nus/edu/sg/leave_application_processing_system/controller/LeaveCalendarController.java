@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.CalendarEventControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.model.PublicHoliday;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.PublicHoliday;
 import iss.nus.edu.sg.leave_application_processing_system.security.ApplicationUserDetails;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.features.view_leave_requests.PublicHolidayService;

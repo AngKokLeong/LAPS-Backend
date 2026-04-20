@@ -1,7 +1,7 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
 
 public class DeleteLeaveRequestControllerDTO implements ControllerDTO {
 

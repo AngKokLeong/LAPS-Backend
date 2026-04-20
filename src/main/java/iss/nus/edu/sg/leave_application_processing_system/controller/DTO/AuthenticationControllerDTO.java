@@ -1,6 +1,6 @@
 package iss.nus.edu.sg.leave_application_processing_system.controller.DTO;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.Role;
 
 public class AuthenticationControllerDTO implements ControllerDTO{
 

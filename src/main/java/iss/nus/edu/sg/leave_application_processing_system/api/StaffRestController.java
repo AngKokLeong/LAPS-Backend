@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.DashboardDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveEntitlement;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveEntitlement;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.EmployeeRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveEntitlementRepository;
 
 @RestController
 @RequestMapping("/api/staff")

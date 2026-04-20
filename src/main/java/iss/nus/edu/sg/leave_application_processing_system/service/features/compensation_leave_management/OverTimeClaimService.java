@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
-import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
-import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.OverTimeClaim;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.OTClaimStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.OverTimeClaimRepository;
 import jakarta.transaction.Transactional;
 
 @Service

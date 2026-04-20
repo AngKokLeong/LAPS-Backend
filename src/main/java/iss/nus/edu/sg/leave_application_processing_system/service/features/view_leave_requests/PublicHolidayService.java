@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import iss.nus.edu.sg.leave_application_processing_system.model.PublicHoliday;
-import iss.nus.edu.sg.leave_application_processing_system.repo.PublicHolidayRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.PublicHoliday;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.PublicHolidayRepository;
 
 @Service
 public class PublicHolidayService {

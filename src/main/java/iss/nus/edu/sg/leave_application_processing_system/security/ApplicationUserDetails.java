@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.Employee;
 
 public class ApplicationUserDetails implements UserDetails {
     private final Employee employee;

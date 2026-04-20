@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-
-import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.repository.LeaveApplicationRepository;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
 

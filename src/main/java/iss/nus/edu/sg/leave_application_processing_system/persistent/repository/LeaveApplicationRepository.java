@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.repo;
+package iss.nus.edu.sg.leave_application_processing_system.persistent.repository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,9 +11,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveMovementDTO;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
-import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
-import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.entity.LeaveApplication;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveStatus;
+import iss.nus.edu.sg.leave_application_processing_system.persistent.enumeration.LeaveType;
 
 
 @Repository
