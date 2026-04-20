@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveEntitlementCreditDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Designation;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveType;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
@@ -36,7 +37,7 @@ public class EmployeeService {
 	}
 	
 	@Transactional
-	public void save(Employee employee) {
+	public LeaveEntitlementCreditDTO save(Employee employee) {
 		if (employee.getPassword() != null && !employee.getPassword().startsWith("$2")) {
 			employee.setPassword(passwordEncoder.encode(employee.getPassword()));
 		}
@@ -57,7 +58,7 @@ public class EmployeeService {
         double proRateFactor = (13.0 - joinMonth) / 12.0;
 
         // Determine Annual Leave Days
-        int annualBase = (employee.getDesignation() == Designation.PROFESSIONAL) ? 14 : 18;
+        int annualBase = (employee.getDesignation() == Designation.PROFESSIONAL) ? 18 : 14;
         int annualEntitlement = (int) Math.round(annualBase * proRateFactor);
 
         // Create Annual Leave Record
@@ -79,6 +80,10 @@ public class EmployeeService {
         medical.setTotalDays(medicalEntitlement);
         medical.setUsedDays(0);
         leaveRepo.save(medical);
+        
+        LeaveEntitlementCreditDTO leDTO = new LeaveEntitlementCreditDTO(savedEmp.getName(), annualEntitlement, medicalEntitlement);
+        
+        return leDTO;
     }
 
 	
