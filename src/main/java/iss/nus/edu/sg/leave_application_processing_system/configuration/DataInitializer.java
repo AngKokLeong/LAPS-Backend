@@ -27,7 +27,7 @@ import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationR
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.PublicHolidayRepository;
-import iss.nus.edu.sg.leave_application_processing_system.service.CompensationService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.compensation_leave_management.CompensationService;
 
 @Component
 public class DataInitializer implements CommandLineRunner {

@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.service;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.shared_service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveApplicationControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.LeaveStatus;
@@ -21,7 +21,7 @@ import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationR
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveEntitlementRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.PublicHolidayRepository;
 
-@Component
+@Service
 public class LeaveValidationService {
 	
 	private final LeaveApplicationRepository laRepo;

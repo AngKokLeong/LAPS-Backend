@@ -1,7 +1,7 @@
-package iss.nus.edu.sg.leave_application_processing_system.service.implementation;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.view_subordinate_leave_history;
 
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,25 +9,20 @@ import org.springframework.stereotype.Service;
 
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.ControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.TeamLeaveHistoryControllerDTO;
-import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
-import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
-import iss.nus.edu.sg.leave_application_processing_system.service.LeaveValidationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.TeamLeaveHistoryServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.shared_service.LeaveValidationService;
 
 @Service
 public class ViewTeamLeaveHistoryService {
     
     private final LeaveApplicationRepository leaveApplicationRepository;
-    private final EmployeeRepository employeeRepository;
     private final LeaveValidationService lvService;
 
-    public ViewTeamLeaveHistoryService(LeaveApplicationRepository leaveApplicationRepository,
-    		EmployeeRepository employeeRepository, LeaveValidationService lvService){
+    public ViewTeamLeaveHistoryService(LeaveApplicationRepository leaveApplicationRepository, LeaveValidationService lvService){
         this.leaveApplicationRepository = leaveApplicationRepository;
-        this.employeeRepository = employeeRepository;
         this.lvService = lvService;
     }
 

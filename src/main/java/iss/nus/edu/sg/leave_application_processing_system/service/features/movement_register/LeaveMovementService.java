@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.service;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.movement_register;
 
 import java.time.LocalDate;
 import java.time.YearMonth;

@@ -16,8 +16,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
-import iss.nus.edu.sg.leave_application_processing_system.service.EmployeeService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.EmployeeServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.administration.EmployeeService;
 
 @Controller
 @RequestMapping("/admin")

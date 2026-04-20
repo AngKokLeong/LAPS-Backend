@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.service;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.compensation_leave_management;
 
 import org.springframework.stereotype.Service;
 
