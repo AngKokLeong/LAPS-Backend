@@ -75,9 +75,9 @@ public class TeamManagementService implements ManagerService {
 
         if ("APPROVE".equals(action)) {
 
-            if (oldStatus != LeaveStatus.APPLIED) {
+            if (oldStatus != LeaveStatus.APPLIED && oldStatus != LeaveStatus.UPDATED) {
                 throw new IllegalStateException(
-                        "Only APPLIED requests can be approved.");
+                        "Only APPLIED and UPDATED requests can be approved.");
             }
 
             if (application.getLeaveType() == LeaveType.COMPENSATION) {
