@@ -32,14 +32,14 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.TeamLea
 import iss.nus.edu.sg.leave_application_processing_system.helper.OTClaimStatus;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.security.ApplicationUserDetails;
-import iss.nus.edu.sg.leave_application_processing_system.service.CSVExportService;
-import iss.nus.edu.sg.leave_application_processing_system.service.OverTimeClaimService;
-import iss.nus.edu.sg.leave_application_processing_system.service.ReportingService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.LeaveApprovalServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ManagerQueryServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.TeamLeaveHistoryServiceDTO;
-import iss.nus.edu.sg.leave_application_processing_system.service.implementation.TeamManagementService;
-import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewTeamLeaveHistoryService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.compensation_leave_management.OverTimeClaimService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.reporting.CSVExportService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.reporting.ReportingService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.view_leave_application_for_approval.TeamManagementService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.view_subordinate_leave_history.ViewTeamLeaveHistoryService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 

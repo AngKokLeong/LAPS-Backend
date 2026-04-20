@@ -13,9 +13,9 @@ import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.Control
 import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveRequestControllerDTO;
 import iss.nus.edu.sg.leave_application_processing_system.model.PublicHoliday;
 import iss.nus.edu.sg.leave_application_processing_system.security.ApplicationUserDetails;
-import iss.nus.edu.sg.leave_application_processing_system.service.PublicHolidayService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ViewLeaveRequestsServiceDTO;
-import iss.nus.edu.sg.leave_application_processing_system.service.implementation.ViewLeaveRequestsService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.view_leave_requests.PublicHolidayService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.view_leave_requests.ViewLeaveRequestsService;
 
 @RestController
 public class LeaveCalendarController {

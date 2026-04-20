@@ -1,8 +1,6 @@
-package iss.nus.edu.sg.leave_application_processing_system.service.implementation;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.compensation_leave_management;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -15,13 +13,12 @@ import iss.nus.edu.sg.leave_application_processing_system.model.CompensationLedg
 import iss.nus.edu.sg.leave_application_processing_system.model.LeaveApplication;
 import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.LeaveApplicationRepository;
-import iss.nus.edu.sg.leave_application_processing_system.service.LeaveApplicationService;
-import iss.nus.edu.sg.leave_application_processing_system.service.LeaveValidationService;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.CompensationLeaveServiceDTO;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.ServiceDTO;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.shared_service.LeaveValidationService;
 
 @Service
-public class CompensationLeaveApplicationService implements LeaveApplicationService {
+public class CompensationLeaveApplicationService {
 
 	private CompensationLedgerRepository compRepo;
 	private LeaveApplicationRepository laRepo;
@@ -35,12 +32,7 @@ public class CompensationLeaveApplicationService implements LeaveApplicationServ
 		this.validationService = validationService;
 	}
 
-	@Override
-	public List<ControllerDTO> viewApplicationStatus(ServiceDTO serviceDTO) {
-		throw new UnsupportedOperationException("Unimplemented method 'viewApplicationStatus'");
-	}
 
-	@Override
 	public ControllerDTO submitApplication(ServiceDTO serviceDTO) {
 		LeaveApplicationControllerDTO response = new LeaveApplicationControllerDTO();
         CompensationLeaveServiceDTO dto = (CompensationLeaveServiceDTO) serviceDTO.getAllAttribute();

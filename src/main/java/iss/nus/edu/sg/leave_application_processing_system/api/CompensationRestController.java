@@ -20,7 +20,7 @@ import iss.nus.edu.sg.leave_application_processing_system.model.OverTimeClaim;
 import iss.nus.edu.sg.leave_application_processing_system.repo.CompensationLedgerRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.EmployeeRepository;
 import iss.nus.edu.sg.leave_application_processing_system.repo.OverTimeClaimRepository;
-import iss.nus.edu.sg.leave_application_processing_system.service.CompensationService;
+import iss.nus.edu.sg.leave_application_processing_system.service.features.compensation_leave_management.CompensationService;
 
 @RestController
 @RequestMapping("/api/compensation")

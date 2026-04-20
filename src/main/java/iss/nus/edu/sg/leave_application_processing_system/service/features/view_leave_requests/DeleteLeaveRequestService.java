@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.service.implementation;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.view_leave_requests;
 
 import org.springframework.stereotype.Service;
 

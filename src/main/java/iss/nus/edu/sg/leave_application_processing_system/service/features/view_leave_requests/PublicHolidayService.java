@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.service;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.view_leave_requests;
 
 import java.util.List;
 
@@ -16,6 +16,11 @@ public class PublicHolidayService {
 		this.phRepo = phRepo;
 	}
 	
+
+	 /**
+     * Find all public holiday records
+     * @return List of Public Holiday Entity class object
+     */
 	public List<PublicHoliday> findAll() {
 		return phRepo.findAll();
 	}

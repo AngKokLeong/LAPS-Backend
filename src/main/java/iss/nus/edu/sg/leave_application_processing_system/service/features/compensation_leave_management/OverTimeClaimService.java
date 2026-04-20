@@ -1,4 +1,4 @@
-package iss.nus.edu.sg.leave_application_processing_system.service;
+package iss.nus.edu.sg.leave_application_processing_system.service.features.compensation_leave_management;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -14,27 +14,37 @@ import jakarta.transaction.Transactional;
 @Service
 public class OverTimeClaimService {
 
-    private final OverTimeClaimRepository otRepo;
+    private final OverTimeClaimRepository overTimeClaimRepository;
     private final CompensationService compensationService;
 
     public OverTimeClaimService(
-            OverTimeClaimRepository otRepo,
+            OverTimeClaimRepository overTimeClaimRepository,
             CompensationService compensationService) {
-        this.otRepo = otRepo;
+        this.overTimeClaimRepository = overTimeClaimRepository;
         this.compensationService = compensationService;
     }
 
-    // Employee submits OT claim (TO BE MAPPED TO SUBMIT BUTTON)
+    
+    /**
+     * Employee submits OT claim (TO BE MAPPED TO SUBMIT BUTTON)
+     * @param claim 
+     * @return void
+     */
     public void submitOTClaim(OverTimeClaim claim) {
         claim.setStatus(OTClaimStatus.PENDING);
-        otRepo.save(claim);
+        overTimeClaimRepository.save(claim);
     }
 
-    // Manager approves OT claim (TO BE MAPPED TO APPROVE BUTTON)
+    /**
+     * Purpose: Manager approves OT claim
+     * Transactional
+     * @param claimId 
+     * @return void
+     */
     @Transactional
     public void approveOTClaim(Long claimId) {
 
-        OverTimeClaim claim = otRepo.findById(claimId).orElseThrow();
+        OverTimeClaim claim = overTimeClaimRepository.findById(claimId).orElseThrow();
 
         if (claim.getStatus() != OTClaimStatus.PENDING) {
             throw new IllegalStateException("OT Claim already processed");
@@ -56,20 +66,24 @@ public class OverTimeClaimService {
             claim.getEmployee().getId(), year, hoursWorked
         );
 
-        otRepo.save(claim);
+        overTimeClaimRepository.save(claim);
     }
 
-    // Manager rejects OT claim (TO BE MAPPED TO REJECT BUTTON)
+    /**
+     * Purpose: Manager rejects OT claim
+     * Transactional
+     * @param claimId 
+     * @return void
+     */
     public void rejectOTClaim(Long claimId) {
-        OverTimeClaim claim = otRepo.findById(claimId).orElseThrow();
+        OverTimeClaim claim = overTimeClaimRepository.findById(claimId).orElseThrow();
         claim.setStatus(OTClaimStatus.REJECTED);
-        otRepo.save(claim);
+        overTimeClaimRepository.save(claim);
     }
     
     // Find by OT Status (Pending, Approve, Reject)
-    public List<OverTimeClaim> findByStatus(OTClaimStatus
-        status) {
-            return otRepo.findByStatus(status);
+    public List<OverTimeClaim> findByStatus(OTClaimStatus status) {
+            return overTimeClaimRepository.findByStatus(status);
         }
 
 
