@@ -84,7 +84,10 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm">
                                             <p class="text-gray-900" th:text="${leave.reviewBy}">Reviewer</p>
-                                            <p class="text-gray-500 text-xs" th:text="${#dates.format(leave.leaveRequestUpdatedDate, 'MMM d')}">Review Date</p>
+											<p th:if="${leave.leaveRequestUpdatedDate != null}" 
+											   class="text-gray-500 text-xs" 
+											   th:text="'Reviewed on: ' + ${#temporals.format(leave.leaveRequestUpdatedDate, 'MMM d')}">
+											</p>
                                         </div>
                                     </td>
                                 </tr>

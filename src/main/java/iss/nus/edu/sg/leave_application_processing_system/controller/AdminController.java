@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import iss.nus.edu.sg.leave_application_processing_system.controller.DTO.LeaveEntitlementCreditDTO;
 import iss.nus.edu.sg.leave_application_processing_system.helper.Role;
 import iss.nus.edu.sg.leave_application_processing_system.model.Employee;
 import iss.nus.edu.sg.leave_application_processing_system.service.DTO.EmployeeServiceDTO;
@@ -133,8 +134,18 @@ public class AdminController {
 	    }
 
 	    try {
-	    	employeeService.save(employee);
-	    	redirectAttrs.addFlashAttribute("successMessage", "New employee record saved successfully.");
+	    	LeaveEntitlementCreditDTO leDTO = employeeService.save(employee);
+	    	String name = leDTO.getEmployeeName();
+	    	int annualDays = leDTO.getAnnualEntitlement();
+	    	int medicalDays = leDTO.getMedicalEntitlement();
+	    	
+	    	String msg = String.format(
+	                "New employee record for %s saved successfully. " + 
+	                "Pro-rated leave entitlement has been credited: Annual: %d days, Medical: %d days.", 
+	                name, annualDays, medicalDays
+	            );
+	    	
+	    	redirectAttrs.addFlashAttribute("successMessage", msg);
 	    } catch (Exception e) {
 	    	redirectAttrs.addFlashAttribute("errorMessage", "Failed to create new employee: " + e.getMessage());
 	    }
