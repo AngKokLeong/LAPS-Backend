@@ -298,7 +298,7 @@ jobs:
         run: |
           kubectl rollout status deployment/laps-backend-$DEPLOY_SLOT \
             --namespace=laps \
-            --timeout=300s
+            --timeout=600s
 
       - name: Verify Health of Inactive Slot
         run: |
