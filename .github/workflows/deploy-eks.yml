@@ -90,10 +90,10 @@ jobs:
               --query "Vpcs[0].VpcId" \
               --output text --region us-east-1)
 
-            # Get subnet IDs
+            # Get subnet IDs excluding unsupported AZ us-east-1e
             SUBNET_IDS=$(aws ec2 describe-subnets \
               --filters "Name=vpc-id,Values=$VPC_ID" \
-              --query "Subnets[*].SubnetId" \
+              --query "Subnets[?AvailabilityZone!='us-east-1e'].SubnetId" \
               --output text --region us-east-1)
 
             # Create EKS cluster using LabEksClusterRole
