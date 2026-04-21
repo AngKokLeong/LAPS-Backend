@@ -222,6 +222,8 @@ jobs:
               --group-id $ALB_SG_ID --protocol tcp --port 80 --cidr 0.0.0.0/0 --region $REGION
             aws ec2 authorize-security-group-ingress \
               --group-id $ALB_SG_ID --protocol tcp --port 443 --cidr 0.0.0.0/0 --region $REGION
+            aws ec2 authorize-security-group-ingress \
+              --group-id $ALB_SG_ID --protocol tcp --port 8443 --cidr 0.0.0.0/0 --region $REGION
           fi
 
           # Create ALB if not exists
@@ -278,6 +280,22 @@ jobs:
               --output text --region $REGION)
           fi
 
+          # Ensure green TG is associated with ALB via port 8443 listener
+          GREEN_TEST_LISTENER=$(aws elbv2 describe-listeners \
+            --load-balancer-arn $ALB_ARN \
+            --query 'Listeners[?Port==`8443`].ListenerArn' \
+            --output text --region $REGION 2>/dev/null || true)
+
+          if [ -z "$GREEN_TEST_LISTENER" ] || [ "$GREEN_TEST_LISTENER" == "None" ]; then
+            aws elbv2 create-listener \
+              --load-balancer-arn $ALB_ARN \
+              --protocol HTTPS \
+              --port 8443 \
+              --certificates CertificateArn=$CERT_ARN \
+              --default-actions Type=forward,TargetGroupArn=$GREEN_TG_ARN \
+              --region $REGION
+          fi
+
           # Create HTTPS listener if not exists
           LISTENER_ARN=$(aws elbv2 describe-listeners \
             --load-balancer-arn $ALB_ARN \
@@ -293,6 +311,15 @@ jobs:
               --default-actions Type=forward,TargetGroupArn=$BLUE_TG_ARN \
               --query 'Listeners[0].ListenerArn' \
               --output text --region $REGION)
+
+            # Test listener for green slot (required so green TG is associated with ALB)
+            aws elbv2 create-listener \
+              --load-balancer-arn $ALB_ARN \
+              --protocol HTTPS \
+              --port 8443 \
+              --certificates CertificateArn=$CERT_ARN \
+              --default-actions Type=forward,TargetGroupArn=$GREEN_TG_ARN \
+              --region $REGION
 
             # HTTP redirect to HTTPS
             aws elbv2 create-listener \
