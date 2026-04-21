@@ -67,6 +67,69 @@ jobs:
           docker tag $ECR_REGISTRY/laps-backend:$IMAGE_TAG $ECR_REGISTRY/laps-backend:latest
           docker push $ECR_REGISTRY/laps-backend:latest
 
+      - name: Create EKS Cluster if not exists
+        run: |
+          CLUSTER_STATUS=$(aws eks describe-cluster \
+            --name ${{ github.event.inputs.eks_cluster_name }} \
+            --query 'cluster.status' \
+            --output text \
+            --region us-east-1 2>/dev/null || echo "not-found")
+
+          # LabEksClusterRole - used for EKS cluster and node group
+          EKS_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabEksClusterRole"
+
+          # LabRole - used for all other AWS services (ECR, RDS, Lambda etc)
+          LAB_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole"
+
+          if [ "$CLUSTER_STATUS" == "not-found" ]; then
+            echo "Creating EKS cluster..."
+
+            # Get default VPC
+            VPC_ID=$(aws ec2 describe-vpcs \
+              --filters "Name=isDefault,Values=true" \
+              --query "Vpcs[0].VpcId" \
+              --output text --region us-east-1)
+
+            # Get subnet IDs
+            SUBNET_IDS=$(aws ec2 describe-subnets \
+              --filters "Name=vpc-id,Values=$VPC_ID" \
+              --query "Subnets[*].SubnetId" \
+              --output text --region us-east-1)
+
+            # Create EKS cluster using LabEksClusterRole
+            aws eks create-cluster \
+              --name ${{ github.event.inputs.eks_cluster_name }} \
+              --role-arn $EKS_ROLE_ARN \
+              --resources-vpc-config subnetIds=$(echo $SUBNET_IDS | tr ' ' ','),endpointPublicAccess=true \
+              --kubernetes-version 1.29 \
+              --region us-east-1
+
+            echo "Waiting for EKS cluster to be active (this may take 10-15 minutes)..."
+            aws eks wait cluster-active \
+              --name ${{ github.event.inputs.eks_cluster_name }} \
+              --region us-east-1
+
+            # Create managed node group using LabEksClusterRole
+            aws eks create-nodegroup \
+              --cluster-name ${{ github.event.inputs.eks_cluster_name }} \
+              --nodegroup-name laps-nodegroup \
+              --node-role $EKS_ROLE_ARN \
+              --subnets $(echo $SUBNET_IDS | tr ' ' ' ') \
+              --instance-types t3.medium \
+              --scaling-config minSize=1,maxSize=3,desiredSize=2 \
+              --region us-east-1
+
+            echo "Waiting for node group to be active..."
+            aws eks wait nodegroup-active \
+              --cluster-name ${{ github.event.inputs.eks_cluster_name }} \
+              --nodegroup-name laps-nodegroup \
+              --region us-east-1
+
+            echo "EKS cluster created successfully"
+          else
+            echo "EKS cluster already exists with status: $CLUSTER_STATUS"
+          fi
+
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig \
@@ -192,8 +255,41 @@ jobs:
           # Replace image placeholder in target slot deployment
           sed -i "s|PLACEHOLDER_IMAGE|$ECR_REGISTRY/laps-backend:$IMAGE_TAG|g" k8s/deployment-$DEPLOY_SLOT.yaml
 
+      - name: Create ACM Certificate if not exists
+        run: |
+          # Check if certificate already exists
+          CERT_ARN=$(aws acm list-certificates \
+            --query "CertificateSummaryList[?DomainName=='laps-backend.local'].CertificateArn" \
+            --output text --region us-east-1)
+
+          if [ -z "$CERT_ARN" ]; then
+            echo "Creating self-signed certificate in ACM..."
+
+            # Generate self-signed certificate
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+              -keyout /tmp/tls.key \
+              -out /tmp/tls.crt \
+              -subj "/CN=laps-backend.local/O=LAPS"
+
+            # Import certificate into ACM
+            CERT_ARN=$(aws acm import-certificate \
+              --certificate fileb:///tmp/tls.crt \
+              --private-key fileb:///tmp/tls.key \
+              --query 'CertificateArn' \
+              --output text --region us-east-1)
+
+            echo "Certificate created: $CERT_ARN"
+          else
+            echo "Certificate already exists: $CERT_ARN"
+          fi
+
+          echo "CERT_ARN=$CERT_ARN" >> $GITHUB_ENV
+
       - name: Deploy to Inactive Slot
         run: |
+          # Inject certificate ARN into ingress
+          sed -i "s|PLACEHOLDER_CERT_ARN|$CERT_ARN|g" k8s/ingress.yaml
+
           kubectl apply -f k8s/deployment-$DEPLOY_SLOT.yaml
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/ingress.yaml
@@ -241,6 +337,7 @@ jobs:
 
           echo "========================================"
           echo "Active Slot         : $DEPLOY_SLOT"
-          echo "EKS Application URL : http://$ALB_URL/laps"
+          echo "EKS Application URL : https://$ALB_URL/laps"
           echo "RDS Endpoint        : $RDS_ENDPOINT"
+          echo "ACM Certificate ARN : $CERT_ARN"
           echo "========================================"
