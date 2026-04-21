@@ -209,9 +209,9 @@ jobs:
           ALB_SG_ID=$(aws ec2 describe-security-groups \
             --filters "Name=group-name,Values=laps-alb-sg" "Name=vpc-id,Values=$VPC_ID" \
             --query 'SecurityGroups[0].GroupId' \
-            --output text --region $REGION 2>/dev/null || echo "none")
+            --output text --region $REGION 2>/dev/null)
 
-          if [ "$ALB_SG_ID" == "none" ] || [ -z "$ALB_SG_ID" ]; then
+          if [ -z "$ALB_SG_ID" ] || [ "$ALB_SG_ID" == "None" ]; then
             ALB_SG_ID=$(aws ec2 create-security-group \
               --group-name laps-alb-sg \
               --description "LAPS ALB Security Group" \
@@ -229,9 +229,9 @@ jobs:
           ALB_ARN=$(aws elbv2 describe-load-balancers \
             --names laps-backend-alb \
             --query 'LoadBalancers[0].LoadBalancerArn' \
-            --output text --region $REGION 2>/dev/null || echo "none")
+            --output text --region $REGION 2>/dev/null)
 
-          if [ "$ALB_ARN" == "none" ] || [ -z "$ALB_ARN" ]; then
+          if [ -z "$ALB_ARN" ] || [ "$ALB_ARN" == "None" ]; then
             ALB_ARN=$(aws elbv2 create-load-balancer \
               --name laps-backend-alb \
               --subnets $(echo $SUBNET_IDS | tr ' ' ' ') \
@@ -247,9 +247,9 @@ jobs:
           BLUE_TG_ARN=$(aws elbv2 describe-target-groups \
             --names laps-backend-blue-tg \
             --query 'TargetGroups[0].TargetGroupArn' \
-            --output text --region $REGION 2>/dev/null || echo "none")
+            --output text --region $REGION 2>/dev/null)
 
-          if [ "$BLUE_TG_ARN" == "none" ] || [ -z "$BLUE_TG_ARN" ]; then
+          if [ -z "$BLUE_TG_ARN" ] || [ "$BLUE_TG_ARN" == "None" ]; then
             BLUE_TG_ARN=$(aws elbv2 create-target-group \
               --name laps-backend-blue-tg \
               --protocol HTTP \
@@ -265,9 +265,9 @@ jobs:
           GREEN_TG_ARN=$(aws elbv2 describe-target-groups \
             --names laps-backend-green-tg \
             --query 'TargetGroups[0].TargetGroupArn' \
-            --output text --region $REGION 2>/dev/null || echo "none")
+            --output text --region $REGION 2>/dev/null)
 
-          if [ "$GREEN_TG_ARN" == "none" ] || [ -z "$GREEN_TG_ARN" ]; then
+          if [ -z "$GREEN_TG_ARN" ] || [ "$GREEN_TG_ARN" == "None" ]; then
             GREEN_TG_ARN=$(aws elbv2 create-target-group \
               --name laps-backend-green-tg \
               --protocol HTTP \
@@ -283,9 +283,9 @@ jobs:
           LISTENER_ARN=$(aws elbv2 describe-listeners \
             --load-balancer-arn $ALB_ARN \
             --query 'Listeners[?Port==`443`].ListenerArn' \
-            --output text --region $REGION 2>/dev/null || echo "none")
+            --output text --region $REGION 2>/dev/null)
 
-          if [ "$LISTENER_ARN" == "none" ] || [ -z "$LISTENER_ARN" ]; then
+          if [ -z "$LISTENER_ARN" ] || [ "$LISTENER_ARN" == "None" ]; then
             LISTENER_ARN=$(aws elbv2 create-listener \
               --load-balancer-arn $ALB_ARN \
               --protocol HTTPS \
@@ -406,9 +406,9 @@ jobs:
           ECS_SG_ID=$(aws ec2 describe-security-groups \
             --filters "Name=group-name,Values=laps-ecs-sg" "Name=vpc-id,Values=$VPC_ID" \
             --query 'SecurityGroups[0].GroupId' \
-            --output text --region $REGION 2>/dev/null || echo "none")
+            --output text --region $REGION 2>/dev/null)
 
-          if [ "$ECS_SG_ID" == "none" ] || [ -z "$ECS_SG_ID" ]; then
+          if [ -z "$ECS_SG_ID" ] || [ "$ECS_SG_ID" == "None" ]; then
             ECS_SG_ID=$(aws ec2 create-security-group \
               --group-name laps-ecs-sg \
               --description "LAPS ECS Security Group" \
