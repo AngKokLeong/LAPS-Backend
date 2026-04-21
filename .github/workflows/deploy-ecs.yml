@@ -473,6 +473,7 @@ jobs:
               --service $DEPLOY_SERVICE \
               --task-definition $TASK_DEF_ARN \
               --desired-count 2 \
+              --health-check-grace-period-seconds 120 \
               --region $REGION
           else
             echo "Creating new ECS service: $DEPLOY_SERVICE"
@@ -482,6 +483,7 @@ jobs:
               --task-definition $TASK_DEF_ARN \
               --desired-count 2 \
               --launch-type FARGATE \
+              --health-check-grace-period-seconds 120 \
               --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_IDS],securityGroups=[$ECS_SG_ID],assignPublicIp=ENABLED}" \
               --load-balancers "targetGroupArn=$DEPLOY_TG_ARN,containerName=$CONTAINER_NAME,containerPort=8100" \
               --region $REGION
