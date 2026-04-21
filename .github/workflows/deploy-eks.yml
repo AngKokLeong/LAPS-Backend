@@ -101,7 +101,7 @@ jobs:
               --name ${{ github.event.inputs.eks_cluster_name }} \
               --role-arn $EKS_ROLE_ARN \
               --resources-vpc-config subnetIds=$(echo $SUBNET_IDS | tr ' ' ','),endpointPublicAccess=true \
-              --kubernetes-version 1.29 \
+              --kubernetes-version 1.32 \
               --region us-east-1
 
             echo "Waiting for EKS cluster to be active (this may take 10-15 minutes)..."
