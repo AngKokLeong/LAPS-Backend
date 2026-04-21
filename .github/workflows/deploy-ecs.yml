@@ -327,6 +327,7 @@ jobs:
             --output text --region $REGION)
 
           echo "ALB_ARN=$ALB_ARN" >> $GITHUB_ENV
+          echo "ALB_SG_ID=$ALB_SG_ID" >> $GITHUB_ENV
           echo "BLUE_TG_ARN=$BLUE_TG_ARN" >> $GITHUB_ENV
           echo "GREEN_TG_ARN=$GREEN_TG_ARN" >> $GITHUB_ENV
           echo "LISTENER_ARN=$LISTENER_ARN" >> $GITHUB_ENV
@@ -366,10 +367,10 @@ jobs:
           ECR_IMAGE="${{ env.ECR_IMAGE }}"
           RDS_ENDPOINT="${{ env.RDS_ENDPOINT }}"
 
-          python3 -c "import json,os; td={'family':os.environ['TASK_FAMILY']+'-'+os.environ['DEPLOY_SLOT'],'networkMode':'awsvpc','requiresCompatibilities':['FARGATE'],'cpu':'512','memory':'1024','executionRoleArn':os.environ['LAB_ROLE_ARN'],'taskRoleArn':os.environ['LAB_ROLE_ARN'],'containerDefinitions':[{'name':os.environ['CONTAINER_NAME'],'image':os.environ['ECR_IMAGE'],'portMappings':[{'containerPort':8100,'protocol':'tcp'}],'environment':[{'name':'SPRING_PROFILES_ACTIVE','value':'prod'},{'name':'SPRING_DATASOURCE_URL','value':'jdbc:mysql://'+os.environ['RDS_ENDPOINT']+':3306/lapsdb?createDatabaseIfNotExist=true'},{'name':'SPRING_DATASOURCE_USERNAME','value':os.environ['DB_USERNAME']},{'name':'SPRING_DATASOURCE_PASSWORD','value':os.environ['DB_PASSWORD']}],'logConfiguration':{'logDriver':'awslogs','options':{'awslogs-group':'/ecs/laps-backend','awslogs-region':os.environ['REGION'],'awslogs-stream-prefix':'ecs','awslogs-create-group':'true'}},'healthCheck':{'command':['CMD-SHELL','curl -f http://localhost:8100/laps/actuator/health || exit 1'],'interval':30,'timeout':10,'retries':3,'startPeriod':120}}]}; open('/tmp/task-def.json','w').write(json.dumps(td))" \
-            LAB_ROLE_ARN="$LAB_ROLE_ARN" DEPLOY_SLOT="$DEPLOY_SLOT" ECR_IMAGE="$ECR_IMAGE" \
-            RDS_ENDPOINT="$RDS_ENDPOINT" DB_USERNAME="${{ github.event.inputs.db_username }}" \
-            DB_PASSWORD="${{ github.event.inputs.db_password }}"
+          export LAB_ROLE_ARN DEPLOY_SLOT ECR_IMAGE RDS_ENDPOINT TASK_FAMILY CONTAINER_NAME REGION
+          export DB_USERNAME="${{ github.event.inputs.db_username }}"
+          export DB_PASSWORD="${{ github.event.inputs.db_password }}"
+          python3 -c "import json,os; td={'family':os.environ['TASK_FAMILY']+'-'+os.environ['DEPLOY_SLOT'],'networkMode':'awsvpc','requiresCompatibilities':['FARGATE'],'cpu':'512','memory':'1024','executionRoleArn':os.environ['LAB_ROLE_ARN'],'taskRoleArn':os.environ['LAB_ROLE_ARN'],'containerDefinitions':[{'name':os.environ['CONTAINER_NAME'],'image':os.environ['ECR_IMAGE'],'portMappings':[{'containerPort':8100,'protocol':'tcp'}],'environment':[{'name':'SPRING_PROFILES_ACTIVE','value':'prod'},{'name':'SPRING_DATASOURCE_URL','value':'jdbc:mysql://'+os.environ['RDS_ENDPOINT']+':3306/lapsdb?createDatabaseIfNotExist=true'},{'name':'SPRING_DATASOURCE_USERNAME','value':os.environ['DB_USERNAME']},{'name':'SPRING_DATASOURCE_PASSWORD','value':os.environ['DB_PASSWORD']}],'logConfiguration':{'logDriver':'awslogs','options':{'awslogs-group':'/ecs/laps-backend','awslogs-region':os.environ['REGION'],'awslogs-stream-prefix':'ecs','awslogs-create-group':'true'}},'healthCheck':{'command':['CMD-SHELL','curl -f http://localhost:8100/laps/actuator/health || exit 1'],'interval':30,'timeout':10,'retries':3,'startPeriod':120}}]}; open('/tmp/task-def.json','w').write(json.dumps(td))"
 
           TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file:///tmp/task-def.json \
@@ -384,6 +385,7 @@ jobs:
           DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
           DEPLOY_TG_ARN="${{ env.DEPLOY_TG_ARN }}"
           TASK_DEF_ARN="${{ env.TASK_DEF_ARN }}"
+          ALB_SG_ID="${{ env.ALB_SG_ID }}"
 
           VPC_ID=$(aws ec2 describe-vpcs \
             --filters "Name=isDefault,Values=true" \
@@ -410,7 +412,8 @@ jobs:
               --output text --region $REGION)
 
             aws ec2 authorize-security-group-ingress \
-              --group-id $ECS_SG_ID --protocol tcp --port 8100 --cidr 0.0.0.0/0 --region $REGION
+              --group-id $ECS_SG_ID --protocol tcp --port 8100 \
+              --source-group $ALB_SG_ID --region $REGION
           fi
 
           DEPLOY_SERVICE="$SERVICE_NAME-$DEPLOY_SLOT"
