@@ -42,14 +42,6 @@ Parameters:
 Resources:
 
   # ------------------
-  # ECR Repository
-  # ------------------
-  ECRRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: laps-backend
-
-  # ------------------
   # VPC & Networking
   # ------------------
   VPC:
@@ -209,15 +201,6 @@ Resources:
         - FARGATE_SPOT
 
   # ------------------
-  # CloudWatch Log Group
-  # ------------------
-  LogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: /ecs/laps-backend
-      RetentionInDays: 7
-
-  # ------------------
   # ECS Task Definitions (Blue & Green)
   # ------------------
   BlueTaskDefinition:
@@ -252,6 +235,7 @@ Resources:
               awslogs-group: /ecs/laps-backend
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
+              awslogs-create-group: "true"
           HealthCheck:
             Command: [CMD-SHELL, "curl -f http://localhost:8100/laps/actuator/health || exit 1"]
             Interval: 30
@@ -291,6 +275,7 @@ Resources:
               awslogs-group: /ecs/laps-backend
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
+              awslogs-create-group: "true"
           HealthCheck:
             Command: [CMD-SHELL, "curl -f http://localhost:8100/laps/actuator/health || exit 1"]
             Interval: 30
