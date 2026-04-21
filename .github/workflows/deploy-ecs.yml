@@ -376,45 +376,45 @@ jobs:
           RDS_ENDPOINT="${{ env.RDS_ENDPOINT }}"
 
           cat > /tmp/task-def.json << TASKEOF
-          {
-            "family": "${TASK_FAMILY}-${DEPLOY_SLOT}",
-            "networkMode": "awsvpc",
-            "requiresCompatibilities": ["FARGATE"],
-            "cpu": "512",
-            "memory": "1024",
-            "executionRoleArn": "${LAB_ROLE_ARN}",
-            "taskRoleArn": "${LAB_ROLE_ARN}",
-            "containerDefinitions": [
-              {
-                "name": "${CONTAINER_NAME}",
-                "image": "${ECR_IMAGE}",
-                "portMappings": [{"containerPort": 8100, "protocol": "tcp"}],
-                "environment": [
-                  {"name": "SPRING_PROFILES_ACTIVE", "value": "prod"},
-                  {"name": "spring.datasource.url", "value": "jdbc:mysql://${RDS_ENDPOINT}:3306/lapsdb?createDatabaseIfNotExist=true"},
-                  {"name": "spring.datasource.username", "value": "${{ github.event.inputs.db_username }}"},
-                  {"name": "spring.datasource.password", "value": "${{ github.event.inputs.db_password }}"}
-                ],
-                "logConfiguration": {
-                  "logDriver": "awslogs",
-                  "options": {
-                    "awslogs-group": "/ecs/laps-backend",
-                    "awslogs-region": "${REGION}",
-                    "awslogs-stream-prefix": "ecs",
-                    "awslogs-create-group": "true"
-                  }
-                },
-                "healthCheck": {
-                  "command": ["CMD-SHELL", "curl -f http://localhost:8100/laps/actuator/health || exit 1"],
-                  "interval": 30,
-                  "timeout": 10,
-                  "retries": 3,
-                  "startPeriod": 60
-                }
-              }
-            ]
-          }
-          TASKEOF
+{
+  "family": "${TASK_FAMILY}-${DEPLOY_SLOT}",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "${LAB_ROLE_ARN}",
+  "taskRoleArn": "${LAB_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "${CONTAINER_NAME}",
+      "image": "${ECR_IMAGE}",
+      "portMappings": [{"containerPort": 8100, "protocol": "tcp"}],
+      "environment": [
+        {"name": "SPRING_PROFILES_ACTIVE", "value": "prod"},
+        {"name": "SPRING_DATASOURCE_URL", "value": "jdbc:mysql://${RDS_ENDPOINT}:3306/lapsdb?createDatabaseIfNotExist=true"},
+        {"name": "SPRING_DATASOURCE_USERNAME", "value": "${{ github.event.inputs.db_username }}"},
+        {"name": "SPRING_DATASOURCE_PASSWORD", "value": "${{ github.event.inputs.db_password }}"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/laps-backend",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8100/laps/actuator/health || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 120
+      }
+    }
+  ]
+}
+TASKEOF
 
           TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file:///tmp/task-def.json \
@@ -444,7 +444,7 @@ jobs:
           ECS_SG_ID=$(aws ec2 describe-security-groups \
             --filters "Name=group-name,Values=laps-ecs-sg" "Name=vpc-id,Values=$VPC_ID" \
             --query 'SecurityGroups[0].GroupId' \
-            --output text --region $REGION 2>/dev/null)
+            --output text --region $REGION 2>/dev/null || true)
 
           if [ -z "$ECS_SG_ID" ] || [ "$ECS_SG_ID" == "None" ]; then
             ECS_SG_ID=$(aws ec2 create-security-group \
@@ -493,11 +493,27 @@ jobs:
         run: |
           DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
           echo "Waiting for $SERVICE_NAME-$DEPLOY_SLOT to be stable..."
-          aws ecs wait services-stable \
-            --cluster $CLUSTER_NAME \
-            --services $SERVICE_NAME-$DEPLOY_SLOT \
-            --region $REGION
-          echo "Service is stable"
+          RETRIES=40
+          INTERVAL=30
+          for i in $(seq 1 $RETRIES); do
+            STATUS=$(aws ecs describe-services \
+              --cluster $CLUSTER_NAME \
+              --services $SERVICE_NAME-$DEPLOY_SLOT \
+              --query 'services[0].deployments[?status==`PRIMARY`].rolloutState' \
+              --output text --region $REGION)
+            echo "Attempt $i/$RETRIES — Rollout state: $STATUS"
+            if [ "$STATUS" == "COMPLETED" ]; then
+              echo "Service is stable"
+              exit 0
+            fi
+            if [ "$STATUS" == "FAILED" ]; then
+              echo "Deployment rollout FAILED, aborting"
+              exit 1
+            fi
+            sleep $INTERVAL
+          done
+          echo "Service did not stabilize after $((RETRIES * INTERVAL))s, aborting"
+          exit 1
 
       - name: Verify Health of Inactive Slot
         run: |
