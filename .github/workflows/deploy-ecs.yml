@@ -502,19 +502,23 @@ jobs:
           DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
           DEPLOY_TG_ARN="${{ env.DEPLOY_TG_ARN }}"
           echo "Verifying health of $DEPLOY_SLOT target group..."
-          sleep 30
 
-          HEALTHY=$(aws elbv2 describe-target-health \
-            --target-group-arn $DEPLOY_TG_ARN \
-            --query 'TargetHealthDescriptions[?TargetHealth.State==`healthy`] | length(@)' \
-            --output text --region $REGION)
-
-          echo "Healthy targets: $HEALTHY"
-          if [ "$HEALTHY" -lt "1" ]; then
-            echo "No healthy targets found in $DEPLOY_SLOT slot, aborting deployment"
-            exit 1
-          fi
-          echo "Health check passed for $DEPLOY_SLOT slot"
+          RETRIES=20
+          INTERVAL=30
+          for i in $(seq 1 $RETRIES); do
+            HEALTHY=$(aws elbv2 describe-target-health \
+              --target-group-arn $DEPLOY_TG_ARN \
+              --query 'TargetHealthDescriptions[?TargetHealth.State==`healthy`] | length(@)' \
+              --output text --region $REGION)
+            echo "Attempt $i/$RETRIES — Healthy targets: $HEALTHY"
+            if [ "$HEALTHY" -ge "1" ]; then
+              echo "Health check passed for $DEPLOY_SLOT slot"
+              exit 0
+            fi
+            sleep $INTERVAL
+          done
+          echo "No healthy targets found in $DEPLOY_SLOT slot after $((RETRIES * INTERVAL))s, aborting"
+          exit 1
 
       - name: Switch Traffic to New Slot
         run: |
