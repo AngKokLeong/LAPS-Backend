@@ -24,6 +24,14 @@ Parameters:
     Type: String
     Description: ACM certificate ARN for HTTPS listener
 
+  VpcSecondOctet:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      Second octet for VPC CIDR (10.X.0.0/16). Change per deployment to avoid CIDR conflicts.
+
   ActiveSlot:
     Type: String
     Default: blue
@@ -47,7 +55,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.0.0.0/16
+      CidrBlock: !Sub "10.${VpcSecondOctet}.0.0/16"
       EnableDnsHostnames: true
       EnableDnsSupport: true
 
@@ -64,7 +72,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.1.0/24
+      CidrBlock: !Sub "10.${VpcSecondOctet}.1.0/24"
       MapPublicIpOnLaunch: true
       AvailabilityZone: !Select [0, !GetAZs '']
 
@@ -72,7 +80,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.2.0/24
+      CidrBlock: !Sub "10.${VpcSecondOctet}.2.0/24"
       MapPublicIpOnLaunch: true
       AvailabilityZone: !Select [1, !GetAZs '']
 
@@ -80,7 +88,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.3.0/24
+      CidrBlock: !Sub "10.${VpcSecondOctet}.3.0/24"
       MapPublicIpOnLaunch: false
       AvailabilityZone: !Select [0, !GetAZs '']
 
@@ -88,7 +96,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.4.0/24
+      CidrBlock: !Sub "10.${VpcSecondOctet}.4.0/24"
       MapPublicIpOnLaunch: false
       AvailabilityZone: !Select [1, !GetAZs '']
 
