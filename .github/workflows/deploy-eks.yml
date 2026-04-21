@@ -1,0 +1,246 @@
+name: Deploy to EKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_access_key_id:
+        description: 'AWS Access Key ID'
+        required: true
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key'
+        required: true
+      aws_session_token:
+        description: 'AWS Session Token'
+        required: true
+      eks_cluster_name:
+        description: 'EKS Cluster Name'
+        required: true
+      aws_account_id:
+        description: 'AWS Account ID'
+        required: true
+      db_username:
+        description: 'DB Username'
+        required: true
+      db_password:
+        description: 'DB Password'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Build WAR
+        run: mvn clean package -DskipTests
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          aws-access-key-id: ${{ github.event.inputs.aws_access_key_id }}
+          aws-secret-access-key: ${{ github.event.inputs.aws_secret_access_key }}
+          aws-session-token: ${{ github.event.inputs.aws_session_token }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Create ECR Repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names laps-backend --region us-east-1 || \
+          aws ecr create-repository --repository-name laps-backend --region us-east-1
+
+      - name: Build and Push Docker Image to ECR
+        env:
+          ECR_REGISTRY: ${{ github.event.inputs.aws_account_id }}.dkr.ecr.us-east-1.amazonaws.com
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/laps-backend:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/laps-backend:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/laps-backend:$IMAGE_TAG $ECR_REGISTRY/laps-backend:latest
+          docker push $ECR_REGISTRY/laps-backend:latest
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ github.event.inputs.eks_cluster_name }} \
+            --region us-east-1
+
+      - name: Setup RDS MySQL Database
+        run: |
+          # Check if RDS instance already exists
+          DB_STATUS=$(aws rds describe-db-instances \
+            --db-instance-identifier laps-backend-db \
+            --query 'DBInstances[0].DBInstanceStatus' \
+            --output text \
+            --region us-east-1 2>/dev/null || echo "not-found")
+
+          if [ "$DB_STATUS" == "not-found" ]; then
+            echo "Creating RDS MySQL instance..."
+
+            # Get default VPC
+            VPC_ID=$(aws ec2 describe-vpcs \
+              --filters "Name=isDefault,Values=true" \
+              --query "Vpcs[0].VpcId" \
+              --output text --region us-east-1)
+
+            # Get subnets in default VPC
+            SUBNET_IDS=$(aws ec2 describe-subnets \
+              --filters "Name=vpc-id,Values=$VPC_ID" \
+              --query "Subnets[*].SubnetId" \
+              --output text --region us-east-1 | tr '\t' ',')
+
+            # Create DB subnet group
+            aws rds create-db-subnet-group \
+              --db-subnet-group-name laps-backend-subnet-group \
+              --db-subnet-group-description "LAPS Backend DB Subnet Group" \
+              --subnet-ids $(echo $SUBNET_IDS | tr ',' ' ') \
+              --region us-east-1 || true
+
+            # Create security group for RDS
+            SG_ID=$(aws ec2 create-security-group \
+              --group-name laps-rds-sg \
+              --description "LAPS RDS Security Group" \
+              --vpc-id $VPC_ID \
+              --query 'GroupId' \
+              --output text --region us-east-1)
+
+            # Allow MySQL port from anywhere in VPC
+            aws ec2 authorize-security-group-ingress \
+              --group-id $SG_ID \
+              --protocol tcp \
+              --port 3306 \
+              --cidr 0.0.0.0/0 \
+              --region us-east-1
+
+            # Create RDS instance
+            aws rds create-db-instance \
+              --db-instance-identifier laps-backend-db \
+              --db-instance-class db.t3.micro \
+              --engine mysql \
+              --engine-version 8.0 \
+              --master-username ${{ github.event.inputs.db_username }} \
+              --master-user-password ${{ github.event.inputs.db_password }} \
+              --db-name lapsdb \
+              --db-subnet-group-name laps-backend-subnet-group \
+              --vpc-security-group-ids $SG_ID \
+              --allocated-storage 20 \
+              --no-multi-az \
+              --no-publicly-accessible \
+              --backup-retention-period 0 \
+              --no-deletion-protection \
+              --region us-east-1
+
+            echo "Waiting for RDS to be available (this may take 5-10 minutes)..."
+            aws rds wait db-instance-available \
+              --db-instance-identifier laps-backend-db \
+              --region us-east-1
+
+            echo "RDS instance created successfully"
+          else
+            echo "RDS instance already exists with status: $DB_STATUS"
+          fi
+
+          # Get RDS endpoint and set as output
+          RDS_ENDPOINT=$(aws rds describe-db-instances \
+            --db-instance-identifier laps-backend-db \
+            --query 'DBInstances[0].Endpoint.Address' \
+            --output text --region us-east-1)
+          echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
+          echo "RDS Endpoint: $RDS_ENDPOINT"
+
+      - name: Apply Namespace and Secrets
+        run: |
+          # Apply namespace only
+          kubectl create namespace laps --dry-run=client -o yaml | kubectl apply -f -
+
+          # Apply secrets using bash variable from GITHUB_ENV
+          kubectl create secret generic laps-secrets \
+            --namespace=laps \
+            --from-literal=datasource-url="jdbc:mysql://$RDS_ENDPOINT:3306/lapsdb?createDatabaseIfNotExist=true" \
+            --from-literal=datasource-username="${{ github.event.inputs.db_username }}" \
+            --from-literal=datasource-password="${{ github.event.inputs.db_password }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Update Deployment Image
+        env:
+          ECR_REGISTRY: ${{ github.event.inputs.aws_account_id }}.dkr.ecr.us-east-1.amazonaws.com
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Determine active slot
+          ACTIVE_SLOT=$(kubectl get service laps-backend -n laps \
+            -o jsonpath='{.spec.selector.slot}' 2>/dev/null || echo "blue")
+
+          if [ "$ACTIVE_SLOT" == "blue" ]; then
+            DEPLOY_SLOT="green"
+          else
+            DEPLOY_SLOT="blue"
+          fi
+
+          echo "Active slot: $ACTIVE_SLOT"
+          echo "Deploying to: $DEPLOY_SLOT"
+          echo "DEPLOY_SLOT=$DEPLOY_SLOT" >> $GITHUB_ENV
+          echo "ACTIVE_SLOT=$ACTIVE_SLOT" >> $GITHUB_ENV
+
+          # Replace image placeholder in target slot deployment
+          sed -i "s|PLACEHOLDER_IMAGE|$ECR_REGISTRY/laps-backend:$IMAGE_TAG|g" k8s/deployment-$DEPLOY_SLOT.yaml
+
+      - name: Deploy to Inactive Slot
+        run: |
+          kubectl apply -f k8s/deployment-$DEPLOY_SLOT.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/ingress.yaml
+
+      - name: Wait for Inactive Slot to be Ready
+        run: |
+          kubectl rollout status deployment/laps-backend-$DEPLOY_SLOT \
+            --namespace=laps \
+            --timeout=300s
+
+      - name: Verify Health of Inactive Slot
+        run: |
+          # Get a pod from the inactive slot and check health
+          POD=$(kubectl get pods -n laps \
+            -l app=laps-backend,slot=$DEPLOY_SLOT \
+            -o jsonpath='{.items[0].metadata.name}')
+
+          echo "Checking health of pod: $POD"
+          kubectl exec -n laps $POD -- \
+            wget -qO- http://localhost:8100/laps/actuator/health | grep -q '"status":"UP"'
+          echo "Health check passed for $DEPLOY_SLOT slot"
+
+      - name: Switch Traffic to New Slot
+        run: |
+          kubectl patch service laps-backend -n laps \
+            -p "{\"spec\":{\"selector\":{\"app\":\"laps-backend\",\"slot\":\"$DEPLOY_SLOT\"}}}"
+          echo "Traffic switched from $ACTIVE_SLOT to $DEPLOY_SLOT"
+
+      - name: Scale Down Old Slot
+        run: |
+          kubectl scale deployment laps-backend-$ACTIVE_SLOT \
+            --replicas=0 --namespace=laps
+          echo "Scaled down $ACTIVE_SLOT slot"
+
+      - name: Get Load Balancer URL
+        run: |
+          echo "Waiting for Load Balancer URL..."
+          sleep 30
+
+          ALB_URL=$(kubectl get ingress laps-backend -n laps -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          RDS_ENDPOINT=$(aws rds describe-db-instances \
+            --db-instance-identifier laps-backend-db \
+            --query 'DBInstances[0].Endpoint.Address' \
+            --output text --region us-east-1)
+
+          echo "========================================"
+          echo "Active Slot         : $DEPLOY_SLOT"
+          echo "EKS Application URL : http://$ALB_URL/laps"
+          echo "RDS Endpoint        : $RDS_ENDPOINT"
+          echo "========================================"
