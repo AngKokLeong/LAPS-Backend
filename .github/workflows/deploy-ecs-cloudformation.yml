@@ -107,7 +107,7 @@ jobs:
             --query 'Stacks[0].StackStatus' \
             --output text --region $REGION 2>/dev/null || echo "NOT_FOUND")
 
-          if [ "$STACK_STATUS" == "NOT_FOUND" ] || [ "$STACK_STATUS" == "DELETE_COMPLETE" ]; then
+          if [ "$STACK_STATUS" == "NOT_FOUND" ] || [ "$STACK_STATUS" == "DELETE_COMPLETE" ] || [ "$STACK_STATUS" == "ROLLBACK_COMPLETE" ]; then
             echo "ACTIVE_SLOT=blue" >> $GITHUB_ENV
             echo "DEPLOY_SLOT=green" >> $GITHUB_ENV
             echo "First deployment — active: blue, deploy: green"
@@ -139,7 +139,12 @@ jobs:
             --query 'Stacks[0].StackStatus' \
             --output text --region $REGION 2>/dev/null || echo "NOT_FOUND")
 
-          if [ "$STACK_STATUS" == "NOT_FOUND" ] || [ "$STACK_STATUS" == "DELETE_COMPLETE" ]; then
+          if [ "$STACK_STATUS" == "NOT_FOUND" ] || [ "$STACK_STATUS" == "DELETE_COMPLETE" ] || [ "$STACK_STATUS" == "ROLLBACK_COMPLETE" ]; then
+            if [ "$STACK_STATUS" == "ROLLBACK_COMPLETE" ]; then
+              echo "Stack in ROLLBACK_COMPLETE, deleting before recreating..."
+              aws cloudformation delete-stack --stack-name ${{ steps.vars.outputs.stack_name }} --region $REGION
+              aws cloudformation wait stack-delete-complete --stack-name ${{ steps.vars.outputs.stack_name }} --region $REGION
+            fi
             echo "Creating new CloudFormation stack..."
             aws cloudformation create-stack \
               --stack-name ${{ steps.vars.outputs.stack_name }} \
