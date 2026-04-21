@@ -208,7 +208,7 @@ jobs:
           ALB_SG_ID=$(aws ec2 describe-security-groups \
             --filters "Name=group-name,Values=laps-alb-sg" "Name=vpc-id,Values=$VPC_ID" \
             --query 'SecurityGroups[0].GroupId' \
-            --output text --region $REGION 2>/dev/null)
+            --output text --region $REGION 2>/dev/null || true)
 
           if [ -z "$ALB_SG_ID" ] || [ "$ALB_SG_ID" == "None" ]; then
             ALB_SG_ID=$(aws ec2 create-security-group \
@@ -312,15 +312,6 @@ jobs:
               --query 'Listeners[0].ListenerArn' \
               --output text --region $REGION)
 
-            # Test listener for green slot (required so green TG is associated with ALB)
-            aws elbv2 create-listener \
-              --load-balancer-arn $ALB_ARN \
-              --protocol HTTPS \
-              --port 8443 \
-              --certificates CertificateArn=$CERT_ARN \
-              --default-actions Type=forward,TargetGroupArn=$GREEN_TG_ARN \
-              --region $REGION
-
             # HTTP redirect to HTTPS
             aws elbv2 create-listener \
               --load-balancer-arn $ALB_ARN \
@@ -375,46 +366,10 @@ jobs:
           ECR_IMAGE="${{ env.ECR_IMAGE }}"
           RDS_ENDPOINT="${{ env.RDS_ENDPOINT }}"
 
-          cat > /tmp/task-def.json << TASKEOF
-{
-  "family": "${TASK_FAMILY}-${DEPLOY_SLOT}",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "1024",
-  "executionRoleArn": "${LAB_ROLE_ARN}",
-  "taskRoleArn": "${LAB_ROLE_ARN}",
-  "containerDefinitions": [
-    {
-      "name": "${CONTAINER_NAME}",
-      "image": "${ECR_IMAGE}",
-      "portMappings": [{"containerPort": 8100, "protocol": "tcp"}],
-      "environment": [
-        {"name": "SPRING_PROFILES_ACTIVE", "value": "prod"},
-        {"name": "SPRING_DATASOURCE_URL", "value": "jdbc:mysql://${RDS_ENDPOINT}:3306/lapsdb?createDatabaseIfNotExist=true"},
-        {"name": "SPRING_DATASOURCE_USERNAME", "value": "${{ github.event.inputs.db_username }}"},
-        {"name": "SPRING_DATASOURCE_PASSWORD", "value": "${{ github.event.inputs.db_password }}"}
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/laps-backend",
-          "awslogs-region": "${REGION}",
-          "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "true"
-        }
-      },
-      "healthCheck": {
-        "command": ["CMD-SHELL", "curl -f http://localhost:8100/laps/actuator/health || exit 1"],
-        "interval": 30,
-        "timeout": 10,
-        "retries": 3,
-        "startPeriod": 120
-      }
-    }
-  ]
-}
-TASKEOF
+          python3 -c "import json,os; td={'family':os.environ['TASK_FAMILY']+'-'+os.environ['DEPLOY_SLOT'],'networkMode':'awsvpc','requiresCompatibilities':['FARGATE'],'cpu':'512','memory':'1024','executionRoleArn':os.environ['LAB_ROLE_ARN'],'taskRoleArn':os.environ['LAB_ROLE_ARN'],'containerDefinitions':[{'name':os.environ['CONTAINER_NAME'],'image':os.environ['ECR_IMAGE'],'portMappings':[{'containerPort':8100,'protocol':'tcp'}],'environment':[{'name':'SPRING_PROFILES_ACTIVE','value':'prod'},{'name':'SPRING_DATASOURCE_URL','value':'jdbc:mysql://'+os.environ['RDS_ENDPOINT']+':3306/lapsdb?createDatabaseIfNotExist=true'},{'name':'SPRING_DATASOURCE_USERNAME','value':os.environ['DB_USERNAME']},{'name':'SPRING_DATASOURCE_PASSWORD','value':os.environ['DB_PASSWORD']}],'logConfiguration':{'logDriver':'awslogs','options':{'awslogs-group':'/ecs/laps-backend','awslogs-region':os.environ['REGION'],'awslogs-stream-prefix':'ecs','awslogs-create-group':'true'}},'healthCheck':{'command':['CMD-SHELL','curl -f http://localhost:8100/laps/actuator/health || exit 1'],'interval':30,'timeout':10,'retries':3,'startPeriod':120}}]}; open('/tmp/task-def.json','w').write(json.dumps(td))" \
+            LAB_ROLE_ARN="$LAB_ROLE_ARN" DEPLOY_SLOT="$DEPLOY_SLOT" ECR_IMAGE="$ECR_IMAGE" \
+            RDS_ENDPOINT="$RDS_ENDPOINT" DB_USERNAME="${{ github.event.inputs.db_username }}" \
+            DB_PASSWORD="${{ github.event.inputs.db_password }}"
 
           TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file:///tmp/task-def.json \
