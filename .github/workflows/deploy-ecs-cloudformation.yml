@@ -279,6 +279,6 @@ jobs:
 
           echo "========================================"
           echo "Active Slot         : ${{ env.DEPLOY_SLOT }}"
-          echo "ECS Application URL : https://$ALB_DNS/laps"
+          echo "ECS Application URL : https://$ALB_DNS/"
           echo "RDS Endpoint        : $RDS_ENDPOINT"
           echo "========================================"

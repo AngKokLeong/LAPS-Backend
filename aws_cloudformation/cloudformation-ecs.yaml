@@ -237,7 +237,7 @@ Resources:
               awslogs-stream-prefix: ecs
               awslogs-create-group: "true"
           HealthCheck:
-            Command: [CMD-SHELL, "curl -f http://localhost:8100/laps/actuator/health || exit 1"]
+            Command: [CMD-SHELL, "curl -f http://localhost:8100/actuator/health || exit 1"]
             Interval: 30
             Timeout: 10
             Retries: 3
@@ -277,7 +277,7 @@ Resources:
               awslogs-stream-prefix: ecs
               awslogs-create-group: "true"
           HealthCheck:
-            Command: [CMD-SHELL, "curl -f http://localhost:8100/laps/actuator/health || exit 1"]
+            Command: [CMD-SHELL, "curl -f http://localhost:8100/actuator/health || exit 1"]
             Interval: 30
             Timeout: 10
             Retries: 3
@@ -306,7 +306,7 @@ Resources:
       Port: 8100
       VpcId: !Ref VPC
       TargetType: ip
-      HealthCheckPath: /laps/actuator/health
+      HealthCheckPath: /actuator/health
       HealthCheckIntervalSeconds: 30
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 3
@@ -319,7 +319,7 @@ Resources:
       Port: 8100
       VpcId: !Ref VPC
       TargetType: ip
-      HealthCheckPath: /laps/actuator/health
+      HealthCheckPath: /actuator/health
       HealthCheckIntervalSeconds: 30
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 3
@@ -416,7 +416,7 @@ Conditions:
 Outputs:
   ALBDnsName:
     Value: !GetAtt ALB.DNSName
-    Description: Application URL - https://<ALBDnsName>/laps
+    Description: Application URL - https://<ALBDnsName>/
 
   RDSEndpoint:
     Value: !GetAtt MySQLDB.Endpoint.Address
