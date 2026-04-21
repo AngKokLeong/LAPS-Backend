@@ -31,7 +31,6 @@ jobs:
       TASK_FAMILY: laps-backend-task
       CONTAINER_NAME: laps-backend
       REGION: us-east-1
-      LAB_ROLE_ARN: arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole
 
     steps:
       - uses: actions/checkout@v5
@@ -203,7 +202,7 @@ jobs:
           SUBNET_IDS=$(aws ec2 describe-subnets \
             --filters "Name=vpc-id,Values=$VPC_ID" \
             --query "Subnets[*].SubnetId" \
-            --output text --region $REGION)
+            --output text --region $REGION | tr '\t' ' ')
 
           # Create ALB security group if not exists
           ALB_SG_ID=$(aws ec2 describe-security-groups \
@@ -229,12 +228,12 @@ jobs:
           ALB_ARN=$(aws elbv2 describe-load-balancers \
             --names laps-backend-alb \
             --query 'LoadBalancers[0].LoadBalancerArn' \
-            --output text --region $REGION 2>/dev/null)
+            --output text --region $REGION 2>/dev/null || true)
 
           if [ -z "$ALB_ARN" ] || [ "$ALB_ARN" == "None" ]; then
             ALB_ARN=$(aws elbv2 create-load-balancer \
               --name laps-backend-alb \
-              --subnets $(echo $SUBNET_IDS | tr ' ' ' ') \
+              --subnets $SUBNET_IDS \
               --security-groups $ALB_SG_ID \
               --scheme internet-facing \
               --type application \
@@ -317,6 +316,10 @@ jobs:
 
       - name: Determine Blue-Green Active Slot
         run: |
+          LISTENER_ARN="${{ env.LISTENER_ARN }}"
+          BLUE_TG_ARN="${{ env.BLUE_TG_ARN }}"
+          GREEN_TG_ARN="${{ env.GREEN_TG_ARN }}"
+
           ACTIVE_TG=$(aws elbv2 describe-listeners \
             --listener-arns $LISTENER_ARN \
             --query 'Listeners[0].DefaultActions[0].TargetGroupArn' \
@@ -340,23 +343,28 @@ jobs:
 
       - name: Register ECS Task Definition
         run: |
-          TASK_DEF=$(cat <<EOF
+          LAB_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole"
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          ECR_IMAGE="${{ env.ECR_IMAGE }}"
+          RDS_ENDPOINT="${{ env.RDS_ENDPOINT }}"
+
+          cat > /tmp/task-def.json << TASKEOF
           {
-            "family": "$TASK_FAMILY-$DEPLOY_SLOT",
+            "family": "${TASK_FAMILY}-${DEPLOY_SLOT}",
             "networkMode": "awsvpc",
             "requiresCompatibilities": ["FARGATE"],
             "cpu": "512",
             "memory": "1024",
-            "executionRoleArn": "$LAB_ROLE_ARN",
-            "taskRoleArn": "$LAB_ROLE_ARN",
+            "executionRoleArn": "${LAB_ROLE_ARN}",
+            "taskRoleArn": "${LAB_ROLE_ARN}",
             "containerDefinitions": [
               {
-                "name": "$CONTAINER_NAME",
-                "image": "$ECR_IMAGE",
+                "name": "${CONTAINER_NAME}",
+                "image": "${ECR_IMAGE}",
                 "portMappings": [{"containerPort": 8100, "protocol": "tcp"}],
                 "environment": [
                   {"name": "SPRING_PROFILES_ACTIVE", "value": "prod"},
-                  {"name": "spring.datasource.url", "value": "jdbc:mysql://$RDS_ENDPOINT:3306/lapsdb?createDatabaseIfNotExist=true"},
+                  {"name": "spring.datasource.url", "value": "jdbc:mysql://${RDS_ENDPOINT}:3306/lapsdb?createDatabaseIfNotExist=true"},
                   {"name": "spring.datasource.username", "value": "${{ github.event.inputs.db_username }}"},
                   {"name": "spring.datasource.password", "value": "${{ github.event.inputs.db_password }}"}
                 ],
@@ -364,7 +372,7 @@ jobs:
                   "logDriver": "awslogs",
                   "options": {
                     "awslogs-group": "/ecs/laps-backend",
-                    "awslogs-region": "$REGION",
+                    "awslogs-region": "${REGION}",
                     "awslogs-stream-prefix": "ecs",
                     "awslogs-create-group": "true"
                   }
@@ -379,11 +387,10 @@ jobs:
               }
             ]
           }
-          EOF
-          )
+          TASKEOF
 
-          TASK_DEF_ARN=$(echo $TASK_DEF | aws ecs register-task-definition \
-            --cli-input-json file:///dev/stdin \
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/task-def.json \
             --query 'taskDefinition.taskDefinitionArn' \
             --output text --region $REGION)
 
@@ -392,6 +399,10 @@ jobs:
 
       - name: Create or Update ECS Service on Inactive Slot
         run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          DEPLOY_TG_ARN="${{ env.DEPLOY_TG_ARN }}"
+          TASK_DEF_ARN="${{ env.TASK_DEF_ARN }}"
+
           VPC_ID=$(aws ec2 describe-vpcs \
             --filters "Name=isDefault,Values=true" \
             --query "Vpcs[0].VpcId" \
@@ -444,13 +455,14 @@ jobs:
               --task-definition $TASK_DEF_ARN \
               --desired-count 2 \
               --launch-type FARGATE \
-              --network-configuration "awsvpcConfiguration={subnets=[$(echo $SUBNET_IDS | tr ',' ',')],securityGroups=[$ECS_SG_ID],assignPublicIp=ENABLED}" \
+              --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_IDS],securityGroups=[$ECS_SG_ID],assignPublicIp=ENABLED}" \
               --load-balancers "targetGroupArn=$DEPLOY_TG_ARN,containerName=$CONTAINER_NAME,containerPort=8100" \
               --region $REGION
           fi
 
       - name: Wait for Inactive Slot to be Stable
         run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
           echo "Waiting for $SERVICE_NAME-$DEPLOY_SLOT to be stable..."
           aws ecs wait services-stable \
             --cluster $CLUSTER_NAME \
@@ -460,6 +472,8 @@ jobs:
 
       - name: Verify Health of Inactive Slot
         run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          DEPLOY_TG_ARN="${{ env.DEPLOY_TG_ARN }}"
           echo "Verifying health of $DEPLOY_SLOT target group..."
           sleep 30
 
@@ -477,6 +491,10 @@ jobs:
 
       - name: Switch Traffic to New Slot
         run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          ACTIVE_SLOT="${{ env.ACTIVE_SLOT }}"
+          DEPLOY_TG_ARN="${{ env.DEPLOY_TG_ARN }}"
+          LISTENER_ARN="${{ env.LISTENER_ARN }}"
           aws elbv2 modify-listener \
             --listener-arn $LISTENER_ARN \
             --default-actions Type=forward,TargetGroupArn=$DEPLOY_TG_ARN \
@@ -485,6 +503,7 @@ jobs:
 
       - name: Scale Down Old Slot
         run: |
+          ACTIVE_SLOT="${{ env.ACTIVE_SLOT }}"
           aws ecs update-service \
             --cluster $CLUSTER_NAME \
             --service $SERVICE_NAME-$ACTIVE_SLOT \
@@ -494,6 +513,9 @@ jobs:
 
       - name: Get Deployment Outputs
         run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          ALB_DNS="${{ env.ALB_DNS }}"
+          CERT_ARN="${{ env.CERT_ARN }}"
           RDS_ENDPOINT=$(aws rds describe-db-instances \
             --db-instance-identifier laps-backend-db \
             --query 'DBInstances[0].Endpoint.Address' \
