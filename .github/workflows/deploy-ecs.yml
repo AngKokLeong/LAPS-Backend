@@ -31,6 +31,7 @@ jobs:
       TASK_FAMILY: laps-backend-task
       CONTAINER_NAME: laps-backend
       REGION: us-east-1
+      LAB_ROLE_ARN: arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole
 
     steps:
       - uses: actions/checkout@v5
@@ -194,8 +195,6 @@ jobs:
 
       - name: Create ALB and Target Groups for Blue-Green
         run: |
-          LAB_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole"
-
           VPC_ID=$(aws ec2 describe-vpcs \
             --filters "Name=isDefault,Values=true" \
             --query "Vpcs[0].VpcId" \
@@ -341,8 +340,6 @@ jobs:
 
       - name: Register ECS Task Definition
         run: |
-          LAB_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole"
-
           TASK_DEF=$(cat <<EOF
           {
             "family": "$TASK_FAMILY-$DEPLOY_SLOT",
@@ -395,8 +392,6 @@ jobs:
 
       - name: Create or Update ECS Service on Inactive Slot
         run: |
-          LAB_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole"
-
           VPC_ID=$(aws ec2 describe-vpcs \
             --filters "Name=isDefault,Values=true" \
             --query "Vpcs[0].VpcId" \
