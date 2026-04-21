@@ -246,7 +246,7 @@ jobs:
           BLUE_TG_ARN=$(aws elbv2 describe-target-groups \
             --names laps-backend-blue-tg \
             --query 'TargetGroups[0].TargetGroupArn' \
-            --output text --region $REGION 2>/dev/null)
+            --output text --region $REGION 2>/dev/null || true)
 
           if [ -z "$BLUE_TG_ARN" ] || [ "$BLUE_TG_ARN" == "None" ]; then
             BLUE_TG_ARN=$(aws elbv2 create-target-group \
@@ -264,7 +264,7 @@ jobs:
           GREEN_TG_ARN=$(aws elbv2 describe-target-groups \
             --names laps-backend-green-tg \
             --query 'TargetGroups[0].TargetGroupArn' \
-            --output text --region $REGION 2>/dev/null)
+            --output text --region $REGION 2>/dev/null || true)
 
           if [ -z "$GREEN_TG_ARN" ] || [ "$GREEN_TG_ARN" == "None" ]; then
             GREEN_TG_ARN=$(aws elbv2 create-target-group \
@@ -282,7 +282,7 @@ jobs:
           LISTENER_ARN=$(aws elbv2 describe-listeners \
             --load-balancer-arn $ALB_ARN \
             --query 'Listeners[?Port==`443`].ListenerArn' \
-            --output text --region $REGION 2>/dev/null)
+            --output text --region $REGION 2>/dev/null || true)
 
           if [ -z "$LISTENER_ARN" ] || [ "$LISTENER_ARN" == "None" ]; then
             LISTENER_ARN=$(aws elbv2 create-listener \
