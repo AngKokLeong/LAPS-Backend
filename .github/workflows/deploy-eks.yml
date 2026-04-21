@@ -76,7 +76,7 @@ jobs:
             --region us-east-1 2>/dev/null || echo "not-found")
 
           # LabEksClusterRole - used for EKS cluster and node group
-          EKS_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabEksClusterRole"
+          EKS_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole"
 
           # LabRole - used for all other AWS services (ECR, RDS, Lambda etc)
           LAB_ROLE_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/LabRole"
