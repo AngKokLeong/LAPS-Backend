@@ -371,7 +371,7 @@ Resources:
       ServiceName: laps-backend-service-blue
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref BlueTaskDefinition
-      DesiredCount: !If [IsBlueActive, 2, 0]
+      DesiredCount: 2
       LaunchType: FARGATE
       HealthCheckGracePeriodSeconds: 120
       NetworkConfiguration:
@@ -394,7 +394,7 @@ Resources:
       ServiceName: laps-backend-service-green
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref GreenTaskDefinition
-      DesiredCount: !If [IsBlueActive, 0, 2]
+      DesiredCount: 2
       LaunchType: FARGATE
       HealthCheckGracePeriodSeconds: 120
       NetworkConfiguration:

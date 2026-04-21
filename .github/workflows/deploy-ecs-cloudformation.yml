@@ -210,11 +210,19 @@ jobs:
       - name: Verify Health of Deploy Slot
         run: |
           DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+
+          if [ "$DEPLOY_SLOT" == "blue" ]; then
+            TG_OUTPUT_KEY="BlueTargetGroupArn"
+          else
+            TG_OUTPUT_KEY="GreenTargetGroupArn"
+          fi
+
           DEPLOY_TG_ARN=$(aws cloudformation describe-stacks \
             --stack-name ${{ steps.vars.outputs.stack_name }} \
-            --query "Stacks[0].Outputs[?OutputKey=='$([ "$DEPLOY_SLOT" == "blue" ] && echo BlueTargetGroupArn || echo GreenTargetGroupArn)'].OutputValue" \
+            --query "Stacks[0].Outputs[?OutputKey=='${TG_OUTPUT_KEY}'].OutputValue" \
             --output text --region $REGION)
 
+          echo "Deploy TG ARN: $DEPLOY_TG_ARN"
           echo "Verifying health of $DEPLOY_SLOT target group..."
           RETRIES=20
           INTERVAL=30
