@@ -19,6 +19,10 @@ on:
       aws_account_id:
         description: 'AWS Account ID'
         required: true
+      vpc_second_octet:
+        description: 'VPC Second Octet (0-255), change per deployment to avoid CIDR conflicts'
+        required: false
+        default: '0'
       db_username:
         description: 'RDS Master Username'
         required: true
@@ -145,6 +149,7 @@ jobs:
                 ParameterKey=DBPassword,ParameterValue=${{ github.event.inputs.db_password }} \
                 ParameterKey=ImageUri,ParameterValue=$ECR_IMAGE \
                 ParameterKey=CertificateArn,ParameterValue=$CERT_ARN \
+                ParameterKey=VpcSecondOctet,ParameterValue=${{ github.event.inputs.vpc_second_octet }} \
                 ParameterKey=ActiveSlot,ParameterValue=$ACTIVE_SLOT \
               --capabilities CAPABILITY_NAMED_IAM \
               --region $REGION
@@ -162,6 +167,7 @@ jobs:
                 ParameterKey=DBPassword,ParameterValue=${{ github.event.inputs.db_password }} \
                 ParameterKey=ImageUri,ParameterValue=$ECR_IMAGE \
                 ParameterKey=CertificateArn,ParameterValue=$CERT_ARN \
+                ParameterKey=VpcSecondOctet,ParameterValue=${{ github.event.inputs.vpc_second_octet }} \
                 ParameterKey=ActiveSlot,ParameterValue=$ACTIVE_SLOT \
               --capabilities CAPABILITY_NAMED_IAM \
               --region $REGION || echo "No changes to deploy"
@@ -238,6 +244,7 @@ jobs:
               ParameterKey=DBPassword,ParameterValue=${{ github.event.inputs.db_password }} \
               ParameterKey=ImageUri,ParameterValue=$ECR_IMAGE \
               ParameterKey=CertificateArn,ParameterValue=$CERT_ARN \
+              ParameterKey=VpcSecondOctet,ParameterValue=${{ github.event.inputs.vpc_second_octet }} \
               ParameterKey=ActiveSlot,ParameterValue=$DEPLOY_SLOT \
             --capabilities CAPABILITY_NAMED_IAM \
             --region $REGION
