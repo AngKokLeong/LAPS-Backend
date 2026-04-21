@@ -1,0 +1,441 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  ECS Fargate blue-green deployment for LAPS backend.
+  Creates ECR, ECS Cluster, ALB, Target Groups, RDS MySQL, and ECS Service.
+
+Parameters:
+  DBUsername:
+    Type: String
+    NoEcho: true
+    MinLength: 1
+    MaxLength: 16
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+
+  ImageUri:
+    Type: String
+    Description: Full ECR image URI including tag (e.g. 123456789.dkr.ecr.us-east-1.amazonaws.com/laps-backend:abc123)
+
+  CertificateArn:
+    Type: String
+    Description: ACM certificate ARN for HTTPS listener
+
+  ActiveSlot:
+    Type: String
+    Default: blue
+    AllowedValues: [blue, green]
+    Description: Which slot (blue/green) receives live traffic on port 443
+
+
+Resources:
+
+  # ------------------
+  # ECR Repository
+  # ------------------
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: laps-backend
+
+  # ------------------
+  # VPC & Networking
+  # ------------------
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [0, !GetAZs '']
+
+  PublicSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [1, !GetAZs '']
+
+  PrivateSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.3.0/24
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [0, !GetAZs '']
+
+  PrivateSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/24
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [1, !GetAZs '']
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetAZ1RouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetAZ1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetAZ2RouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetAZ2
+      RouteTableId: !Ref PublicRouteTable
+
+  # ------------------
+  # Security Groups
+  # ------------------
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB inbound HTTP/HTTPS
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8443
+          ToPort: 8443
+          CidrIp: 0.0.0.0/0
+
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS tasks - allow port 8100 from ALB only
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8100
+          ToPort: 8100
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RDS MySQL - allow from ECS tasks only
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref ECSSecurityGroup
+
+  # ------------------
+  # RDS MySQL
+  # ------------------
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: RDS private subnets
+      SubnetIds:
+        - !Ref PrivateSubnetAZ1
+        - !Ref PrivateSubnetAZ2
+
+  MySQLDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: mysql
+      EngineVersion: '8.0'
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      DBName: lapsdb
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups:
+        - !GetAtt DBSecurityGroup.GroupId
+      PubliclyAccessible: false
+      BackupRetentionPeriod: 0
+      DeletionProtection: false
+
+  # ------------------
+  # ECS Cluster
+  # ------------------
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: laps-backend-cluster
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+
+  # ------------------
+  # CloudWatch Log Group
+  # ------------------
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/laps-backend
+      RetentionInDays: 7
+
+  # ------------------
+  # ECS Task Definitions (Blue & Green)
+  # ------------------
+  BlueTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    DependsOn: MySQLDB
+    Properties:
+      Family: laps-backend-task-blue
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: '512'
+      Memory: '1024'
+      ExecutionRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+      TaskRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+      ContainerDefinitions:
+        - Name: laps-backend
+          Image: !Ref ImageUri
+          PortMappings:
+            - ContainerPort: 8100
+              Protocol: tcp
+          Environment:
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: prod
+            - Name: spring.datasource.url
+              Value: !Sub jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true
+            - Name: spring.datasource.username
+              Value: !Ref DBUsername
+            - Name: spring.datasource.password
+              Value: !Ref DBPassword
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/laps-backend
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          HealthCheck:
+            Command: [CMD-SHELL, "curl -f http://localhost:8100/laps/actuator/health || exit 1"]
+            Interval: 30
+            Timeout: 10
+            Retries: 3
+            StartPeriod: 120
+
+  GreenTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    DependsOn: MySQLDB
+    Properties:
+      Family: laps-backend-task-green
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: '512'
+      Memory: '1024'
+      ExecutionRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+      TaskRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+      ContainerDefinitions:
+        - Name: laps-backend
+          Image: !Ref ImageUri
+          PortMappings:
+            - ContainerPort: 8100
+              Protocol: tcp
+          Environment:
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: prod
+            - Name: spring.datasource.url
+              Value: !Sub jdbc:mysql://${MySQLDB.Endpoint.Address}:3306/lapsdb?createDatabaseIfNotExist=true
+            - Name: spring.datasource.username
+              Value: !Ref DBUsername
+            - Name: spring.datasource.password
+              Value: !Ref DBPassword
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/laps-backend
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          HealthCheck:
+            Command: [CMD-SHELL, "curl -f http://localhost:8100/laps/actuator/health || exit 1"]
+            Interval: 30
+            Timeout: 10
+            Retries: 3
+            StartPeriod: 120
+
+  # ------------------
+  # ALB
+  # ------------------
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: laps-backend-alb
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicSubnetAZ1
+        - !Ref PublicSubnetAZ2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+
+  BlueTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: laps-backend-blue-tg
+      Protocol: HTTP
+      Port: 8100
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /laps/actuator/health
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+
+  GreenTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: laps-backend-green-tg
+      Protocol: HTTP
+      Port: 8100
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /laps/actuator/health
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+
+  HTTPSListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Protocol: HTTPS
+      Port: 443
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !If [IsBlueActive, !Ref BlueTG, !Ref GreenTG]
+
+  GreenTestListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Protocol: HTTPS
+      Port: 8443
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !If [IsBlueActive, !Ref GreenTG, !Ref BlueTG]
+
+  HTTPListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+        - Type: redirect
+          RedirectConfig:
+            Protocol: HTTPS
+            Port: '443'
+            StatusCode: HTTP_301
+
+  # ------------------
+  # ECS Services (Blue & Green)
+  # ------------------
+  BlueService:
+    Type: AWS::ECS::Service
+    DependsOn: HTTPSListener
+    Properties:
+      ServiceName: laps-backend-service-blue
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref BlueTaskDefinition
+      DesiredCount: !If [IsBlueActive, 2, 0]
+      LaunchType: FARGATE
+      HealthCheckGracePeriodSeconds: 120
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PublicSubnetAZ1
+            - !Ref PublicSubnetAZ2
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+          AssignPublicIp: ENABLED
+      LoadBalancers:
+        - TargetGroupArn: !Ref BlueTG
+          ContainerName: laps-backend
+          ContainerPort: 8100
+
+  GreenService:
+    Type: AWS::ECS::Service
+    DependsOn: HTTPSListener
+    Properties:
+      ServiceName: laps-backend-service-green
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref GreenTaskDefinition
+      DesiredCount: !If [IsBlueActive, 0, 2]
+      LaunchType: FARGATE
+      HealthCheckGracePeriodSeconds: 120
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PublicSubnetAZ1
+            - !Ref PublicSubnetAZ2
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+          AssignPublicIp: ENABLED
+      LoadBalancers:
+        - TargetGroupArn: !Ref GreenTG
+          ContainerName: laps-backend
+          ContainerPort: 8100
+
+Conditions:
+  IsBlueActive: !Equals [!Ref ActiveSlot, blue]
+
+Outputs:
+  ALBDnsName:
+    Value: !GetAtt ALB.DNSName
+    Description: Application URL - https://<ALBDnsName>/laps
+
+  RDSEndpoint:
+    Value: !GetAtt MySQLDB.Endpoint.Address
+
+  ECSClusterName:
+    Value: !Ref ECSCluster
+
+  BlueTargetGroupArn:
+    Value: !Ref BlueTG
+
+  GreenTargetGroupArn:
+    Value: !Ref GreenTG
+
+  HTTPSListenerArn:
+    Value: !Ref HTTPSListener

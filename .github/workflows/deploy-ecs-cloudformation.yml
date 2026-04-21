@@ -1,0 +1,264 @@
+name: Deploy ECS via CloudFormation
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_access_key_id:
+        description: 'AWS Access Key ID'
+        required: true
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key'
+        required: true
+      aws_session_token:
+        description: 'AWS Session Token'
+        required: true
+      stack_name:
+        description: 'CloudFormation Stack Name'
+        required: true
+        default: 'laps-ecs-stack'
+      aws_account_id:
+        description: 'AWS Account ID'
+        required: true
+      db_username:
+        description: 'RDS Master Username'
+        required: true
+      db_password:
+        description: 'RDS Master Password (min 8 chars)'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      REGION: us-east-1
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set lowercase stack name
+        id: vars
+        run: echo "stack_name=$(echo '${{ github.event.inputs.stack_name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Build WAR
+        run: mvn clean package -DskipTests
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          aws-access-key-id: ${{ github.event.inputs.aws_access_key_id }}
+          aws-secret-access-key: ${{ github.event.inputs.aws_secret_access_key }}
+          aws-session-token: ${{ github.event.inputs.aws_session_token }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Create ECR Repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names laps-backend --region $REGION || \
+          aws ecr create-repository --repository-name laps-backend --region $REGION
+
+      - name: Build and Push Docker Image
+        run: |
+          ECR_REGISTRY="${{ github.event.inputs.aws_account_id }}.dkr.ecr.$REGION.amazonaws.com"
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t $ECR_REGISTRY/laps-backend:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/laps-backend:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/laps-backend:$IMAGE_TAG $ECR_REGISTRY/laps-backend:latest
+          docker push $ECR_REGISTRY/laps-backend:latest
+          echo "ECR_IMAGE=$ECR_REGISTRY/laps-backend:$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Create ACM Certificate if not exists
+        run: |
+          CERT_ARN=$(aws acm list-certificates \
+            --query "CertificateSummaryList[?DomainName=='laps-backend.local'].CertificateArn" \
+            --output text --region $REGION)
+
+          if [ -z "$CERT_ARN" ]; then
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+              -keyout /tmp/tls.key -out /tmp/tls.crt \
+              -subj "/CN=laps-backend.local/O=LAPS"
+
+            CERT_ARN=$(aws acm import-certificate \
+              --certificate fileb:///tmp/tls.crt \
+              --private-key fileb:///tmp/tls.key \
+              --query 'CertificateArn' \
+              --output text --region $REGION)
+            echo "Certificate created: $CERT_ARN"
+          else
+            echo "Certificate already exists: $CERT_ARN"
+          fi
+          echo "CERT_ARN=$CERT_ARN" >> $GITHUB_ENV
+
+      - name: Determine Active Slot for Blue-Green
+        run: |
+          STACK_STATUS=$(aws cloudformation describe-stacks \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --query 'Stacks[0].StackStatus' \
+            --output text --region $REGION 2>/dev/null || echo "NOT_FOUND")
+
+          if [ "$STACK_STATUS" == "NOT_FOUND" ] || [ "$STACK_STATUS" == "DELETE_COMPLETE" ]; then
+            echo "ACTIVE_SLOT=blue" >> $GITHUB_ENV
+            echo "DEPLOY_SLOT=green" >> $GITHUB_ENV
+            echo "First deployment — active: blue, deploy: green"
+          else
+            CURRENT_ACTIVE=$(aws cloudformation describe-stacks \
+              --stack-name ${{ steps.vars.outputs.stack_name }} \
+              --query "Stacks[0].Parameters[?ParameterKey=='ActiveSlot'].ParameterValue" \
+              --output text --region $REGION 2>/dev/null || echo "blue")
+
+            if [ "$CURRENT_ACTIVE" == "blue" ]; then
+              echo "ACTIVE_SLOT=blue" >> $GITHUB_ENV
+              echo "DEPLOY_SLOT=green" >> $GITHUB_ENV
+            else
+              echo "ACTIVE_SLOT=green" >> $GITHUB_ENV
+              echo "DEPLOY_SLOT=blue" >> $GITHUB_ENV
+            fi
+            echo "Current active: $CURRENT_ACTIVE"
+          fi
+
+      - name: Deploy CloudFormation Stack
+        run: |
+          ACTIVE_SLOT="${{ env.ACTIVE_SLOT }}"
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          ECR_IMAGE="${{ env.ECR_IMAGE }}"
+          CERT_ARN="${{ env.CERT_ARN }}"
+
+          STACK_STATUS=$(aws cloudformation describe-stacks \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --query 'Stacks[0].StackStatus' \
+            --output text --region $REGION 2>/dev/null || echo "NOT_FOUND")
+
+          if [ "$STACK_STATUS" == "NOT_FOUND" ] || [ "$STACK_STATUS" == "DELETE_COMPLETE" ]; then
+            echo "Creating new CloudFormation stack..."
+            aws cloudformation create-stack \
+              --stack-name ${{ steps.vars.outputs.stack_name }} \
+              --template-body file://aws_cloudformation/cloudformation-ecs.yaml \
+              --parameters \
+                ParameterKey=DBUsername,ParameterValue=${{ github.event.inputs.db_username }} \
+                ParameterKey=DBPassword,ParameterValue=${{ github.event.inputs.db_password }} \
+                ParameterKey=ImageUri,ParameterValue=$ECR_IMAGE \
+                ParameterKey=CertificateArn,ParameterValue=$CERT_ARN \
+                ParameterKey=ActiveSlot,ParameterValue=$ACTIVE_SLOT \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --region $REGION
+
+            echo "Waiting for stack creation..."
+            aws cloudformation wait stack-create-complete \
+              --stack-name ${{ steps.vars.outputs.stack_name }} --region $REGION
+          else
+            echo "Updating existing CloudFormation stack with deploy slot: $DEPLOY_SLOT..."
+            aws cloudformation update-stack \
+              --stack-name ${{ steps.vars.outputs.stack_name }} \
+              --template-body file://aws_cloudformation/cloudformation-ecs.yaml \
+              --parameters \
+                ParameterKey=DBUsername,ParameterValue=${{ github.event.inputs.db_username }} \
+                ParameterKey=DBPassword,ParameterValue=${{ github.event.inputs.db_password }} \
+                ParameterKey=ImageUri,ParameterValue=$ECR_IMAGE \
+                ParameterKey=CertificateArn,ParameterValue=$CERT_ARN \
+                ParameterKey=ActiveSlot,ParameterValue=$ACTIVE_SLOT \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --region $REGION || echo "No changes to deploy"
+
+            aws cloudformation wait stack-update-complete \
+              --stack-name ${{ steps.vars.outputs.stack_name }} --region $REGION || true
+          fi
+
+      - name: Wait for Deploy Slot Service to be Stable
+        run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          echo "Waiting for laps-backend-service-$DEPLOY_SLOT to be stable..."
+          RETRIES=40
+          INTERVAL=30
+          for i in $(seq 1 $RETRIES); do
+            STATUS=$(aws ecs describe-services \
+              --cluster laps-backend-cluster \
+              --services laps-backend-service-$DEPLOY_SLOT \
+              --query 'services[0].deployments[?status==`PRIMARY`].rolloutState' \
+              --output text --region $REGION)
+            echo "Attempt $i/$RETRIES — Rollout state: $STATUS"
+            if [ "$STATUS" == "COMPLETED" ]; then
+              echo "Service is stable"
+              exit 0
+            fi
+            if [ "$STATUS" == "FAILED" ]; then
+              echo "Deployment FAILED"
+              exit 1
+            fi
+            sleep $INTERVAL
+          done
+          echo "Service did not stabilize in time"
+          exit 1
+
+      - name: Verify Health of Deploy Slot
+        run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          DEPLOY_TG_ARN=$(aws cloudformation describe-stacks \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --query "Stacks[0].Outputs[?OutputKey=='$([ "$DEPLOY_SLOT" == "blue" ] && echo BlueTargetGroupArn || echo GreenTargetGroupArn)'].OutputValue" \
+            --output text --region $REGION)
+
+          echo "Verifying health of $DEPLOY_SLOT target group..."
+          RETRIES=20
+          INTERVAL=30
+          for i in $(seq 1 $RETRIES); do
+            HEALTHY=$(aws elbv2 describe-target-health \
+              --target-group-arn $DEPLOY_TG_ARN \
+              --query 'TargetHealthDescriptions[?TargetHealth.State==`healthy`] | length(@)' \
+              --output text --region $REGION)
+            echo "Attempt $i/$RETRIES — Healthy targets: $HEALTHY"
+            if [ "$HEALTHY" -ge "1" ]; then
+              echo "Health check passed"
+              exit 0
+            fi
+            sleep $INTERVAL
+          done
+          echo "No healthy targets found, aborting"
+          exit 1
+
+      - name: Switch Traffic to Deploy Slot
+        run: |
+          DEPLOY_SLOT="${{ env.DEPLOY_SLOT }}"
+          ACTIVE_SLOT="${{ env.ACTIVE_SLOT }}"
+          CERT_ARN="${{ env.CERT_ARN }}"
+          ECR_IMAGE="${{ env.ECR_IMAGE }}"
+
+          echo "Switching traffic from $ACTIVE_SLOT to $DEPLOY_SLOT..."
+          aws cloudformation update-stack \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --template-body file://aws_cloudformation/cloudformation-ecs.yaml \
+            --parameters \
+              ParameterKey=DBUsername,ParameterValue=${{ github.event.inputs.db_username }} \
+              ParameterKey=DBPassword,ParameterValue=${{ github.event.inputs.db_password }} \
+              ParameterKey=ImageUri,ParameterValue=$ECR_IMAGE \
+              ParameterKey=CertificateArn,ParameterValue=$CERT_ARN \
+              ParameterKey=ActiveSlot,ParameterValue=$DEPLOY_SLOT \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --region $REGION
+
+          aws cloudformation wait stack-update-complete \
+            --stack-name ${{ steps.vars.outputs.stack_name }} --region $REGION
+          echo "Traffic switched to $DEPLOY_SLOT"
+
+      - name: Get Deployment Outputs
+        run: |
+          ALB_DNS=$(aws cloudformation describe-stacks \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --query "Stacks[0].Outputs[?OutputKey=='ALBDnsName'].OutputValue" \
+            --output text --region $REGION)
+          RDS_ENDPOINT=$(aws cloudformation describe-stacks \
+            --stack-name ${{ steps.vars.outputs.stack_name }} \
+            --query "Stacks[0].Outputs[?OutputKey=='RDSEndpoint'].OutputValue" \
+            --output text --region $REGION)
+
+          echo "========================================"
+          echo "Active Slot         : ${{ env.DEPLOY_SLOT }}"
+          echo "ECS Application URL : https://$ALB_DNS/laps"
+          echo "RDS Endpoint        : $RDS_ENDPOINT"
+          echo "========================================"
